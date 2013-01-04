@@ -1,4 +1,14 @@
+
 "use strict";
+/*
+
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
+
+This file may distributed and/or modified under the
+terms of the Insight Maker Public License (http://insightMaker.com/impl) (http://InsightMaker.com/impl).
+
+*/
+
 
 function testTests(){
 	test = "Test";
@@ -269,6 +279,19 @@ function testAgents(){
 	assertEqual("Pop 4", res.value(v2)[0], 0);
 	assertEqual("Pop 5", res.value(v)[8], 0);
 	assertEqual("Pop 6", res.value(v2)[8], 10);
+	
+
+	var v3 = createPrimitive("My Variable 3", "Variable", [1200,150], [150,100]);
+	var l4 = createConnector("My Link", "Link", pop, v3);
+	var l5 = createConnector("My Link", "Link", v3, v2);
+	setValue(v3, "FindState([Population], [State 2])")
+	setValue(v2, "Count([My Variable 3])")
+
+	res = runModel(true);
+	assertEqual("Pop 6.1", res.value(v)[0], 10);
+	assertEqual("Pop 6.2", res.value(v2)[0], 0);
+	assertEqual("Pop 6.3", res.value(v)[8], 0);
+	assertEqual("Pop 6.4", res.value(v2)[8], 10);
 	
 	setValue(v, "Count(FindNotState([Population], [State 1]))")
 	setValue(v2, "Count(FindNotState([Population], [State 2]))")
@@ -953,6 +976,10 @@ function testSimulation(){
 			res = runModel(true);
 			assertEqual("More Flow Scaling 2", res.value(p)[20], 20);
 			
+			setUnits(f, "euros per years");
+			res = runModel(true);
+			assertEqual("More Flow Scaling 2", res.value(p)[20], 20);
+			
 			setValue(f, "years");
 			setUnits(p, "euros/years");
 			setValue(p, "[My Flow]");
@@ -1573,6 +1600,10 @@ function testFind(){
 	setupComplexDummy();
 	
 	assertEqual("findType", findType("Stock").length, 4);
+	assertEqual("findNote", findNote("foo").length, 0);
+	setNote(findType("Stock"), "foo")
+	assertEqual("findNote", findNote("foo").length, 4);
+	
 	assertEqual("findType", findType(["Stock","Variable"]).length, 6);
 	assertEqual("findType", findType(["dsfsdf"]).length, 0);
 	assertEqual("findType", findType("dsfsdf").length, 0);

@@ -1,6 +1,6 @@
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).

@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -19,6 +19,7 @@ var RKPosition;
 var oldAggregateSeries;
 var timeLength;
 var timeIndex;
+var doFullSpeed = false;
 
 //model: {primitives, timeStart, timeLength, timeStep, RKOrder}
 var simulate = function(model, silent, callback){
@@ -252,7 +253,7 @@ var simulate = function(model, silent, callback){
 		 timeIndex = Math.round((time.value - timeStart.value) / timeStep.value);
 
 		 var timeTaken = new Date().getTime()-start;
-		if((! silent) && ( ( (!firstTime) && timeTaken>600) || (simulate.timeCounter/simulate.timeLengthNumber<.12 && timeTaken>200) || timeTaken > 1000 ) ){
+		if((! silent) && (! doFullSpeed) && ( ( (!firstTime) && timeTaken>600) || (simulate.timeCounter/simulate.timeLengthNumber<.12 && timeTaken>200) || timeTaken > 1000 ) ){
 			simulatorProgress.updateProgress(simulate.timeCounter/simulate.timeLengthNumber, "Current Time: "+round(Math.min(timeEnd.value,time.value).toString(),12)+" "+time.units.names[0]);
 			setTimeout(simulate,50);
 			return;
@@ -274,7 +275,7 @@ var simulate = function(model, silent, callback){
 	
 	function unitsToBase(v, u, flow){
 		//finders++;
-		var i = v.id+"-"+u.id();
+		var i = v.id+"-"+(u?u.id():"");
 		//notfound++;
 		//console.log(i);
 		if(i in unitsToBase){return unitsToBase[i]};
@@ -284,7 +285,7 @@ var simulate = function(model, silent, callback){
 			 x =  new Quantities(timeLength.units).toBase;
 		}
 		var q = new Quantities(u);
-		unitsToBase[i] = fn["/"](fn["/"](sn("#e"+q.toBase), v.toBase),sn("#e"+x));
+		unitsToBase[i] = fn["/"](fn["/"](sn("#e"+q.toBase), v.dna.toBase),sn("#e"+x));
 		return unitsToBase[i];
 		
 	}
@@ -313,7 +314,7 @@ var simulate = function(model, silent, callback){
 						error("The result of the calculation has units "+x.units.toString()+", but the primitive is unitless. Please set the units for the primitive so we can determine the proper output.", findID(v.id), true);
 					}
 					//console.log(x);
-					if((item.displayed[i] instanceof Flow) && (! item.displayed[i].flowUnitless)){
+					if((item.displayed[i] instanceof Flow) && (! item.displayed[i].dna.flowUnitless)){
 						x = mult(x, new Material(1, timeLength.units.clone()));
 					}
 					//console.log(x);

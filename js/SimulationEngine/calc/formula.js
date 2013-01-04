@@ -1,23 +1,24 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
 
+if(! sn){
+	var sn = SchemeNumber;
+	var fn = sn.fn;
+	var ns = fn["number->string"];
 
-var sn = SchemeNumber;
-var fn = sn.fn;
-var ns = fn["number->string"];
-
-sn.raise = function(conditionType,message){
-	if (message == "division by exact zero"){
-		throw "MSG: You cannot divide by 0."
-	}else{
-		throw "BigNum Error: "+message;
+	sn.raise = function(conditionType,message){
+		if (message == "division by exact zero"){
+			throw "MSG: You cannot divide by 0."
+		}else{
+			throw "BigNum Error: "+message;
+		}
 	}
 }
 
@@ -174,7 +175,7 @@ function createTree(input){
 	var parsedTree = parser.lines();
 	var root = convertToObject(parsedTree.tree, parser);
 	if (isLocal()) {
-		// console.log(root);
+		//console.log(root);
 	}
 	return root;
 }
@@ -291,14 +292,14 @@ funcEvalMap["NEGATE"] = function(node, scope) {
 };
 function negate(x){
 	if(x instanceof Vector){
-		return x.apply( negate);
+		return x.apply(negate);
 	}
 	
 	if((typeof x == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
 	
-	return new Material(fn["-"](x.value), x.units);
+	return new Material(fn["-"](x.value), x.units?x.units.clone():undefined);
 }
 
 funcEvalMap["AND"] = function(node, scope) {
@@ -363,7 +364,7 @@ function neq(lhs, rhs){
 			return true;
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
@@ -391,7 +392,7 @@ function eq(lhs, rhs){
 			return false;
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
@@ -415,7 +416,7 @@ function lessThan(lhs, rhs){
 			unitAlert(lhs.units, rhs.units, "comparison");
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
@@ -439,7 +440,7 @@ function lessThanEq(lhs, rhs){
 			unitAlert(lhs.units, rhs.units, "comparison");
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
@@ -464,7 +465,7 @@ function greaterThan(lhs, rhs){
 			unitAlert(lhs.units, rhs.units, "comparison");
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
@@ -516,11 +517,11 @@ function plus(lhs, rhs){
 			unitAlert(lhs.units, rhs.units, "addition");
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
-	return new Material(fn["+"](lhs.value, rhs.value), rhs.units.clone());
+	return new Material(fn["+"](lhs.value, rhs.value), rhs.units?rhs.units.clone():undefined);
 
 }
 
@@ -546,11 +547,11 @@ function minus(lhs, rhs){
 			unitAlert(lhs.units, rhs.units, "subtraction");
 		} else {
 			rhs.value = fn["*"](rhs.value, scale);
-			rhs.units = lhs.units.clone();
+			rhs.units = lhs.units?lhs.units.clone():undefined;
 		}
 	}
 
-	return new Material(fn["-"](lhs.value, rhs.value), rhs.units.clone());
+	return new Material(fn["-"](lhs.value, rhs.value), rhs.units?rhs.units.clone():undefined);
 }
 
 funcEvalMap["MULT"] = function(node, scope) {
@@ -568,9 +569,17 @@ function mult(lhs, rhs){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
 	
-	var x = new Material(fn["*"](lhs.value, rhs.value), lhs.units.clone());
-	x.units.multiplyUnitStore(rhs.units, 1);
-	x.simplify();
+	var x = new Material(fn["*"](lhs.value, rhs.value));
+	if(lhs.units && rhs.units){
+		x.units = lhs.units.clone();
+		x.units.multiplyUnitStore(rhs.units, 1);
+		x.simplify();
+	}else if(lhs.units){
+		x.units = lhs.units.clone();
+	}else if(rhs.units){
+		x.units = rhs.units.clone();
+	}
+	
 	return x;
 }
 
@@ -589,9 +598,17 @@ function div(lhs, rhs){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
 	
-	var x = new Material(fn["/"](lhs.value, rhs.value), lhs.units.clone());
-	x.units.multiplyUnitStore(rhs.units, -1);
-	x.simplify();
+	var x = new Material(fn["/"](lhs.value, rhs.value));
+	if(lhs.units && rhs.units){
+		x.units = lhs.units.clone();
+		x.units.multiplyUnitStore(rhs.units, -1);
+		x.simplify();
+	}else if(lhs.units){
+		x.units = lhs.units.clone();
+	}else if(rhs.units){
+		x.units = rhs.units.clone();
+	}
+	
 	return x;
 }
 
@@ -605,7 +622,7 @@ funcEvalMap["POWER"] = function(node, scope) {
 	
 	for(var j = node.children.length - 1; j > 0; j--){
 		var lhs = evaluateNode(node.children[j - 1], scope).toNum();
-		if ((rhs instanceof Vector) || rhs.units.unitless()) {
+		if ((rhs instanceof Vector) || unitless(rhs.units)) {
 			rhs = power(lhs, rhs);
 		} else {
 			throw "MSG: Exponents may not have units.";
@@ -624,16 +641,17 @@ function power(lhs, rhs){
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
-	
-	for (var i = 0; i < lhs.units.exponents.length; i++) {
-		lhs.units.exponents[i] = lhs.units.exponents[i] * rhs.value;
+	if(lhs.units){
+		for (var i = 0; i < lhs.units.exponents.length; i++) {
+			lhs.units.exponents[i] = lhs.units.exponents[i] * rhs.value;
+		}
 	}
 	
 	var x = lhs.value;
 	if(typeof x == "number"){
 		x = sn("#e"+x)
 	}
-	return new Material(fn.expt(x, rhs.value), lhs.units.clone());
+	return new Material(fn.expt(x, rhs.value), lhs.units?lhs.units.clone():undefined);
 }
 
 funcEvalMap["MOD"] = function(node, scope) {
@@ -651,8 +669,8 @@ function doMod(lhs, rhs){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
 	
-	if (rhs.units.unitless()) {
-		return new Material(fn.mod(lhs.value, rhs.value), lhs.units.clone());
+	if (unitless(rhs.units)) {
+		return new Material(fn.mod(lhs.value, rhs.value), lhs.units?lhs.units.clone():undefined);
 	} else {
 		throw "MSG: The right hand side of \"mod\" may not have units."
 	}
@@ -864,7 +882,7 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 			scope = origScope;
 		}
 		scope[varName] = x;
-		return varName + " = " + x;
+		return x;
 	}
 };
 
@@ -915,6 +933,7 @@ unitEvalMap["DIV"] = function(node) {
 	}
 	return lhs.concat(rhs);
 };
+unitEvalMap["PER"] = unitEvalMap["DIV"];
 
 unitEvalMap["UNIT"] = function(node) {
 	var unitName = "";
@@ -996,7 +1015,7 @@ trimEvalMap["MATERIAL"] = function(node, scope) {
 	var x = trimNode(node.children[1], scope);
 	var units = evaluateUnits(units);
 	var exponents = [], names = [];
-	for(var i=0; i<units.length; i++){
+	for(var i=0; i < units.length; i++){
 		exponents.push(units[i].exponent);
 		names.push(units[i].id);
 	}
@@ -1009,7 +1028,7 @@ trimEvalMap["MULT"] = function(node, scope) {
 		return mult(lhs, rhs);
 	}else{
 		var n = new TreeNode(node.origText, node.typeName);
-		n.children = [lhs,rhs]
+		n.children = [lhs, rhs]
 		return n;
 	}
 };

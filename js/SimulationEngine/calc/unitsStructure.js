@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -129,10 +129,12 @@ UnitStore.prototype.toString = function() {
 }
 // ********** Code for Quantities **************
 function Quantities(store) {
-  this.units = store.clone();
   this.toBase = 1;
   this.unitless= true;
-  this.ApplyConversions();
+  if(store){
+  	this.units = store.clone();
+  	this.ApplyConversions();
+	}
 }
 
 Quantities.prototype.ApplyConversions = function() {
@@ -197,7 +199,7 @@ function convertUnits(source, target, forceLoose) {
 }
 function unitsEqual(lhs, rhs, forceLoose) {
 	
-  if (lhs == null || rhs == null || ((strictUnits && forceLoose!==true)?(rhs.unitless() && lhs.unitless()):(rhs.unitless() || lhs.unitless()))) {// if (lhs == null || rhs == null || (rhs.unitless() && lhs.unitless())) {
+  if (lhs == null || rhs == null || isUndefined(lhs) || isUndefined(rhs) || ((strictUnits && forceLoose!==true)?(rhs.unitless() && lhs.unitless()):(rhs.unitless() || lhs.unitless()))) {// if (lhs == null || rhs == null || (rhs.unitless() && lhs.unitless())) {
     return true;
   }
 

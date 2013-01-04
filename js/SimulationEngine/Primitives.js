@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -9,43 +9,34 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 */
 
 
-
 function Primitive() {
-	this.parent = null;
 	this.id = null;
 	this.agentId = null;
 	this.index = null;
-	this.name = null;
+	this.fullId = null;
+	this.instanceId = null;
+
+	this.parent = null;
+
+	this.dna = null;
+	
+	this.equation = null;
+	
 	this.pastValues = [];
 	this.pastData = new DataBank();
-	this.units = new UnitStore();
-	this.maximumConstraintType = null;
-	this.minimumConstraintType = null;
-	this.maximumConstraint = null;
-	this.minimumConstraint = null;
-	this.unitless = null;
-	this.equation = null;
+	
+	this.cutoff = 0;
 }
 Primitive.method("clone", function(){
 	var p = new this.constructorFunction();
+	p.dna = this.dna;
 	p.parent = this.parent;
-	p.id = this.id;
 	p.agentId = this.agentId;
-	p.index = this.index
-	p.name = this.name
+	p.index = this.index;
+	p.id = this.id;
+	p.createIds();
 	p.pastValues = this.pastValues.slice(0);
-	p.units = this.units.clone();
-	while(p.pastValues.length <= timeIndex){
-		p.pastValues.push(new Material(0, this.units.clone()));
-	}
-	p.pastData = this.pastData.clone();
-	p.maximumConstraintType = this.maximumConstraintType;
-	p.minimumConstraintType = this.minimumConstraintType;
-	p.maximumConstraint = this.maximumConstraints;
-	p.minimumConstraint = this.minimumConstraint;
-	p.unitless = this.unitless;
-	
-	//p.equation = 1;//equation is set through linking
+	p.cutoff = this.cutoff;
 	
 	this.innerClone(p);
 	
@@ -55,27 +46,11 @@ Primitive.method("toNum", function(){
 	return this.value();
 });
 Primitive.method("calculateValue", function() {
-	throw "MSG: ["+this.name+"] does not have a value and can not be used as a value in an equation.";
+	throw "MSG: ["+this.dna.name+"] does not have a value and can not be used as a value in an equation.";
 });
 Primitive.method("createIds", function(){
 	this.fullId = ":"+this.id+"-"+this.agentId+"-"+this.index;
 	this.instanceId = ":"+this.agentId+"-"+this.index;
-});
-Primitive.method("setup", function(units, extra) {
-	this.units = units;
-	this.toBase = units?(new Quantities(this.units)).toBase:1;//units?sn("#e"+(new Quantities(this.units)).toBase):1;
-	this.unitless = (! units) || unitless(units);
-	if(isDefined(extra)){
-		for(var v in extra){
-			this[v] = extra[v];
-		}
-	}
-});
-Primitive.method("setConstraints", function(max, maxType, min, minType) {
-	this.maximumConstraint = max;
-	this.maximumConstraintType = maxType;
-	this.minimumConstraint = min;
-	this.minimumConstraintType = minType;
 });
 Primitive.method("clearPastValues", function(count) {
 	this.pastValues.splice(this.pastValues.length - 1 - count, count);
@@ -84,12 +59,12 @@ Primitive.method("clearPastValues", function(count) {
 Primitive.method("getPastValues",  function( length ){
 	var res = [];
     if( isUndefined(length) ){
-      res = map(this.pastValues, function(x){return new Material(fn["real-part"](x.value), x.units.clone())});
+      res = map(this.pastValues.slice(), function(x){return new Material(fn["real-part"](x.value), x.units?x.units.clone():undefined)});
     }else{
 		var bins =  Math.ceil(div(length.forceUnits(timeStart.units), timeStep).value);
 		
 	    for(var i = this.pastValues.length-1; i >= Math.max(0, this.pastValues.length-1-bins); i--){
-	      	  res.push(new Material(fn["real-part"](this.pastValues[i].value), this.pastValues[i].units.clone()));
+	      	  res.push(new Material(fn["real-part"](this.pastValues[i].value), this.pastValues[i].units?this.pastValues[i].units.clone():undefined));
 	    }
 	}
 	if(RKOrder==4){
@@ -191,28 +166,28 @@ Primitive.method("expDelayF", function( order , delay , initialV ){
     return dat[dat.length-1].out.fullClone();
   });
 Primitive.method("testUnits", function(m, ignoreFlow) {
-	if( unitless(this.units) && (! (m instanceof Vector) && ! unitless(m.units))){
-		error("Wrong units generated for <i>"+clean(this.name)+"</i>. Expected no units and got <i>"+clean(m.units.toString())+"</i>. Either specify units for the primitive or adjust the equation.", this, true);
-	}else if (! this.units.unitless() && m instanceof Vector) {
-		error("Units error for <i>"+clean(this.name)+"</i>. Expected <i>"+clean(this.units.toString())+"</i> and the equation resulted in a vector.", this, true);
-	}else if (! unitsEqual(this.units, m.units)) {
-		var scale = convertUnits(m.units, this.units, true);
+	if(unitless(this.dna.units) && (! (m instanceof Vector) && ! unitless(m.units))){
+		error("Wrong units generated for <i>"+clean(this.dna.name)+"</i>. Expected no units and got <i>"+clean(m.units.toString())+"</i>. Either specify units for the primitive or adjust the equation.", this, true);
+	}else if (! unitless(this.dna.units) && m instanceof Vector) {
+		error("Units error for <i>"+clean(this.dna.name)+"</i>. Expected <i>"+clean(this.dna.units.toString())+"</i> and the equation resulted in a vector.", this, true);
+	}else if (! unitsEqual(this.dna.units, m.units)) {
+		var scale = convertUnits(m.units, this.dna.units, true);
 		if (scale == 0) {
 			if(isLocal()){
 				console.log(m.units);
-				console.log(this.units);
+				console.log(this.dna.units);
 			}
-			error("Wrong units generated for <i>"+clean(this.name)+"</i>. Expected <i>"+clean(this.units.toString())+"</i>, and got <i>"+clean(m.units.toString())+"</i>.", this, true);
+			error("Wrong units generated for <i>"+clean(this.dna.name)+"</i>. Expected <i>"+clean(this.dna.units.toString())+"</i>, and got <i>"+clean(m.units.toString())+"</i>.", this, true);
 			return
 		} else {
 			//console.log("----+")
 			m.value = m.value * scale;
-			m.units = this.units.clone();
+			m.units = this.dna.units.clone();
 			//console.log((this instanceof Flow));
 			//console.log(ignoreFlow);	
 		}
 	}
-	if((this instanceof Flow) && (ignoreFlow != true) && this.flowUnitless){
+	if((this instanceof Flow) && (ignoreFlow != true) && this.dna.flowUnitless){
 		var x = mult(m, new Material(1, timeLength.units.clone()));
 		m.value = x.value;
 		m.units = x.units;
@@ -222,8 +197,6 @@ Primitive.method("setValue", function() {
 	throw "MSG: You cannot set the value for that primitive.";
 });
 Primitive.method("value", function() {
-	//console.log("Value!");
-	//console.log(this.name);
 	
 	if (this.pastValues.length - 1 < timeIndex) {
 		try{
@@ -246,25 +219,34 @@ Primitive.method("value", function() {
 			this.testUnits(x);
 			this.testConstraints(x);
 		}
-		this.pastValues.push(x);
-	}
-	while (this.pastValues.length - 1 < timeIndex) {
+		if (this.pastValues.length - 1 < timeIndex-1) {
+			this.pastValues = [];
+			//this.pastValues.push(null);
+			this.cutoff = timeIndex;
+		}
 		this.pastValues.push(x);
 	}
 	
-	var x = this.pastValues[timeIndex];
 	
+	var x = this.pastValues[timeIndex-this.cutoff];
+	/*if(this.cutoff){
+		console.log("--");
+		console.log(this.cutoff)
+		console.log(timeIndex);
+		console.log(this.pastValues);
+		console.log(x);
+	}*/
 	if(x && x.fullClone){
-		return this.pastValues[timeIndex].fullClone();
+		return x.fullClone();
 	}else{
 		return x;
 	}
 });
 Primitive.method("testConstraints", function(x) {
-	if ((this.maximumConstraintType == 1 && x.value > this.maximumConstraint) || (this.maximumConstraintType == 2 && x.value >= this.maximumConstraint)) {
+	if ((this.dna.maxConstraintType == 1 && x.value > this.dna.maxConstraint) || (this.dna.maxConstraintType == 2 && x.value >= this.dna.maxConstraint)) {
 		constraintAlert(this, "max", x);
 	}
-	if ((this.minimumConstraintType == 1 && x.value < this.minimumConstraint) || (this.minimumConstraintType == 2 && x.value <= this.minimumConstraint)) {
+	if ((this.dna.minConstraintType == 1 && x.value < this.dna.minConstraint) || (this.dna.minConstraintType == 2 && x.value <= this.dna.minConstraint)) {
 		constraintAlert(this, "min", x);
 	}
 });
@@ -293,15 +275,13 @@ Primitive.method("setEquation", function(tree, neighborhood) {
 })
 
 function Placeholder(dna, primitive){
-	Primitive.call(this);
-	this.id = dna.id;
-	this.name = dna.name;
 	this.dna = dna;
+	this.id = dna.id;
 	this.primitive = primitive;
 }
 Placeholder.inherits(Primitive);
 Placeholder.method("calculateValue",function(){
-	error("["+this.dna.name+"] is a placeholder and cannot be used as a direct value in equations.", this.primitive, true);
+	error("["+clean(this.dna.name)+"] is a placeholder and cannot be used as a direct value in equations.", this.primitive, true);
 });
 
 function State() {
@@ -327,8 +307,11 @@ State.method("setValue", function(value) {
 	this.active = trueValue(value);
 	this.value();
 	this.clearPastValues(1);
-	//console.log(value.value.toString());
-	//console.log(this.value().value.toString());
+	
+	if(this.agentId){
+		this.parent.updateStates();
+	}
+	
 });
 State.method("preserveActive", function() {
 	this.oldActive = this.active;
@@ -337,6 +320,9 @@ State.method("preserveActive", function() {
 State.method("restoreActive", function() {
 	this.active = this.oldActive;
 	this.arrivalTime = this.oldArrivalTime;
+	if(this.agentId){
+		this.parent.updateStates();
+	}
 });
 State.method("calculateValue", function() {
 	if (this.active === null) {
@@ -377,6 +363,9 @@ State.method("setInitialActive", function() {
 	if (this.active) {
 		this.arrivalTime = timeStart.fullClone();
 	}
+	if(this.agentId){
+		this.parent.updateStates();
+	}
 });
 State.method("getActive", function(){
 	if (this.active === null) {
@@ -391,12 +380,10 @@ function Transition() {
 	Primitive.call(this);
 	this.alpha = null;
 	this.omega = null;
-	this.trigger = null;
 	this.constructorFunction = Transition;
 }
 Transition.inherits(Primitive);
 Transition.method("innerClone", function(p){
-	p.trigger = this.trigger;
 });
 Transition.method("setEnds", function(alpha, omega) {
 	this.alpha = alpha;
@@ -407,7 +394,7 @@ Transition.method("calculateValue", function() {
 		var x = evaluateTree(this.equation, varBank).toNum();
 		
 		if(x instanceof Vector){
-			error("Cannot set the value of a transition to a vector.", this, true);
+			error("You cannot set the value of a transition to a vector.", this, true);
 		}
 		
 		if(x===true){
@@ -415,6 +402,9 @@ Transition.method("calculateValue", function() {
 		}else if(x===false){
 			return new Material(0);
 		}else{
+			if(this.dna.trigger == "Timeout" && unitless(x.units)){
+				x.units = time.units.clone();
+			}
 			return x;
 		}
 	}else{
@@ -423,34 +413,32 @@ Transition.method("calculateValue", function() {
 });
 Transition.method("transition", function() {
 	if(this.alpha && this.alpha.getActive() && ( eq(timeStart, time) || (! eq(this.alpha.arrivalTime, time)))){
-		if(this.trigger == "Timeout"){
+		if(this.dna.trigger == "Timeout"){
 			var v = this.value().toNum();
-			if(unitless(v.units)){
-				v.units = time.units.clone();
-			}
+			
 			if(greaterThanEq(minus(time, this.alpha.arrivalTime), v)  ){
 				this.doTransition();
 			}
 			
-		}else if(this.trigger == "Condition"){
+		}else if(this.dna.trigger == "Condition"){
 			if(trueValue(this.value().toNum())){
 				this.doTransition();
 			}
-		}else if(this.trigger == "Probability"){
+		}else if(this.dna.trigger == "Probability"){
 			var v = this.value().toNum();
 			if(unitless(v.units)){
 				if(greaterThanEq(v, new Material(1))){
 					this.doTransition();
 				}else if(lessThanEq(v, new Material(0))){
 					//do nothing...
-				}else if(lessThanEq(functionBank["rand"]([]), minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))))){
+				}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))).value){
 					this.doTransition();
 				}
 			}else{
 				error("The probability for the trigger had units of "+this.value().units.toString()+". Probabilities must be unitless.", this, true);
 			}
 		}else{
-			error("Unknown trigger: "+this.trigger, this, true);
+			error("Unknown trigger: "+this.dna.trigger, this, true);
 		}
 	}else{
 		this.value();
@@ -463,18 +451,19 @@ Transition.method("doTransition", function() {
 		this.omega.active = true;
 		this.omega.arrivalTime = time.fullClone();
 	}
+	if(this.agentId){
+		this.parent.updateStates();
+	}
 });
 
 function Action() {
 	Primitive.call(this);
-	this.trigger = null;
 	this.action = null;
 	this.timerStart = null;
 	this.constructorFunction = Action;
 }
 Action.inherits(Primitive);
 Action.method("innerClone", function(p){
-	p.trigger = this.trigger;
 	p.timerStart = this.timerStart;
 });
 Action.method("resetTimer", function(){
@@ -497,7 +486,7 @@ Action.method("test", function() {
 			error(err, this, false);
 		}
 	}
-	if(this.trigger == "Timeout"){
+	if(this.dna.trigger == "Timeout"){
 		var v = value;
 		if(unitless(v.units)){
 			v.units = time.units.clone();
@@ -505,25 +494,25 @@ Action.method("test", function() {
 		if(greaterThanEq(minus(time, this.timerStart), v)  ){
 			this.act();
 		}
-	}else if(this.trigger == "Condition"){
+	}else if(this.dna.trigger == "Condition"){
 		if(trueValue(value)){
 			this.act();
 		}
-	}else if(this.trigger == "Probability"){
+	}else if(this.dna.trigger == "Probability"){
 		var v = value;
 		if(unitless(v.units)){;
 			if(greaterThanEq(v, new Material(1))){
 				this.act();
 			}else if(lessThanEq(v, new Material(0))){
 				//do nothing...
-			}else if(lessThanEq(functionBank["rand"]([]), minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))))){
+			}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))).value){
 				this.act();
 			}
 		}else{
 			error("The probability for the trigger had units of "+this.value().units.toString()+". Probabilities must be unitless.", this, true);
 		}
 	}else{
-		error("Unknown trigger: "+this.trigger, this, true);
+		error("Unknown trigger: "+this.dna.trigger, this, true);
 	}
 	
 });
@@ -556,7 +545,7 @@ function Agents() {
 	this.geoDimUnits = null;
 	this.geoDimUnitsObject = null;
 	this.geoWrap = null;
-	this.DNA = null;
+	this.DNAs = null;
 	this.nextDie = [];
 	this.nextCreate = [];
 	this.stateIds = [];
@@ -564,11 +553,12 @@ function Agents() {
 }
 Agents.inherits(Primitive);
 Agents.method("collectData", function() {
-	var u = this.geoDimUnitsObject;
-	return this.agents.map(function(agent){
-		var state = agent.state();
-		return {id: agent.id, instanceId: agent.instanceId, connected: agent.connected.map(function(x){return x.instanceId}), location: simpleNum(agent.location.clone(), u), state: state?state.slice():null};
-	});
+	var x =[];
+	for(var i=0; i<this.agents.length; i++){
+		var agent = this.agents[i];
+		x.push({id: agent.id, instanceId: agent.instanceId, connected: agent.connected.map(function(x){return x.instanceId}), location: simpleNum(agent.location.clone(), this.geoDimUnitsObject), state: agent.states.length>0?agent.states.slice():null});
+	}
+	return x;
 });
 Agents.method("states", function() {
 	return this.stateIds.slice(0);
@@ -583,9 +573,9 @@ Agents.method("add", function(base){
 		var agent = base.agentClone();
 		agent.setIndex(this.size-1);
 		agent.createAgentIds();
-		for(var i = 0; i < this.DNA.length; i++){
+		for(var i = 0; i < this.DNAs.length; i++){
 			agent.children[i].parent = agent;
-			linkPrimitive(agent.children[i], this.DNA[i]);
+			linkPrimitive(agent.children[i], this.DNAs[i]);
 		}
 	}else{
 		//console.log("-----");
@@ -595,15 +585,15 @@ Agents.method("add", function(base){
 		agent.childrenId = {};
 		agent.agentId = this.agentId;
 		
-		for(var i = 0; i < this.DNA.length; i++){
-			decodeDNA(this.DNA[i], agent);
+		for(var i = 0; i < this.DNAs.length; i++){
+			decodeDNA(this.DNAs[i], agent);
 		}
 
 		agent.setIndex(this.size-1);
 		agent.createAgentIds();
 		
-		for(var i = 0; i < this.DNA.length; i++){
-			linkPrimitive(agent.children[i], this.DNA[i]);
+		for(var i = 0; i < this.DNAs.length; i++){
+			linkPrimitive(agent.children[i], this.DNAs[i]);
 		}
 
 		setAgentInitialValues(agent);
@@ -640,19 +630,35 @@ function Agent() {
 	this.connected = [];
 	this.dead = false;
 	this.constructorFunction = Agent;
+	this.stateIDs = [];
+	this.states = [];
 }
 Agent.inherits(Primitive);
+Agent.method("toString", function(){
+	return "Agent";
+})
 Agent.method("toNum", function(){
 	return this;
 });
+Agent.method("updateStates", function() {
+	this.states = [];
+	this.stateIDs = [];
+	for(var c = 0; c < this.children.length; c++){
+		if(this.children[c].active){
+			this.states.push(this.children[c]);
+			this.stateIDs.push(this.children[c].dna.id);
+		}
+	}
+});
 Agent.method("agentClone", function(){
 	var agent = new Agent();
+	agent.dna = this.dna;
 	agent.children = [];
 	agent.childrenId = {};
 	
 	for(var i = 0; i < this.children.length; i++){
 		agent.children.push(this.children[i].clone());
-		agent.childrenId[agent.children[i].id] = agent.children[i];
+		agent.childrenId[agent.children[i].dna.id] = agent.children[i];
 	}
 
 	agent.location = this.location.clone();
@@ -688,20 +694,6 @@ Agent.method("die", function(){
 	this.dead = true;
 	simulate.agentsChanged = true;
 });
-Agent.method("state", function() {
-	var states = [];
-	for(var c = 0; c < this.children.length; c++){
-		if(this.children[c].active){
-			states.push(this.children[c]);
-		}
-	}
-	//console.log(states);
-	if(states.length > 0){
-		return states;
-	}else{
-		return null;
-	}
-});
 Agent.method("connect", function(x) {
 	if(x.instanceId != this.instanceId){
 		var i = indexOfID(this.connected, x.instanceId);
@@ -735,16 +727,12 @@ function Stock() {
 	Primitive.call(this);
 	this.level = [null];
 	this.oldLevel = [];
-	this.nonNegative = false;
-	this.delay = new Material(0);
 	this.constructorFunction = Stock;
 }
 Stock.inherits(Primitive);
 Stock.method("innerClone", function(p){
 	p.level = this.level.slice(0);
 	p.oldLevel = this.oldLevel.slice(0);
-	p.nonNegative = this.nonNegative;
-	p.delay = this.delay;
 });
 Stock.method("setValue", function(value) {
 	//console.log("--")
@@ -758,7 +746,7 @@ Stock.method("stepForward", function() {
 	if (this.level.length > 1) {
 		for (var i = this.level.length - 1; i > 0; i--) {
 			this.level[i] = plus(this.level[i], this.level[i - 1]);
-			this.level[i - 1] = new Material(0, this.units.clone());
+			this.level[i - 1] = new Material(0, this.dna.units.clone());
 		}
 	}
 });
@@ -775,12 +763,12 @@ Stock.method("restoreLevels", function() {
 	}
 });
 Stock.method("setDelay", function( ){
-  this.setBuckets(Math.ceil(div(this.delay, timeStep).value)+1);
+  this.setBuckets(this.dna.delay?Math.ceil(div(this.dna.delay, timeStep).value)+1:1);
 });
 Stock.method("setBuckets", function( count ){
 	this.level = [];
 	for(var i = 0; i < count; i++){
-		this.level.push(new Material(0, this.units.clone()));
+		this.level.push(new Material(0, this.dna.units.clone()));
 	}
 });
 Stock.method("setInitialValue", function() {
@@ -815,11 +803,11 @@ Stock.method("setInitialValue", function() {
 		}
 	}
 	
-	if (this.nonNegative && init.value < 0) {
-		init = new Material(0, this.units.clone());
+	if (this.dna.nonNegative && init.value < 0) {
+		init = new Material(0, this.dna.units.clone());
 	}
 	if (unitless(init.units)) {
-		init.units = this.units.clone();
+		init.units = this.dna.units.clone();
 	}
 
 	//this.testUnits(init);
@@ -838,18 +826,18 @@ Stock.method("setInitialValue", function() {
 });
 Stock.method("subtract", function(amnt) {
 	this.level[this.level.length - 1] = minus(this.level[this.level.length - 1], amnt);
-	if (this.nonNegative && this.level[this.level.length - 1].value < 0) {
-		this.level[this.level.length - 1] = new Material(0, this.units.clone());
+	if (this.dna.nonNegative && this.level[this.level.length - 1].value < 0) {
+		this.level[this.level.length - 1] = new Material(0, this.dna.units.clone());
 	}
 });
 Stock.method("add", function(amnt) {
 	this.level[0] = plus(this.level[0], amnt);
-	if (this.nonNegative && this.level[0].value < 0) {
-		this.level[0] = new Material(0, this.units.clone());
+	if (this.dna.nonNegative && this.level[0].value < 0) {
+		this.level[0] = new Material(0, this.dna.units.clone());
 	}
 });
 Stock.method("totalContents", function() {
-	var res = new Material(0, this.units.clone());
+	var res = new Material(0, this.dna.units.clone());
 	for (var i = 0; i < this.level.length; i++) {;
 		res = plus(res, this.level[i]);
 	}
@@ -874,24 +862,14 @@ Stock.method("calculateValue", function() {
 
 function Converter() {
 	Primitive.call(this);
-	this.inputs = [];
-	this.outputs = [];
-	this.interpolation = "linear";
 	this.source = null;
 	this.constructorFunction = Converter;
 }
 Converter.inherits(Primitive);
 Converter.method("innerClone", function(p){
-	p.interpolation = this.interpolation;
-	p.inputs = this.inputs.slice(0);
-	p.outputs = this.outputs.slice(0);
 });
 Converter.method("setSource", function(source){
 	this.source = source;
-});
-Converter.method("setData", function(input, output){
-	this.inputs = input;
-	this.outputs = output;
 });
 Converter.method("getInputValue", function(){
      var inp;
@@ -900,7 +878,11 @@ Converter.method("getInputValue", function(){
       }else{
 		  /*console.log("---")
 		  console.log(this.source.value());
-		  console.log("====")*/
+		  console.log("====")
+		  console.log(this.source);
+		  console.log(this.source.value())
+		  console.log(this.source.value().toNum());
+		  */
         inp = this.source.value().toNum();
 		if(! inp){
 
@@ -913,54 +895,54 @@ Converter.method("getInputValue", function(){
   }
 );
 Converter.method("calculateValue", function() {
-	return new Material(this.getOutputValue(), this.units.clone());
+	return new Material(this.getOutputValue(), this.dna.units.clone());
 });
 Converter.method("getOutputValue", function() {
 	//console.log("---")
 	
 	var inp = this.getInputValue();
 
-	if (this.inputs.length == 0) {
+	if (this.dna.inputs.length == 0) {
 		return new Material(0);
 	}
 	//console.log("+++")
-	for (var i = 0; i < this.inputs.length; i++) {
-		if (this.interpolation == "discrete") {
+	for (var i = 0; i < this.dna.inputs.length; i++) {
+		if (this.dna.interpolation == "discrete") {
 
-			if (greaterThan(this.inputs[i], inp)) {
+			if (greaterThan(this.dna.inputs[i], inp)) {
 				if (i == 0) {
-					return this.outputs[0];
+					return this.dna.outputs[0];
 				} else {
-					return this.outputs[i - 1];
+					return this.dna.outputs[i - 1];
 				}
 			}
 
-		} else if (this.interpolation == "linear") {
+		} else if (this.dna.interpolation == "linear") {
 			//console.log(i)
-			if (eq(this.inputs[i], inp)) {
+			if (eq(this.dna.inputs[i], inp)) {
 				//console.log("eq")
-				return this.outputs[i];
-			} else if (greaterThan(this.inputs[i], inp)) {
+				return this.dna.outputs[i];
+			} else if (greaterThan(this.dna.inputs[i], inp)) {
 				//console.log("gt")
 				if (i == 0) {
-					return this.outputs[0];
+					return this.dna.outputs[0];
 				} else {
 					///console.log("----")
 					//console.log(mult(minus(inp, this.inputs[i - 1]), this.outputs[i]));
 					//console.log(mult(minus(this.inputs[i], inp), this.outputs[i - 1]))
 					var x = div(
 						plus(
-							mult(minus(inp, this.inputs[i - 1]), this.outputs[i]),
-							mult(minus(this.inputs[i], inp), this.outputs[i - 1])
+							mult(minus(inp, this.dna.inputs[i - 1]), this.dna.outputs[i]),
+							mult(minus(this.dna.inputs[i], inp), this.dna.outputs[i - 1])
 						),
-						minus(this.inputs[i], this.inputs[i - 1]));
+						minus(this.dna.inputs[i], this.dna.inputs[i - 1]));
 					//console.log("===")
 					return x;
 				}
 			}
 		}
 	}
-		return this.outputs[this.outputs.length-1];
+		return this.dna.outputs[this.dna.outputs.length-1];
 	});
 
 
@@ -976,7 +958,12 @@ Variable.method("calculateValue", function() {
 	//console.log("--");
 	//console.log(this.name);
 	//console.log(this.equation);
-	var x = evaluateTree(this.equation, varBank).toNum();
+	//try{
+		var x = evaluateTree(this.equation, varBank).toNum();
+		//}catch(err){
+		//	console.log(this.dna.name);
+		//	throw "calc value error";
+		//}
 	//console.log(x);
 	//return x;
 	if(typeof x == "boolean"){
@@ -990,7 +977,7 @@ Variable.method("calculateValue", function() {
 	//	error("Cannot set a variable value to a vector.", this, true)
 	}
 	if(unitless(x.units)) {
-		x.units = this.units.clone();
+		x.units = this.dna.units.clone();
 	}
 	return x;
 });
@@ -999,16 +986,12 @@ function Flow() {
 	Primitive.call(this);
 	this.alpha = null;
 	this.omega = null;
-	this.onlyPositive = true;
-	this.timeIndependent = false;
 	this.primaryRate = null;
 	this.RKPrimary = [];
 	this.constructorFunction = Flow;
 }
 Flow.inherits(Primitive);
 Flow.method("innerClone", function(p){
-	p.onlyPositive = this.onlyPositive;
-	p.timeIndependent = this.timeIndependent;
 });
 Flow.method("setEnds", function(alpha, omega) {
 	this.alpha = alpha;
@@ -1017,10 +1000,10 @@ Flow.method("setEnds", function(alpha, omega) {
 Flow.method("calculateValue", function() {
 	this.predict();
 	var sr = this.scaledPrimaryRate();
-	if ((!this.onlyPositive) || sr.value >= 0) {
+	if ((!this.dna.onlyPositive) || sr.value >= 0) {
 		return sr;
 	} else {
-		return new Material(0, this.units.clone());
+		return new Material(0, this.dna.units.clone());
 	}
 });
 Flow.method("clean", function() {
@@ -1062,20 +1045,16 @@ Flow.method("predict", function() {
 		
 		//console.log(this.primaryRate.units);
 		if (unitless(this.primaryRate.units)) {
-			this.primaryRate.units = this.units.clone();
+			this.primaryRate.units = this.dna.units.clone();
 		}
 		//console.log("---")
 //		console.log(this.primaryRate)
 		this.testUnits(this.primaryRate, true);
 		//console.log("+++")
 		
-		if (this.timeIndependent) {
-			if (RKOrder == 4) {
-				this.primaryRate = div(this.primaryRate, new Material(2));
-			}
-		} else {
-			this.primaryRate = mult(this.primaryRate, timeStep);
-		}
+		
+		this.primaryRate = mult(this.primaryRate, timeStep);
+		
 		//console.log("push: "+this.id)
 		this.RKPrimary.push(this.primaryRate);
 	}
@@ -1085,35 +1064,27 @@ Flow.method("scaledPrimaryRate", function() {
 	
 
 	if (RKOrder > 1) {
-		if (this.timeIndependent && this.RKPrimary.length > 0) {
-			sr = this.RKPrimary[0];
-		} else {
-			if (RKOrder == 2 && RKPosition == 2) {
-				sr = div(plus(this.RKPrimary[0], this.RKPrimary[1]), new Material(2));
-			} else if (RKOrder == 4) {
-				if (RKPosition == 1) {
-					sr = this.RKPrimary[0];
-				} else if (RKPosition == 2) {
-					sr = this.RKPrimary[1];
-				} else if (RKPosition == 3) {
-					sr = this.RKPrimary[2];
-				} else if (RKPosition == 4) {
-					//console.log(this);
-					//console.log(this.RKPrimary);
+		if (RKOrder == 2 && RKPosition == 2) {
+			sr = div(plus(this.RKPrimary[0], this.RKPrimary[1]), new Material(2));
+		} else if (RKOrder == 4) {
+			if (RKPosition == 1) {
+				sr = this.RKPrimary[0];
+			} else if (RKPosition == 2) {
+				sr = this.RKPrimary[1];
+			} else if (RKPosition == 3) {
+				sr = this.RKPrimary[2];
+			} else if (RKPosition == 4) {
+				//console.log(this);
+				//console.log(this.RKPrimary);
 					
-					sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[3])), new Material(6));
-				}
+				sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[3])), new Material(6));
 			}
 		}
 	}
 	
-	if (this.timeIndependent) {
-		if (RKOrder == 4) {
-			sr = div(sr, new Material(2));
-		}
-	} else {
-		sr = div(sr, timeStep);
-	}
+
+	sr = div(sr, timeStep);
+	
 	
 	return sr;
 });
@@ -1123,26 +1094,17 @@ Flow.method("apply", function() {
 	
 		//console.log(rate);
 	
-		if (this.timeIndependent) {
-			if (RKOrder == 4) {
-				//secondary_rate = calculate_secondary(my_primary_rate)/2;
-				rate = div(rate, 2);
-			} else {
-				//secondary_rate = calculate_secondary(my_primary_rate);
-			}
-		} else {
-			//secondary_rate = calculate_secondary(my_primary_rate) * (TimeStep / Per);
-			//my_primary_rate = my_primary_rate * (TimeStep / Per);
-			rate = mult(rate, timeStep);
-		}
+		
+		rate = mult(rate, timeStep);
+		
 
 		//console.log(rate);
 	
 		var in_r = rate;
 		var out_r = rate;
 
-		if (this.onlyPositive == false || rate.value >= 0) {
-			if (this.omega !== null && this.omega.nonNegative) {
+		if (this.dna.onlyPositive == false || rate.value >= 0) {
+			if (this.omega !== null && this.omega.dna.nonNegative) {
 				if (plus(this.omega.value().toNum(), out_r).value < 0 ) {
 					var modifier = plus(this.omega.value().toNum(), out_r);
 					out_r = minus(out_r, modifier);
@@ -1150,14 +1112,14 @@ Flow.method("apply", function() {
 				}
 			}
 		
-			if (this.alpha !== null && this.alpha.nonNegative) {
+			if (this.alpha !== null && this.alpha.dna.nonNegative) {
 				if (minus(this.alpha.value().toNum(), in_r).value < 0) {
 					var modifier = minus(this.alpha.value().toNum(), in_r);
 					out_r = plus(out_r, modifier);
 					in_r = plus(in_r, modifier);
 				}
 			}
-			if (this.omega !== null && this.omega.nonNegative) {
+			if (this.omega !== null && this.omega.dna.nonNegative) {
 				if (plus(this.omega.value().toNum(), out_r).value < 0) {
 					error("Inconsistent non-negative constraints for flow.", this, false);
 				}

@@ -487,7 +487,7 @@ function finishOptimizer(){
 	
 	var text = "<div style='padding: 1em; text-align: center;'><p>Your model has been set to the optimum solution.</p><br/>"+optString(supremeBestPoint);
 	
-	text=text+"<br/><p>Please note that the optimization algorithm is unable to fully account for local minimums or maximums. Thus, if your solution space contains such features, the algorithm may have returned erroneous results.</p>"
+	text=text+"<br/><p>Please note that the optimization algorithm is unable to fully account for local minimums or maximums. If your solution space contains such features, the algorithm may have returned erroneous results.</p>"
 	if(optimizerController.randomStarts>0 ){
 		text=text+"<hr><p>You specified a total of "+optimizerController.randomStarts+" random iterations. The optimums of the initial iteration and each random one are as follows:<br/>"
 		for(var i=0; i<optimizerController.bestPoints.length; i++){
@@ -749,11 +749,13 @@ function evaluateCurrentPoint(){
 		//sums up the values of the item over the time series. If there are some missing data points (NAN)
 		//they will be ignored. If there are no data points, the sum will be set to NAN
 		var v = res.value(optimizerController.goal);
-		var hasValue = false;
-		for(var i = 0; i<v.length; i++){
-			hasValue=true;
-			optimizerController.solutionSpace[0][optimizerController.evaluations-1] = optimizerController.solutionSpace[0][optimizerController.evaluations-1]+v[i];
+		var sum = 0;
+		for(var i = 0; i < v.length; i++){
+			sum	= sum + v[i];
 		}
+		optimizerController.solutionSpace[0][optimizerController.evaluations-1] = sum;
+	}else{
+		alert("Unknonw optimizer goal type: " + optimizerController.goalType );
 	}
 	
 	for(var i=0; i<optimizerController.targets.length; i++){

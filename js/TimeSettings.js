@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -169,17 +169,17 @@ var timeSettingsFn = function()
 
                         var edit = new mxCellAttributeChange(
                         setting, "TimeLength",
-                        Ext.getCmp('stimelength').getValue());
+                        Ext.getCmp('stimelength').getValue().toString());
                         graph.getModel().execute(edit);
 
                         edit = new mxCellAttributeChange(
                         setting, "TimeStart",
-                        Ext.getCmp('stimestart').getValue());
+                        Ext.getCmp('stimestart').getValue().toString());
                         graph.getModel().execute(edit);
 
                         edit = new mxCellAttributeChange(
                         setting, "TimeStep",
-                        Ext.getCmp('stimestep').getValue());
+                        Ext.getCmp('stimestep').getValue().toString());
                         graph.getModel().execute(edit);
 
 

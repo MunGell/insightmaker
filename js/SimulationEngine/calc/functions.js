@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -113,8 +113,10 @@ defineFunction("atan", {params:[{name: "Number", noVector: true, noUnits: true}]
 defineFunction("Sqrt", {params:[{name: "Number", noVector: true}]}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.sqrt(r.value);
-	for (var i = 0; i < r.units.exponents.length; i++) {
-		r.units.exponents[i] = r.units.exponents[i] / 2;
+	if(r.units){
+		for (var i = 0; i < r.units.exponents.length; i++) {
+			r.units.exponents[i] = r.units.exponents[i] / 2;
+		}
 	}
 	return r;
 });
@@ -174,6 +176,9 @@ functionBank["ifthenelse"].delayEvalParams = true;
 functionBank["map"] = function(x) {
 	testArgumentsSize(x, "Map", 2, 2);
 	var v = evaluateNode(x[0].node, x[0].scope);
+	if(v instanceof Primitive){
+		v = v.toNum();
+	}
 	if(! (v instanceof Vector)){
 		throw "MSG: Map() requires a vector as its first argument.";
 	}
@@ -258,6 +263,9 @@ function findElement(needle, haystack){
 functionBank["filter"] = function(x) {
 	testArgumentsSize(x, "Filter", 2, 2);
 	var v = evaluateNode(x[0].node, x[0].scope);
+	if(v instanceof Primitive){
+		v = v.toNum();
+	}
 	if(! (v instanceof Vector)){
 		throw "MSG: Filter() requires a vector as its first agrument.";
 	}
@@ -604,14 +612,19 @@ function defineFunction(name, definition, fn){
 		
 		for (var i = 0; i < x.length; i++) {
 			var config = arr?configs[i]:configs;
-			if (config.noUnits && (!((!(x[i].toNum() instanceof Material)) || x[i].toNum().units.unitless()))) {
+			if (config.noUnits && (!((!(x[i].toNum() instanceof Material)) || unitless(x[i].toNum().units)))) {
 				throw "MSG: " + fnName + " does not except units for the argument '"+config.name+"'.";
 			}
 			if (config.noVector && (x[i] instanceof Vector)) {
 				throw "MSG: " + fnName + " does not except vectors for the argument '"+config.name+"'.";
 			}
-			if (config.needVector && ! (x[i] instanceof Vector)) {
-				throw "MSG: " + fnName + " requires a vector for the argument '"+config.name+"'.";
+			if (config.needVector) {
+				if(x[i] instanceof Primitive){
+					x[i] = x[i].toNum();
+				}
+				if(! (x[i] instanceof Vector)){
+					throw "MSG: " + fnName + " requires a vector for the argument '"+config.name+"'.";
+				}
 			}
 			if (config.needPrimitive && ! (x[i] instanceof Primitive)) {
 				throw "MSG: " + fnName + " requires a primitive for the argument '"+config.name+"'.";

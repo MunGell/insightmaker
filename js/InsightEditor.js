@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -109,6 +109,7 @@ var settingCell;
 var selectionChanged;
 var primitiveBank = {};
 var clipboardListener;
+var undoHistory;
 
 function main() {
 
@@ -130,7 +131,7 @@ function main() {
 
 	graph = new mxGraph();
 
-	var history = new mxUndoManager();
+	undoHistory = new mxUndoManager();
 	
 	var node = mxUtils.parseXml('<mxStylesheet> 	<add as="defaultVertex" extend="defaultVertex"> 		<add as="strokeColor" value="#666666"/> 		<add as="fontColor" value="#333333"/> 		<add as="fontSize" value="14"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="2"/> 	</add> 	<add as="defaultEdge" extend="defaultEdge"> 		<add as="labelBackgroundColor" value="white"/> 		<add as="rounded" value="1"/> 		<add as="fontSize" value="14"/> 		<add as="edgeStyle" value="elbowEdgeStyle"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="4"/> 	</add> 	<add as="stock" extend="defaultVertex"> 		<add as="fillColor" value="#A6D3F8"/> 	</add> 	<add as="state" extend="defaultVertex"> 		<add as="fillColor" value="#ffffff"/> 	</add> 	<add as="transition" extend="defaultEdge"> 		<add as="strokeColor" value="#000000"/> 		<add as="fontColor" value="#000000"/> 	</add> 	<add as="agents" extend="defaultVertex"> 		<add as="fillColor" value="#F0E68C"/> 		<add as="shape" value="cloud"/> 	</add> 	<add as="textArea" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	<add as="text" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	 	<add as="parameter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="variable" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="action" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FFFFFF"/> 	</add> 	<add as="converter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#B3E2CD"/> 	</add> 	<add as="button" extend="defaultVertex"> 		<add as="rounded" value="1"/> 		<add as="glass" value="1"/> 		<add as="fillColor" value="#C0C0C0"/> 		<add as="fontColor" value="black"/> 		<add as="strokeWidth" value="3"/> 		<add as="fontFamily" value="Helvetica"/> 	</add> 	<add as="display" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="fillColor" value="#FFFFFF"/> 		<add as="strokeColor" value="#FFFFFF"/> 		<add as="fontColor" value="#FFFFFF"/> 		<add as="opacity" value="0"/> 	</add> 	<add as="picture" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="entity" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	<add as="flow" extend="defaultEdge"> 	</add> 	<add as="link" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	 	<add as="line" extend="defaultVertex"> 		<add as="shape" value="line"/> 		<add as="strokeWidth" value="4"/> 		<add as="labelBackgroundColor" value="white"/> 		<add as="verticalAlign" value="top"/> 		<add as="spacingTop" value="8"/> 	</add> 	<add as="image" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="folder" extend="defaultVertex"> 		<add as="verticalAlign" value="top"/> 		<add as="dashed" value="1"/> 		<add as="fillColor" value="none"/> 		<add as="rounded" value="1"/> 	</add> </mxStylesheet> ');
 	var dec = new mxCodec(node);
@@ -399,8 +400,8 @@ function main() {
 		graph.sizeDidChange();
 	});
 
-	configPanel = Ext.create('Ext.Panel', ConfigPanel(graph, history));
-	ribbonPanel = Ext.create('Ext.Panel', RibbonPanel(graph, history, mainPanel, configPanel));
+	configPanel = Ext.create('Ext.Panel', ConfigPanel());
+	ribbonPanel = Ext.create('Ext.Panel', RibbonPanel(graph, mainPanel, configPanel));
 
 	var viewport = new Ext.Viewport({
 		layout: 'border',
@@ -946,7 +947,7 @@ function main() {
 	}
 
 	var listener = function(sender, evt) {
-			history.undoableEditHappened(evt.getProperty('edit'));
+			undoHistory.undoableEditHappened(evt.getProperty('edit'));
 		};
 
 	graph.getModel().addListener(mxEvent.UNDO, listener);
@@ -1001,13 +1002,13 @@ function main() {
 
 	// Updates the states of the undo/redo buttons in the toolbar
 	var historyListener = function() {
-			toolbarItems.getComponent('actions').getComponent('undo').setDisabled(!history.canUndo());
-			toolbarItems.getComponent('actions').getComponent('redo').setDisabled(!history.canRedo());
+			toolbarItems.getComponent('actions').getComponent('undo').setDisabled(!undoHistory.canUndo());
+			toolbarItems.getComponent('actions').getComponent('redo').setDisabled(!undoHistory.canRedo());
 		};
 
-	history.addListener(mxEvent.ADD, historyListener);
-	history.addListener(mxEvent.UNDO, historyListener);
-	history.addListener(mxEvent.REDO, historyListener);
+	undoHistory.addListener(mxEvent.ADD, historyListener);
+	undoHistory.addListener(mxEvent.UNDO, historyListener);
+	undoHistory.addListener(mxEvent.REDO, historyListener);
 
 	// Updates the button states once
 	selectionListener();
@@ -1138,8 +1139,8 @@ function main() {
 			graph.setSelectionCells(graph.getSelectionCellsForChanges(changes));
 		};
 
-	history.addListener(mxEvent.UNDO, undoHandler);
-	history.addListener(mxEvent.REDO, undoHandler);
+	undoHistory.addListener(mxEvent.UNDO, undoHandler);
+	undoHistory.addListener(mxEvent.REDO, undoHandler);
 
 	if(! is_embed){
 		//stealing focus in embedded frames scrolls the page to the frame
@@ -1230,11 +1231,11 @@ function main() {
 	});
 
 	keyHandler.bindControlKey(89, function() {
-		history.redo();
+		undoHistory.redo();
 	});
 
 	keyHandler.bindControlKey(90, function() {
-		history.undo();
+		undoHistory.undo();
 	});
 
 	keyHandler.bindControlKey(88, function() {
@@ -1523,7 +1524,11 @@ function main() {
 					});
 				}
 
-				topDesc = "<big class='description'>" + topDesc + "</big><br/><br/>";
+				topDesc = "<big class='description'>" + topDesc + "</big>";
+				if (drupal_node_ID != -1 && cell == null) {
+					topDesc = topDesc + '<br/><br/> ' + (is_editor ? '<a href="#" style="text-decoration:none" onclick="updateProperties()">Edit description</a>' : '') + ' <div style="float:right; vertical-align:middle"> Share <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span></div>';
+				}
+				topDesc = topDesc + "<br/><br/>";
 				
 				if(topTags != ""){
 					topDesc = topDesc + "Tags: "+topTags+"<br/><br/>";
@@ -1542,9 +1547,6 @@ function main() {
 					bottomItems.push(sliderHolder);
 					var slids = sliderPrimitives();
 					sliders = [];
-
-
-
 
 					for (var i = 0; i < slids.length; i++) {
 						if (isNaN(getValue(slids[i]))) {
@@ -1577,12 +1579,14 @@ function main() {
 							listeners: {
 								change: function(item, e, ops) {
 									if (!item.ignoreChange) {
-										item.ignoreChange = true;
-										var v = parseFloat(item.getValue(), 10);
-										if (!isNaN(v)) {
-											item.slider.setValue(v);
+										if(item.validate()){
+											item.ignoreChange = true;
+											var v = parseFloat(item.getValue(), 10);
+											if (!isNaN(v)) {
+												item.slider.setValue(v);
+											}
+											item.ignoreChange = false;
 										}
-										item.ignoreChange = false;
 									}
 								}
 							}
@@ -1978,9 +1982,7 @@ function main() {
 		}
 		configPanel.removeAll();
 
-		if (drupal_node_ID != -1 && cell == null) {
-			bottomDesc = bottomDesc + '<br/> ' + (is_editor ? '<a href="#" style="text-decoration:none" onclick="updateProperties()">Edit description</a>' : '') + ' <div style="float:right; vertical-align:middle"> Share <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span><br/><br/></div>';
-		}
+		
 
 		if (topDesc != "") {
 			topItems.push(Ext.create('Ext.Component', {

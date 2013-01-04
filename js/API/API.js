@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl) (http://InsightMaker.com/impl).
@@ -610,18 +610,24 @@ Reorganizes the primitives in the model according to an algorithm.
 
 Parameters:
 
-algorithm - The algorithm used to calculate the new positions of the primitive. Either "organic" or "circular"
+algorithm - The algorithm used to calculate the new positions of the primitive. Either "organic" or "circular".
 
 
 */
 
 function layoutModel(algorithm){
-	if(algorithm=="organic"){
+	if(algorithm == "organic"){
 		var layout = new mxFastOrganicLayout(graph);
-		layout.forceConstant = 60;
+		layout.forceConstant = 50;
 		executeLayout(layout, true);
-	}else if(algorithm=="circular"){
+	}else if(algorithm == "circular"){
 		executeLayout(new mxCircleLayout(graph), true);	
+	}else if(algorithm == "hierarchical"){
+		var layout = new mxCompactTreeLayout(graph);
+		layout.horizontal = false;
+		layout.resizeParent = false;
+		layout.moveTree = false;
+		executeLayout(layout, true);
 	}else{
 		alert("Unknown layout algorithm: "+algorithm);
 	}
@@ -943,7 +949,7 @@ A primitive. If multiple primitives exist with the same name, an array of primit
 
 See also:
 
-<findType>, <findAll>, <findID>, <findValue>
+<findType>, <findAll>, <findID>, <findNote>, <findValue>
 
 */
 
@@ -989,13 +995,13 @@ An array of primitives.
 
 See also:
 
-<findName>, <findType>, <findID>, <findValue>
+<findName>, <findType>, <findID>, <findNote>, <findValue>
 
 */
 
 
 function findAll() {
-	var all = findType();
+	var all = primitives();
 	var res = [];
 	for (var i =0 ; i < all.length; i++){
 		if(!(all[i].value.nodeName=="Setting" || all[i].value.nodeName=="Display")){
@@ -1021,7 +1027,7 @@ An array of primitives of the specified type.
 
 See also:
 
-<findName>, <findAll>, <findID>, <findValue>
+<findName>, <findAll>, <findID>, <findNote>, <findValue>
 
 */
 
@@ -1052,14 +1058,14 @@ A primitive. If an array of IDs was passed, returns an array of primitives.
 
 See also:
 
-<findName>, <findType>, <findAll>, <findValue>, <getID>
+<findName>, <findType>, <findAll>, <findValue>, <findNote>, <getID>
 
 */
 
 
 
 function findID(id) {
-	var myCells = findAll();
+	var myCells = primitives();
 	var res = map(id, function(id){
 	for (var i = 0; i < myCells.length; i++) {
 		if (myCells[i].id == id) {
@@ -1085,7 +1091,7 @@ function findID(id) {
 /*
 Method: findValue
 
-Finds and returns all primitives whose values match a regular expressions
+Finds and returns all primitives whose values match a regular expression.
 
 Parameters:
 
@@ -1093,7 +1099,7 @@ search - The regular expression to search for. Can also be a string in which cas
 
 Return:
 
-An array of primitives whose values that match the regular expression. Returns an empty array if no primitives match.
+An array of primitives whose values match the regular expression. Returns an empty array if no primitives match.
 
 Example:
 
@@ -1105,7 +1111,7 @@ Example:
 
 See also:
 
-<findName>, <findType>, <findAll>, <getID>
+<findName>, <findType>, <findAll>, <findNote>, <getID>
 
 */
 
@@ -1132,6 +1138,50 @@ function findValue(search) {
 	
 	return uniquePrimitives(Ext.Array.flatten(res));
 }
+
+/*
+Method: findNote
+
+Finds and returns all primitives whose notes match a regular expression.
+
+Parameters:
+
+search - The regular expression to search for. Can also be a string in which case the primitive notes will be tested for strict case-sensitive equality against the string. May also be an array of regular expressions and strings in which case any primitive with a note that matches one element of the array will be returned.
+
+Return:
+
+An array of primitives whose notes match the regular expression. Returns an empty array if no primitives match.
+
+See also:
+
+<findName>, <findType>, <findAll>, <findValue>, <getID>
+
+*/
+
+
+function findNote(search) {
+	var myCells = findAll();
+	
+
+	var res = map(search, function(regEx){
+		var res = [];
+		for (var i = 0; i < myCells.length; i++) {
+			if(regEx instanceof RegExp){
+				if (regEx.test(getNote(myCells[i]))) {
+					res.push(myCells[i]);
+				}
+			}else{
+				if(getNote(myCells[i]) == regEx){
+					res.push(myCells[i]);
+				}
+			}
+		}
+		return res;
+	});
+	
+	return uniquePrimitives(Ext.Array.flatten(res));
+}
+
 
 /*
 
@@ -3626,5 +3676,16 @@ function toggleSideBar() {
 	}else{
 		configPanel.expand(false);
 	}
+}
+
+/*
+Method: updateSideBar
+
+Refreshes the values in the side panel to reflect any changes in the model.
+
+*/
+
+function updateSideBar(){
+	selectionChanged(true);
 }
 

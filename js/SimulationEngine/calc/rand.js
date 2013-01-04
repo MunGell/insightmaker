@@ -35,7 +35,7 @@ function getRandPos() {
 
 function Rand(minVal, maxVal) {
   if (minVal != null) {
-    return Rand() * (maxVal - minVal) + minVal;
+    return Rand() * (maxVal - minVal) + parseFloat(minVal);
   }
   if(RKOrder == 1){
   	return Math.random();
@@ -48,7 +48,7 @@ function Rand(minVal, maxVal) {
   while (PreviousRandLists.length <= RandPos) {
     PreviousRandLists.push(new RandList());
   }
-  RandLoc = RandLoc + (1);
+  RandLoc = RandLoc + 1;
   return PreviousRandLists[RandPos].get(RandLoc);
 }
 
@@ -62,7 +62,7 @@ function RandNormal(mu, sigma) {
 
   var z;
   z = Math.sqrt((-2) * Math.log((1) - Rand())) * Math.cos(Rand() * (2) * (3.141593));
-  return z * sigma + mu;
+  return z * sigma + parseFloat(mu);
 }
 function RandExp(lambda) {
     if (lambda == null) {
@@ -76,9 +76,8 @@ function RandLognormal(mu, sigma) {
   return Math.exp(RandNormal(lmu, lsigma));
 }
 function RandBinomial(count, probability) {
-  var res = (0);
-  for (var i = (1);
-   i <= count; i++) {
+  var res = 0;
+  for (var i = 1; i <= count; i++) {
     if (Rand() <= probability) {
       res = res + (1);
     }
@@ -86,44 +85,43 @@ function RandBinomial(count, probability) {
   return res;
 }
 function RandNegativeBinomial(successes, probability) {
-  var i = (0);
-  var s = (0);
+  var i = 0;
+  var s = 0;
   while (s < successes) {
     if (Rand() <= probability) {
-      s = s + (1);
+      s = s + 1;
     }
-    i = i + (1);
+    i = i + 1;
   }
   return i;
 }
 function RandPoisson(lambda) {
   var L = Math.exp(-lambda);
-  var k = (0);
-  var p = (1);
+  var k = 0;
+  var p = 1;
   while (true) {
-    k = k + (1);
+    k = k + 1;
     p = p * Rand();
     if (!(p > L)) {
       break;
     }
   }
-  return k - (1);
+  return k - 1;
 }
 function RandGamma(alpha, beta) {
-  var temp = (1);
-  for (var i = (1);
-   i <= alpha; i++) {
+  var temp = 1;
+  for (var i = 1; i <= alpha; i++) {
     temp = temp * Rand();
   }
   return -beta * Math.log(temp);
 }
 function RandTriangular(minimum, maximum, peak) {
-	if(minimum==maximum){
+	if(minimum == maximum){
 		throw "MSG: Maximum can't equal the minimum for the triangular distribution.";
 	}
-	var a = minimum;
-	var b = maximum;
-	var c = peak;
+	var a = parseFloat(minimum);
+	var b = parseFloat(maximum);
+	var c = parseFloat(peak);
 	
 	var fc = (c-a)/(b-a);
 	

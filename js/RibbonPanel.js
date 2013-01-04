@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -108,7 +108,7 @@ if ((!is_editor) || is_embed) {
 }
 var sizeCombo;
 var fontCombo;
-var RibbonPanel = function(graph, history, mainPanel, configPanel) {
+var RibbonPanel = function(graph, mainPanel, configPanel) {
 	Ext.Ajax.timeout = 60000;
 
 	var handlePrimToggle = function(item, pressed) {
@@ -681,7 +681,7 @@ var RibbonPanel = function(graph, history, mainPanel, configPanel) {
 					iconCls: 'undo-icon',
 					tooltip: 'Undo change ' + cmd("Z"),
 					handler: function() {
-						history.undo();
+						undoHistory.undo();
 					},
 					scope: this
 				}, {
@@ -690,7 +690,7 @@ var RibbonPanel = function(graph, history, mainPanel, configPanel) {
 					iconCls: 'redo-icon',
 					tooltip: 'Redo change ' + cmd("Y"),
 					handler: function() {
-						history.redo();
+						undoHistory.redo();
 					},
 					scope: this
 				}, {
@@ -1095,33 +1095,7 @@ var RibbonPanel = function(graph, history, mainPanel, configPanel) {
 					tooltip: 'Sensitivity testing',
 					handler: doSensitivity,
 					scope: this
-				}
-/*,
-                {
-                    hidden: (!is_editor) || is_embed,
-                    id: 'download',
-                    text: 'Download',
-                    iconCls: 'download-icon',
-                    tooltip: 'Download this Insight to your computer',
-                    handler: function()
-                    {
-                        Ext.Msg.show({
-                            icon: Ext.MessageBox.INFO,
-                            title: 'Download Insight',
-                            msg: 'You may download your Insights for further analysis. Insights are saved in a text-based format. One software package that can edit and carry out advanced analysis on the downloaded Insights is <a href="http://simgua.com" target="_blank">Simgua</a>.',
-                            buttons: Ext.MessageBox.OKCANCEL,
-                            fn: function(btn) {
-                                if (btn == "ok") {
-                                    downloadModel();
-                                }
-                            }
-                        });
-                    },
-                    scope: this
-                }*/
-				,
-
-				{
+				},{
 					id: 'embed_but',
 					text: 'Embed',
 					hidden: (!is_editor) || is_embed,
@@ -1148,13 +1122,21 @@ var RibbonPanel = function(graph, history, mainPanel, configPanel) {
 						}
 					},
 					scope: this
-				},  {
+				},{
 					hidden: (!is_editor) || is_embed,
 					id: 'textBut',
 					text: 'Equations',
 					iconCls: 'equations-icon',
 					tooltip: 'A listing of all equations in the Insight',
 					handler: textEquations,
+					scope: this
+				},{
+					hidden: (!is_editor) || is_embed,
+					id: 'optimizeBut',
+					text: 'Optimize',
+					iconCls: 'optimize-icon',
+					tooltip: 'Optimize model parameters',
+					handler: doOptimizer,
 					scope: this
 				}
 

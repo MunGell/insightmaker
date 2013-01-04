@@ -1,13 +1,14 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
 
+var resultsWindows = [];
 
 function commaStr(nStr) {
 	//if(nStr instanceof String){
@@ -589,7 +590,7 @@ function openDisplayConfigure(win) {
 							.execute(new mxCellAttributeChange(d, "Type", type));
 						graph.getModel()
 							.execute(new mxCellAttributeChange(d, "AutoAddPrimitives", Ext.getCmp("autoAdd")
-							.getValue()));
+							.getValue().toString()));
 
 							graph.getModel()
 								.execute(new mxCellAttributeChange(d, "legendPosition", Ext.getCmp("legendPosition")
@@ -663,13 +664,13 @@ function openDisplayConfigure(win) {
 
 						graph.getModel()
 							.execute(new mxCellAttributeChange(d, "showMarkers", Ext.getCmp("showMarkers")
-							.getValue()));
+							.getValue().toString()));
 						graph.getModel()
 							.execute(new mxCellAttributeChange(d, "showLines", Ext.getCmp("showLines")
-							.getValue()));
+							.getValue().toString()));
 						graph.getModel()
 							.execute(new mxCellAttributeChange(d, "showArea", Ext.getCmp("showArea")
-							.getValue()));
+							.getValue().toString()));
 
 						w.tabs.getActiveTab()
 							.removeAll();
@@ -1514,7 +1515,7 @@ function createResultsWindow(displayInformation) {
 		this.slider.setValue(time);
 		this.updatingSlider = false;
 	}
-	if (scripter.combo.getValue() != -1) {
+	if (scripter.combo.getValue() != -1 && ! doFullSpeed) {
 		scripter.loadTime(1);
 		scripter.animInter = setInterval(function() {
 			scripter.advanceTimer()
@@ -1728,6 +1729,7 @@ function createResultsWindow(displayInformation) {
 			win.expand();
 		}
 	});
+	resultsWindows.push(win);
 	win.show();
 }
 

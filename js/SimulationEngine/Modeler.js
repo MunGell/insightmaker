@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -56,7 +56,7 @@ function innerRunSimulation(silent) {
 	
 	allPlaceholders = [];
 	var model = {};
-	submodels = {"base": {id: "base", "DNA":[], agents: [{children: [], childrenId: {}}], size: 1}};
+	submodels = {"base": {id: "base", "DNAs":[], agents: [{children: [], childrenId: {}}], size: 1}};
 	var setting = getSetting();
 
 	strictUnits = isTrue(setting.getAttribute("StrictUnits"));
@@ -112,10 +112,11 @@ function innerRunSimulation(silent) {
 			}
 				
 			var x = new Agents();
+			
+			x.dna = new DNA( "Agents", item, id.id, item.getAttribute("name"));
 			x.id = item.id;
 			x.agentId = id;
 			x.createIds();
-			x.name = item.getAttribute("name");
 			
 			x.geoDimUnits = item.getAttribute("GeoDimUnits");
 			x.geoDimUnitsObject = createUnitStore(item.getAttribute("GeoDimUnits"));
@@ -131,10 +132,10 @@ function innerRunSimulation(silent) {
 			
 			var agentCells = getChildren(findID(id));
 			
-			x.DNA = [];
+			x.DNAs = [];
 			for(var j=0; j<agentCells.length; j++){
 				if(modelType(agentCells[j].value.nodeName)){
-					x.DNA.push(getDNA(agentCells[j]));
+					x.DNAs.push(getDNA(agentCells[j]));
 				}
 				if(agentCells[j].value.nodeName=="State"){
 					x.stateIds.push(agentCells[j].id);
@@ -145,14 +146,13 @@ function innerRunSimulation(silent) {
 			
 			x.agents = [];
 			
-			x.cell = item;
-			x.dna = {type: "Agents", id: x.id, name: x.name, cell: item, agents: x};
+			x.dna.agents = x;
 			
 			submodels[item.id] = x;
-			submodels.base.DNA.push(x.dna);
+			submodels.base.DNAs.push(x.dna);
 		}else if(! inAgent(modelItems[i])){
 			if(modelType(modelItems[i].value.nodeName)){
-				submodels.base.DNA.push(getDNA(modelItems[i]));
+				submodels.base.DNAs.push(getDNA(modelItems[i]));
 			}
 		}
 	};
@@ -173,8 +173,8 @@ function innerRunSimulation(silent) {
 				agent.createIds();
 				submodel.agents.push(agent);
 			}
-			for(var i = 0; i < submodel.DNA.length; i++){
-				decodeDNA(submodel.DNA[i], agent);
+			for(var i = 0; i < submodel.DNAs.length; i++){
+				decodeDNA(submodel.DNAs[i], agent);
 			}
 		}
 	}
@@ -207,9 +207,9 @@ function innerRunSimulation(silent) {
 		//console.log("[[["+submodel+"]]]]");
 		submodel = submodels[submodel];
 		for(var j = 0; j < submodel.size; j++){
-			for(var i = 0; i < submodel.DNA.length; i++){
+			for(var i = 0; i < submodel.DNAs.length; i++){
 				//console.log(i);
-				linkPrimitive(submodel.agents[j].children[i], submodel.DNA[i]);
+				linkPrimitive(submodel.agents[j].children[i], submodel.DNAs[i]);
 			}
 		}
 	} 
@@ -378,9 +378,9 @@ function simpleUnitsTest(mat, units){
 	}
 	
 	
-	if(mat.units.unitless() && units.unitless()){
+	if(unitless(mat.units) && unitless(units)){
 		return mat;
-	}else if(mat.units.unitless()){
+	}else if(unitless(mat.units)){
 		mat.units = units;
 		return mat;
 	}else if(unitsEqual(mat.units, units)){
@@ -576,12 +576,17 @@ function evaluateMacros(macros){
 	evaluateTree(trimTree(createTree(macros), {}), varBank);
 }
 
+function DNA(type, cell, id, name){
+	this.type = type;
+	this.cell = cell;
+	this.id = id;
+	this.name = name;
+	this.units = null;
+}
+
 function getDNA(cell){
 	var type = cell.value.nodeName;
-	var dna = {type: type, cell: cell};
-
-	dna.id = cell.id;
-	dna.name = cell.getAttribute("name");
+	var dna = new DNA(type, cell, cell.id, cell.getAttribute("name"));
 	
 	if(type=="Flow" || type=="Transition"){
 		if (cell.target !== null) {
@@ -624,7 +629,7 @@ function getDNA(cell){
 			dna.stockType="Conveyor";
 			try {
 				dna.delay = evaluateTree(trimTree(createTree(cell.getAttribute("Delay")), {}));
-				if (dna.delay.units.unitless()) {
+				if (unitless(dna.delay.units)) {
 					dna.delay.units = new UnitStore([timeUnits], [1]);
 				}
 			} catch (err) {
@@ -658,8 +663,8 @@ function getDNA(cell){
 			inp.push(new Material(sn(Ext.String.trim(b[0])), myU.clone()));
 			out.push(new Material(sn(Ext.String.trim(b[1]))));
 		}
-		dna.input = inp;
-		dna.output = out;
+		dna.inputs = inp;
+		dna.outputs = out;
 	}
 	
 	if (type != "State") {
@@ -689,10 +694,15 @@ function getDNA(cell){
 			} 
 		}
 		dna.maxConstraint = cell.getAttribute("MaxConstraint");
-		dna.maxConstraintUsed = isTrue(cell.getAttribute("MaxConstraintUsed")) ? 1 : null;
+		dna.maxConstraintType = isTrue(cell.getAttribute("MaxConstraintUsed")) ? 1 : null;
 		dna.minConstraint = cell.getAttribute("MinConstraint");
-		dna.minConstraintUsed = isTrue(cell.getAttribute("MinConstraintUsed")) ? 1 : null;
+		dna.minConstraintType = isTrue(cell.getAttribute("MinConstraintUsed")) ? 1 : null;
+		
 	}
+	
+	
+	dna.toBase = dna.units?(new Quantities(dna.units)).toBase:1;
+	dna.unitless = (! dna.units) || unitless(dna.units);
 	
 	return dna;
 }
@@ -700,48 +710,29 @@ function getDNA(cell){
 function decodeDNA(dna, agent){
 	var type = dna.type;
 	var x;
-	if (type== "Variable") {
+	if (type == "Variable") {
 		x = new Variable();
 	} else if (type == "State") {
 		x = new State();
 	} else if (type == "Transition") {
 		x = new Transition();
-		x.trigger = dna.trigger;
 	} else if (type == "Action") {
 		x = new Action();
-		x.trigger = dna.trigger;
 	} else if (type == "Stock") {
 		x = new Stock();
-		x.nonNegative = dna.nonNegative;
-		if (dna.stockType == "Conveyor") {
-			x.delay = dna.delay;
-		}
 	} else if (type == "Flow") {
 		x = new Flow();
-		x.onlyPositive = dna.onlyPositive;
 	} else if (type == "Converter") {
 		x = new Converter();
-		x.interpolation = dna.interpolation;
-		x.setData(dna.input, dna.output);
 	}
 
 	if(x){
+		x.dna = dna;	
 		x.id = dna.id;
 		x.index = agent.index;
 		x.agentId = agent.agentId;
 		x.parent = agent;
-		x.name = dna.name;
 		x.createIds();
-		if(isDefined(dna.maxConstraint)){
-			x.setConstraints(dna.maxConstraint, dna.maxConstraintUsed, dna.minConstraint, dna.minConstraintUsed);
-		}
-		if(isDefined(dna.units)){
-			if(dna.flowUnitless){
-				x.setup(dna.units.clone(), {flowUnitless: dna.flowUnitless});
-			}else{
-				x.setup(dna.units.clone());
-			}
-		}
 		
 		agent.children.push(x);
 		agent.childrenId[x.id] = x;
@@ -988,18 +979,18 @@ function getPrimitiveNeighborhood(primitive, dna){
 	
 	if(! neighbors.placeholders){
 		if(dna.type=="Agents"){
-			for(var i=0; i<primitive.DNA.length; i++){
-				placeholders[primitive.DNA[i].name.toLowerCase()] = new Placeholder(primitive.DNA[i], primitive);
+			for(var i=0; i<primitive.DNAs.length; i++){
+				placeholders[primitive.DNAs[i].name.toLowerCase()] = new Placeholder(primitive.DNAs[i], primitive);
 			}
 		}
 	}
 	for(var k=0; k<neighbors.length; k++){
 		var item = neighbors[k].item;
 		if(item.value.nodeName == "Agents"){
-			hood[submodels[item.id].name.toLowerCase()] = submodels[item.id];
+			hood[submodels[item.id].dna.name.toLowerCase()] = submodels[item.id];
 			if(! neighbors.placeholders){
-				for(var i = 0; i < submodels[item.id].DNA.length; i++){
-					hood[submodels[item.id].DNA[i].name.toLowerCase()] = new Placeholder(submodels[item.id].DNA[i], primitive);
+				for(var i = 0; i < submodels[item.id].DNAs.length; i++){
+					hood[submodels[item.id].DNAs[i].name.toLowerCase()] = new Placeholder(submodels[item.id].DNAs[i], primitive);
 				}
 			}
 		}else{
@@ -1008,13 +999,13 @@ function getPrimitiveNeighborhood(primitive, dna){
 			var found = false;
 			if(primitive.parent){
 				if(primitive.parent.childrenId[item.id]){
-					hood[primitive.parent.childrenId[item.id].name.toLowerCase()] = primitive.parent.childrenId[item.id];
+					hood[primitive.parent.childrenId[item.id].dna.name.toLowerCase()] = primitive.parent.childrenId[item.id];
 					found = true;
 				}
 			}
 			if(! found){
 				if (submodels["base"]["agents"][0].childrenId[item.id]) {
-					hood[submodels["base"]["agents"][0].childrenId[item.id].name.toLowerCase()] = submodels["base"]["agents"][0].childrenId[item.id];
+					hood[submodels["base"]["agents"][0].childrenId[item.id].dna.name.toLowerCase()] = submodels["base"]["agents"][0].childrenId[item.id];
 					found = true;
 				}
 			}

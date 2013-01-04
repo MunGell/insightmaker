@@ -1,7 +1,7 @@
 "use strict";
 /*
 
-Copyright 2010-2012 Scott Fortmann-Roe. All rights reserved.
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
 
 This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
@@ -55,11 +55,7 @@ var findSourceIndex = function(name){
 
 function Material(value, units) {
 	this.value =  value;
-	if(units){
-  		this.units = units;
-	}else{
-		this.units = new UnitStore();
-	}
+  	this.units = units;
 }
 
 Material.prototype.toNum = function(){
@@ -67,17 +63,17 @@ Material.prototype.toNum = function(){
 };
 
 Material.prototype.simplify = function(){
-	if(! this.units.unitless()){
-	var x =	new Quantities(this.units);
-	this.value = fn["*"](this.value, x.toBase);
-	//console.log(x.toBase)
-	//console.log(x.units)
-	this.units = x.units;
+	if(! unitless(this.units)){
+		var x =	new Quantities(this.units);
+		this.value = fn["*"](this.value, x.toBase);
+		//console.log(x.toBase)
+		//console.log(x.units)
+		this.units = x.units;
 	}
 }
 
 Material.prototype.toString = function(){
-	if(! this.units.unitless()){
+	if(! unitless(this.units)){
 		return "<span class='markup'>{</span>"+this.value+"&nbsp"+this.units.toString()+"<span class='markup'>}</span>";
 	}else{
 		return this.value+"";
@@ -86,7 +82,7 @@ Material.prototype.toString = function(){
 
 
 Material.prototype.fullClone = function(){
-	return new Material(this.value, this.units.clone());
+	return new Material(this.value, this.units?this.units.clone():undefined);
 }
 
 Material.prototype.forceUnits = function(newUnits){
@@ -111,5 +107,5 @@ function unitAlert(lhs, rhs, type){
 }
 
 function unitless(u){
-	return u === null || u.unitless();
+	return  u === null || (! u) || u.unitless();
 }

@@ -327,7 +327,7 @@ defineFunction("Delay3", {params: [{name: "[Primitive]",  noVector: true, needPr
 defineFunction("Exp", { params: [{name: "Number",  noVector: true, noUnits: true}]}, function(x) {	
 	var r = x[0].toNum();
 	r.value = fn.exp(r.value);
-	if(fn["imag-part"](r.value) != 0){
+	if(fn["imag-part"] && fn["imag-part"](r.value) != 0){
 		throw("MSG: Exp() function resulted in an imaginary result.");
 	}else{
 		r.value = fn["real-part"](r.value);
@@ -366,13 +366,12 @@ function getPopulation(item){
 	}
 	var res = [];
 	if(item instanceof Agents){
-		for(var i=0; i<item.agents.length; i++){
-			res.push(item.agents[i]);
-		}
+		return new Vector(item.agents.slice());
+	}else if(item.toNum() instanceof Vector){
+		return item.toNum();
 	}else{
-		res.push(agent(item));
+		return new Vector([agent(item)]);
 	}
-	return new Vector(res);
 }
 
 functionBank["populationsize"] = function(x) {
@@ -427,24 +426,27 @@ defineFunction("Value", {params: [{name: "[Population]"}, {needPrimitive: true, 
 	if(x[0] instanceof Agents){
 		population = getPopulation(x[0]);
 	}
+	
 	if(x[0] instanceof Vector){
 		population = x[0];
 	}
 	if(population !== null){
 		var res = [];
-		var j = -1;
-		for(var i = 0; i < population.length(); i++){
-			if(j != -1){
-				res.push(population.items[i].children[j]);
+		var q = -1;
+		for(var i = 0; i < population.items.length; i++){
+			if(q != -1){
+				res.push(population.items[i].children[q]);
 			}else{
 				for(var j = 0; j < population.items[i].children.length; j++){
 					if(population.items[i].children[j].id == id){
 						res.push(population.items[i].children[j]);
+						q = j;
 						break;
 					}
 				}
 			}
 		}
+		
 		return new Vector(res);
 	}else if(x[0] instanceof Agent){
 		//console.log(x[0].index);
@@ -512,19 +514,19 @@ defineFunction("FindIndex", {params: [{needPopulation: true, name: "[Agent Popul
 defineFunction("FindState", {params: [{needPopulation: true, name: "[Agent Population]"}, {needPrimitive: true, name: "[State]"}]}, function(x) {
 
 	var population = x[0];
+	
 	if(! ((x[1] instanceof State) || (x[1].dna.type == "State"))){
 		throw "MSG: FindState() requires a State primitive as its second argument.";
 	}
+	
 	var id = x[1].id;
 	var res = [];
-	for(var i = 0; i < population.length(); i++){
-		var popState = population.items[i].state();
-		if(popState !== null && popState.map(function(x){return x.id}).indexOf(id)>-1){
+	
+	for(var i = 0; i < population.items.length; i++){
+		if(population.items[i].stateIDs.indexOf(id) > -1){
 			res.push(population.items[i]);
 		}
 	}
-	
-	//console.log(res);
 	
 	return new Vector(res);
 });
@@ -538,12 +540,13 @@ defineFunction("FindNotState", {params: [{needPopulation: true, name: "[Agent Po
 	
 	var id = x[1].id;
 	var res = [];
-	for(var i = 0; i < population.length(); i++){
-		var popState = population.items[i].state();
-		if(popState !== null && popState.map(function(x){return x.id}).indexOf(id)==-1){
+	
+	for(var i = 0; i < population.items.length; i++){
+		if(population.items[i].stateIDs.indexOf(id)==-1){
 			res.push(population.items[i]);
 		}
 	}
+	
 	return new Vector(res);
 });
 
@@ -564,10 +567,9 @@ defineFunction("FindNearby", {params: [{needPopulation: true, name: "[Agent Popu
 
 defineFunction("FindNearest", {params: [{needPopulation: true, name: "[Agent Population]"}, {needAgent: true, name: "[Agent]"}, {noUnits:true, noVector:true, defaultVal:1, name: "Count"}]}, function(x) {
 	var population = x[0];
-
 	var count = 1;
-	if(x.length==3){
-		count = x[2];
+	if(x.length == 3){
+		count = x[2].value;
 	}
 	
 	var res = [];
@@ -584,7 +586,7 @@ defineFunction("FindNearest", {params: [{needPopulation: true, name: "[Agent Pop
 		throw "MSG: Can't find nearest "+count+" agents of a population of size "+res.length+".";
 	}
 	if(count<1){
-		throw "MSG: You must select at least one agent.";
+		throw "MSG: You must select at least one agent in FindNearest().";
 	}
 	
 	var minItems = [res[0]];
@@ -618,10 +620,10 @@ defineFunction("FindFurthest", {params: [{needPopulation: true, name: "[Agent Po
 
 	var count = 1;
 	if(x.length==3){
-		count = x[2];
+		count = x[2].value;
 	}
 	if(count<1){
-		throw "MSG: You must select at least one agent.";
+		throw "MSG: You must select at least one agent in FindFurthest().";
 	}
 	
 	var res = [];
@@ -792,7 +794,7 @@ function distance(a,b){
 	}
 	
 	var dist = fn["real-part"](fn["sqrt"](fn["+"]( fn["*"](v1,v1), fn["*"](v2,v2)) ));
-	dist = new Material(dist, distx.units.clone());
+	dist = new Material(dist, distx.units?distx.units.clone():undefined);
 	distanceCache[s1+s2]=dist;
 	return dist;
 	//var dist = functionBank["sqrt"]([plus( power(distx, (new Material(2))), power(disty, (new Material(2))) )])
@@ -878,7 +880,7 @@ function isDefined(item) {
 }
 
 function constraintAlert(item, type, val) {
-	var msg = "The " + (type == "max" ? "maximum" : "minimum") + " constraint on the primitive <b>" + clean(getName(findID(item.id))) + "</b> has been violated. The primitive's value attempted to become " + val.value + " when the " + (type == "max" ? "maximum" : "minimum") + " allowed value is " + (type == "max" ? item.maximumConstraint : item.minimumConstraint) + ".";
+	var msg = "The " + (type == "max" ? "maximum" : "minimum") + " constraint on the primitive <b>" + clean(getName(findID(item.id))) + "</b> has been violated. The primitive's value attempted to become " + val.value + " when the " + (type == "max" ? "maximum" : "minimum") + " allowed value is " + (type == "max" ? item.dna.maxConstraint : item.dna.minConstraint) + ".";
 	error(msg, item, false);
 }
 

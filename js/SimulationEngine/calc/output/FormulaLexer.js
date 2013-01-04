@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2012-12-05 14:17:48
+// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2012-12-22 06:27:01
 
 var FormulaLexer = function(input, state) {
 // alternate constructor @todo
@@ -19,12 +19,12 @@ var FormulaLexer = function(input, state) {
 
 org.antlr.lang.augmentObject(FormulaLexer, {
     EOF: -1,
-    T__87: 87,
     T__88: 88,
     T__89: 89,
     T__90: 90,
     T__91: 91,
     T__92: 92,
+    T__93: 93,
     NEGATE: 4,
     ASSIGN: 5,
     FUNCALL: 6,
@@ -98,16 +98,17 @@ org.antlr.lang.augmentObject(FormulaLexer, {
     FLOAT: 74,
     TRUE: 75,
     FALSE: 76,
-    COMMENT: 77,
-    LINE_COMMENT: 78,
-    WS: 79,
-    G: 80,
-    J: 81,
-    K: 82,
-    Q: 83,
-    V: 84,
-    X: 85,
-    Z: 86
+    PER: 77,
+    COMMENT: 78,
+    LINE_COMMENT: 79,
+    WS: 80,
+    G: 81,
+    J: 82,
+    K: 83,
+    Q: 84,
+    V: 85,
+    X: 86,
+    Z: 87
 });
 
 (function(){
@@ -115,12 +116,12 @@ var HIDDEN = org.antlr.runtime.Token.HIDDEN_CHANNEL,
     EOF = org.antlr.runtime.Token.EOF;
 org.antlr.lang.extend(FormulaLexer, org.antlr.runtime.Lexer, {
     EOF : -1,
-    T__87 : 87,
     T__88 : 88,
     T__89 : 89,
     T__90 : 90,
     T__91 : 91,
     T__92 : 92,
+    T__93 : 93,
     NEGATE : 4,
     ASSIGN : 5,
     FUNCALL : 6,
@@ -194,46 +195,28 @@ org.antlr.lang.extend(FormulaLexer, org.antlr.runtime.Lexer, {
     FLOAT : 74,
     TRUE : 75,
     FALSE : 76,
-    COMMENT : 77,
-    LINE_COMMENT : 78,
-    WS : 79,
-    G : 80,
-    J : 81,
-    K : 82,
-    Q : 83,
-    V : 84,
-    X : 85,
-    Z : 86,
+    PER : 77,
+    COMMENT : 78,
+    LINE_COMMENT : 79,
+    WS : 80,
+    G : 81,
+    J : 82,
+    K : 83,
+    Q : 84,
+    V : 85,
+    X : 86,
+    Z : 87,
     getGrammarFileName: function() { return "/Library/WebServer/Documents/calc/Formula.g"; }
 });
 org.antlr.lang.augmentObject(FormulaLexer.prototype, {
-    // $ANTLR start T__87
-    mT__87: function()  {
-        try {
-            var _type = this.T__87;
-            var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:7:7: ( '(' )
-            // /Library/WebServer/Documents/calc/Formula.g:7:9: '('
-            this.match('('); 
-
-
-
-            this.state.type = _type;
-            this.state.channel = _channel;
-        }
-        finally {
-        }
-    },
-    // $ANTLR end "T__87",
-
     // $ANTLR start T__88
     mT__88: function()  {
         try {
             var _type = this.T__88;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:8:7: ( ',' )
-            // /Library/WebServer/Documents/calc/Formula.g:8:9: ','
-            this.match(','); 
+            // /Library/WebServer/Documents/calc/Formula.g:7:7: ( '(' )
+            // /Library/WebServer/Documents/calc/Formula.g:7:9: '('
+            this.match('('); 
 
 
 
@@ -250,9 +233,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.T__89;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:9:7: ( ')' )
-            // /Library/WebServer/Documents/calc/Formula.g:9:9: ')'
-            this.match(')'); 
+            // /Library/WebServer/Documents/calc/Formula.g:8:7: ( ',' )
+            // /Library/WebServer/Documents/calc/Formula.g:8:9: ','
+            this.match(','); 
 
 
 
@@ -269,10 +252,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.T__90;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:10:7: ( '<-' )
-            // /Library/WebServer/Documents/calc/Formula.g:10:9: '<-'
-            this.match("<-"); 
-
+            // /Library/WebServer/Documents/calc/Formula.g:9:7: ( ')' )
+            // /Library/WebServer/Documents/calc/Formula.g:9:9: ')'
+            this.match(')'); 
 
 
 
@@ -289,9 +271,10 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.T__91;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:11:7: ( '{' )
-            // /Library/WebServer/Documents/calc/Formula.g:11:9: '{'
-            this.match('{'); 
+            // /Library/WebServer/Documents/calc/Formula.g:10:7: ( '<-' )
+            // /Library/WebServer/Documents/calc/Formula.g:10:9: '<-'
+            this.match("<-"); 
+
 
 
 
@@ -308,6 +291,25 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.T__92;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
+            // /Library/WebServer/Documents/calc/Formula.g:11:7: ( '{' )
+            // /Library/WebServer/Documents/calc/Formula.g:11:9: '{'
+            this.match('{'); 
+
+
+
+            this.state.type = _type;
+            this.state.channel = _channel;
+        }
+        finally {
+        }
+    },
+    // $ANTLR end "T__92",
+
+    // $ANTLR start T__93
+    mT__93: function()  {
+        try {
+            var _type = this.T__93;
+            var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
             // /Library/WebServer/Documents/calc/Formula.g:12:7: ( '}' )
             // /Library/WebServer/Documents/calc/Formula.g:12:9: '}'
             this.match('}'); 
@@ -320,7 +322,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         finally {
         }
     },
-    // $ANTLR end "T__92",
+    // $ANTLR end "T__93",
 
     // $ANTLR start NEWLINE
     mNEWLINE: function()  {
@@ -651,7 +653,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.OR;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:143:5: ( '||' | O R )
+            // /Library/WebServer/Documents/calc/Formula.g:142:5: ( '||' | O R )
             var alt2=2;
             var LA2_0 = this.input.LA(1);
 
@@ -669,14 +671,14 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt2) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:143:8: '||'
+                    // /Library/WebServer/Documents/calc/Formula.g:142:8: '||'
                     this.match("||"); 
 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:143:15: O R
+                    // /Library/WebServer/Documents/calc/Formula.g:142:15: O R
                     this.mO(); 
                     this.mR(); 
 
@@ -697,7 +699,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.AND;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:149:5: ( '&&' | A N D )
+            // /Library/WebServer/Documents/calc/Formula.g:148:5: ( '&&' | A N D )
             var alt3=2;
             var LA3_0 = this.input.LA(1);
 
@@ -715,14 +717,14 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt3) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:149:8: '&&'
+                    // /Library/WebServer/Documents/calc/Formula.g:148:8: '&&'
                     this.match("&&"); 
 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:149:15: A N D
+                    // /Library/WebServer/Documents/calc/Formula.g:148:15: A N D
                     this.mA(); 
                     this.mN(); 
                     this.mD(); 
@@ -744,7 +746,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.EQUALS;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:156:2: ( '=' | '==' )
+            // /Library/WebServer/Documents/calc/Formula.g:155:2: ( '=' | '==' )
             var alt4=2;
             var LA4_0 = this.input.LA(1);
 
@@ -765,13 +767,13 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt4) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:156:4: '='
+                    // /Library/WebServer/Documents/calc/Formula.g:155:4: '='
                     this.match('='); 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:156:10: '=='
+                    // /Library/WebServer/Documents/calc/Formula.g:155:10: '=='
                     this.match("=="); 
 
 
@@ -792,7 +794,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.NOTEQUALS;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:159:2: ( '!=' | '<>' )
+            // /Library/WebServer/Documents/calc/Formula.g:158:2: ( '!=' | '<>' )
             var alt5=2;
             var LA5_0 = this.input.LA(1);
 
@@ -810,14 +812,14 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt5) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:159:4: '!='
+                    // /Library/WebServer/Documents/calc/Formula.g:158:4: '!='
                     this.match("!="); 
 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:159:11: '<>'
+                    // /Library/WebServer/Documents/calc/Formula.g:158:11: '<>'
                     this.match("<>"); 
 
 
@@ -838,8 +840,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.LT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:166:4: ( '<' )
-            // /Library/WebServer/Documents/calc/Formula.g:166:6: '<'
+            // /Library/WebServer/Documents/calc/Formula.g:165:4: ( '<' )
+            // /Library/WebServer/Documents/calc/Formula.g:165:6: '<'
             this.match('<'); 
 
 
@@ -857,8 +859,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.LTEQ;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:167:6: ( '<=' )
-            // /Library/WebServer/Documents/calc/Formula.g:167:8: '<='
+            // /Library/WebServer/Documents/calc/Formula.g:166:6: ( '<=' )
+            // /Library/WebServer/Documents/calc/Formula.g:166:8: '<='
             this.match("<="); 
 
 
@@ -877,8 +879,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.GT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:168:4: ( '>' )
-            // /Library/WebServer/Documents/calc/Formula.g:168:6: '>'
+            // /Library/WebServer/Documents/calc/Formula.g:167:4: ( '>' )
+            // /Library/WebServer/Documents/calc/Formula.g:167:6: '>'
             this.match('>'); 
 
 
@@ -896,8 +898,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.GTEQ;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:169:6: ( '>=' )
-            // /Library/WebServer/Documents/calc/Formula.g:169:8: '>='
+            // /Library/WebServer/Documents/calc/Formula.g:168:6: ( '>=' )
+            // /Library/WebServer/Documents/calc/Formula.g:168:8: '>='
             this.match(">="); 
 
 
@@ -916,8 +918,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.PLUS;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:175:6: ( '+' )
-            // /Library/WebServer/Documents/calc/Formula.g:175:8: '+'
+            // /Library/WebServer/Documents/calc/Formula.g:174:6: ( '+' )
+            // /Library/WebServer/Documents/calc/Formula.g:174:8: '+'
             this.match('+'); 
 
 
@@ -935,8 +937,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.MINUS;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:176:7: ( '-' )
-            // /Library/WebServer/Documents/calc/Formula.g:176:9: '-'
+            // /Library/WebServer/Documents/calc/Formula.g:175:7: ( '-' )
+            // /Library/WebServer/Documents/calc/Formula.g:175:9: '-'
             this.match('-'); 
 
 
@@ -954,8 +956,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.MULT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:182:6: ( '*' )
-            // /Library/WebServer/Documents/calc/Formula.g:182:8: '*'
+            // /Library/WebServer/Documents/calc/Formula.g:181:6: ( '*' )
+            // /Library/WebServer/Documents/calc/Formula.g:181:8: '*'
             this.match('*'); 
 
 
@@ -973,8 +975,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.DIV;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:183:5: ( '/' )
-            // /Library/WebServer/Documents/calc/Formula.g:183:7: '/'
+            // /Library/WebServer/Documents/calc/Formula.g:182:5: ( '/' )
+            // /Library/WebServer/Documents/calc/Formula.g:182:7: '/'
             this.match('/'); 
 
 
@@ -992,7 +994,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.MOD;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:184:5: ( '%' | M O D )
+            // /Library/WebServer/Documents/calc/Formula.g:183:5: ( '%' | M O D )
             var alt6=2;
             var LA6_0 = this.input.LA(1);
 
@@ -1010,13 +1012,13 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt6) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:184:7: '%'
+                    // /Library/WebServer/Documents/calc/Formula.g:183:7: '%'
                     this.match('%'); 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:184:13: M O D
+                    // /Library/WebServer/Documents/calc/Formula.g:183:13: M O D
                     this.mM(); 
                     this.mO(); 
                     this.mD(); 
@@ -1038,8 +1040,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.POW;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:199:5: ( '^' )
-            // /Library/WebServer/Documents/calc/Formula.g:199:7: '^'
+            // /Library/WebServer/Documents/calc/Formula.g:198:5: ( '^' )
+            // /Library/WebServer/Documents/calc/Formula.g:198:7: '^'
             this.match('^'); 
 
 
@@ -1057,7 +1059,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.NOT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:207:5: ( '!' | N O T )
+            // /Library/WebServer/Documents/calc/Formula.g:206:5: ( '!' | N O T )
             var alt7=2;
             var LA7_0 = this.input.LA(1);
 
@@ -1075,13 +1077,13 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt7) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:207:7: '!'
+                    // /Library/WebServer/Documents/calc/Formula.g:206:7: '!'
                     this.match('!'); 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:207:13: N O T
+                    // /Library/WebServer/Documents/calc/Formula.g:206:13: N O T
                     this.mN(); 
                     this.mO(); 
                     this.mT(); 
@@ -1103,7 +1105,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.LARR;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:227:6: ( 'Ç' | '<<' )
+            // /Library/WebServer/Documents/calc/Formula.g:226:6: ( 'Ç' | '<<' )
             var alt8=2;
             var LA8_0 = this.input.LA(1);
 
@@ -1121,13 +1123,13 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt8) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:227:8: 'Ç'
+                    // /Library/WebServer/Documents/calc/Formula.g:226:8: 'Ç'
                     this.match('\u00AB'); 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:227:14: '<<'
+                    // /Library/WebServer/Documents/calc/Formula.g:226:14: '<<'
                     this.match("<<"); 
 
 
@@ -1148,7 +1150,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.RARR;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:228:6: ( 'È' | '>>' )
+            // /Library/WebServer/Documents/calc/Formula.g:227:6: ( 'È' | '>>' )
             var alt9=2;
             var LA9_0 = this.input.LA(1);
 
@@ -1166,13 +1168,13 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt9) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:228:8: 'È'
+                    // /Library/WebServer/Documents/calc/Formula.g:227:8: 'È'
                     this.match('\u00BB'); 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:228:14: '>>'
+                    // /Library/WebServer/Documents/calc/Formula.g:227:14: '>>'
                     this.match(">>"); 
 
 
@@ -1193,9 +1195,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.INTEGER;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:233:2: ( ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )? )
-            // /Library/WebServer/Documents/calc/Formula.g:233:4: ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
-            // /Library/WebServer/Documents/calc/Formula.g:233:4: ( '0' .. '9' )+
+            // /Library/WebServer/Documents/calc/Formula.g:232:2: ( ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )? )
+            // /Library/WebServer/Documents/calc/Formula.g:232:4: ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
+            // /Library/WebServer/Documents/calc/Formula.g:232:4: ( '0' .. '9' )+
             var cnt10=0;
             loop10:
             do {
@@ -1209,7 +1211,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 switch (alt10) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:233:5: '0' .. '9'
+                    // /Library/WebServer/Documents/calc/Formula.g:232:5: '0' .. '9'
                     this.matchRange('0','9'); 
 
 
@@ -1225,7 +1227,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
                 cnt10++;
             } while (true);
 
-            // /Library/WebServer/Documents/calc/Formula.g:233:16: ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
+            // /Library/WebServer/Documents/calc/Formula.g:232:16: ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
             var alt13=2;
             var LA13_0 = this.input.LA(1);
 
@@ -1234,9 +1236,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt13) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:233:17: 'e' ( '+' | '-' )? ( '0' .. '9' )*
+                    // /Library/WebServer/Documents/calc/Formula.g:232:17: 'e' ( '+' | '-' )? ( '0' .. '9' )*
                     this.match('e'); 
-                    // /Library/WebServer/Documents/calc/Formula.g:233:21: ( '+' | '-' )?
+                    // /Library/WebServer/Documents/calc/Formula.g:232:21: ( '+' | '-' )?
                     var alt11=2;
                     var LA11_0 = this.input.LA(1);
 
@@ -1261,7 +1263,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                     }
 
-                    // /Library/WebServer/Documents/calc/Formula.g:233:32: ( '0' .. '9' )*
+                    // /Library/WebServer/Documents/calc/Formula.g:232:32: ( '0' .. '9' )*
                     loop12:
                     do {
                         var alt12=2;
@@ -1274,7 +1276,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt12) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:233:33: '0' .. '9'
+                            // /Library/WebServer/Documents/calc/Formula.g:232:33: '0' .. '9'
                             this.matchRange('0','9'); 
 
 
@@ -1307,9 +1309,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.FLOAT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:237:2: ( ( '0' .. '9' )* '.' ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )? )
-            // /Library/WebServer/Documents/calc/Formula.g:237:4: ( '0' .. '9' )* '.' ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
-            // /Library/WebServer/Documents/calc/Formula.g:237:4: ( '0' .. '9' )*
+            // /Library/WebServer/Documents/calc/Formula.g:236:2: ( ( '0' .. '9' )* '.' ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )? )
+            // /Library/WebServer/Documents/calc/Formula.g:236:4: ( '0' .. '9' )* '.' ( '0' .. '9' )+ ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
+            // /Library/WebServer/Documents/calc/Formula.g:236:4: ( '0' .. '9' )*
             loop14:
             do {
                 var alt14=2;
@@ -1322,7 +1324,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 switch (alt14) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:237:5: '0' .. '9'
+                    // /Library/WebServer/Documents/calc/Formula.g:236:5: '0' .. '9'
                     this.matchRange('0','9'); 
 
 
@@ -1334,7 +1336,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             } while (true);
 
             this.match('.'); 
-            // /Library/WebServer/Documents/calc/Formula.g:237:20: ( '0' .. '9' )+
+            // /Library/WebServer/Documents/calc/Formula.g:236:20: ( '0' .. '9' )+
             var cnt15=0;
             loop15:
             do {
@@ -1348,7 +1350,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 switch (alt15) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:237:21: '0' .. '9'
+                    // /Library/WebServer/Documents/calc/Formula.g:236:21: '0' .. '9'
                     this.matchRange('0','9'); 
 
 
@@ -1364,7 +1366,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
                 cnt15++;
             } while (true);
 
-            // /Library/WebServer/Documents/calc/Formula.g:237:32: ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
+            // /Library/WebServer/Documents/calc/Formula.g:236:32: ( 'e' ( '+' | '-' )? ( '0' .. '9' )* )?
             var alt18=2;
             var LA18_0 = this.input.LA(1);
 
@@ -1373,9 +1375,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt18) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:237:33: 'e' ( '+' | '-' )? ( '0' .. '9' )*
+                    // /Library/WebServer/Documents/calc/Formula.g:236:33: 'e' ( '+' | '-' )? ( '0' .. '9' )*
                     this.match('e'); 
-                    // /Library/WebServer/Documents/calc/Formula.g:237:37: ( '+' | '-' )?
+                    // /Library/WebServer/Documents/calc/Formula.g:236:37: ( '+' | '-' )?
                     var alt16=2;
                     var LA16_0 = this.input.LA(1);
 
@@ -1400,7 +1402,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                     }
 
-                    // /Library/WebServer/Documents/calc/Formula.g:237:48: ( '0' .. '9' )*
+                    // /Library/WebServer/Documents/calc/Formula.g:236:48: ( '0' .. '9' )*
                     loop17:
                     do {
                         var alt17=2;
@@ -1413,7 +1415,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt17) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:237:49: '0' .. '9'
+                            // /Library/WebServer/Documents/calc/Formula.g:236:49: '0' .. '9'
                             this.matchRange('0','9'); 
 
 
@@ -1446,8 +1448,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.TRUE;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:246:2: ( T R U E )
-            // /Library/WebServer/Documents/calc/Formula.g:246:4: T R U E
+            // /Library/WebServer/Documents/calc/Formula.g:245:2: ( T R U E )
+            // /Library/WebServer/Documents/calc/Formula.g:245:4: T R U E
             this.mT(); 
             this.mR(); 
             this.mU(); 
@@ -1468,8 +1470,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.FALSE;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:250:2: ( F A L S E )
-            // /Library/WebServer/Documents/calc/Formula.g:250:5: F A L S E
+            // /Library/WebServer/Documents/calc/Formula.g:249:2: ( F A L S E )
+            // /Library/WebServer/Documents/calc/Formula.g:249:5: F A L S E
             this.mF(); 
             this.mA(); 
             this.mL(); 
@@ -1486,13 +1488,34 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     },
     // $ANTLR end "FALSE",
 
+    // $ANTLR start PER
+    mPER: function()  {
+        try {
+            var _type = this.PER;
+            var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
+            // /Library/WebServer/Documents/calc/Formula.g:256:2: ( P E R )
+            // /Library/WebServer/Documents/calc/Formula.g:256:4: P E R
+            this.mP(); 
+            this.mE(); 
+            this.mR(); 
+
+
+
+            this.state.type = _type;
+            this.state.channel = _channel;
+        }
+        finally {
+        }
+    },
+    // $ANTLR end "PER",
+
     // $ANTLR start IDENT
     mIDENT: function()  {
         try {
             var _type = this.IDENT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:285:2: ( ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )* )
-            // /Library/WebServer/Documents/calc/Formula.g:285:4: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
+            // /Library/WebServer/Documents/calc/Formula.g:292:2: ( ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )* )
+            // /Library/WebServer/Documents/calc/Formula.g:292:4: ( 'a' .. 'z' | 'A' .. 'Z' ) ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
             if ( (this.input.LA(1)>='A' && this.input.LA(1)<='Z')||(this.input.LA(1)>='a' && this.input.LA(1)<='z') ) {
                 this.input.consume();
 
@@ -1502,7 +1525,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
                 this.recover(mse);
                 throw mse;}
 
-            // /Library/WebServer/Documents/calc/Formula.g:285:26: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
+            // /Library/WebServer/Documents/calc/Formula.g:292:26: ( 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' )*
             loop19:
             do {
                 var alt19=2;
@@ -1550,7 +1573,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.PRIMITIVE;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:292:2: ( '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' | '[' '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' ']' | '<' IDENT ( IDENT | ' ' | '-' | '_' | INTEGER )* '>' )
+            // /Library/WebServer/Documents/calc/Formula.g:299:2: ( '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' | '[' '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' ']' | '<' IDENT ( IDENT | ' ' | '-' | '_' | INTEGER )* '>' )
             var alt23=3;
             var LA23_0 = this.input.LA(1);
 
@@ -1581,9 +1604,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt23) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:292:4: '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']'
+                    // /Library/WebServer/Documents/calc/Formula.g:299:4: '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']'
                     this.match('['); 
-                    // /Library/WebServer/Documents/calc/Formula.g:292:9: ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+
+                    // /Library/WebServer/Documents/calc/Formula.g:299:9: ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+
                     var cnt20=0;
                     loop20:
                     do {
@@ -1690,73 +1713,73 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt20) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:10: IDENT
+                            // /Library/WebServer/Documents/calc/Formula.g:299:10: IDENT
                             this.mIDENT(); 
 
 
                             break;
                         case 2 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:16: ' '
+                            // /Library/WebServer/Documents/calc/Formula.g:299:16: ' '
                             this.match(' '); 
 
 
                             break;
                         case 3 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:20: '-'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:20: '-'
                             this.match('-'); 
 
 
                             break;
                         case 4 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:24: '_'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:24: '_'
                             this.match('_'); 
 
 
                             break;
                         case 5 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:28: INTEGER
+                            // /Library/WebServer/Documents/calc/Formula.g:299:28: INTEGER
                             this.mINTEGER(); 
 
 
                             break;
                         case 6 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:36: '#'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:36: '#'
                             this.match('#'); 
 
 
                             break;
                         case 7 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:40: '$'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:40: '$'
                             this.match('$'); 
 
 
                             break;
                         case 8 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:44: '?'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:44: '?'
                             this.match('?'); 
 
 
                             break;
                         case 9 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:48: '&'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:48: '&'
                             this.match('&'); 
 
 
                             break;
                         case 10 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:52: '.'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:52: '.'
                             this.match('.'); 
 
 
                             break;
                         case 11 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:56: ','
+                            // /Library/WebServer/Documents/calc/Formula.g:299:56: ','
                             this.match(','); 
 
 
                             break;
                         case 12 :
-                            // /Library/WebServer/Documents/calc/Formula.g:292:60: '%'
+                            // /Library/WebServer/Documents/calc/Formula.g:299:60: '%'
                             this.match('%'); 
 
 
@@ -1777,10 +1800,10 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:293:5: '[' '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' ']'
+                    // /Library/WebServer/Documents/calc/Formula.g:300:5: '[' '[' ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+ ']' ']'
                     this.match('['); 
                     this.match('['); 
-                    // /Library/WebServer/Documents/calc/Formula.g:293:14: ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+
+                    // /Library/WebServer/Documents/calc/Formula.g:300:14: ( IDENT | ' ' | '-' | '_' | INTEGER | '#' | '$' | '?' | '&' | '.' | ',' | '%' )+
                     var cnt21=0;
                     loop21:
                     do {
@@ -1887,73 +1910,73 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt21) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:15: IDENT
+                            // /Library/WebServer/Documents/calc/Formula.g:300:15: IDENT
                             this.mIDENT(); 
 
 
                             break;
                         case 2 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:21: ' '
+                            // /Library/WebServer/Documents/calc/Formula.g:300:21: ' '
                             this.match(' '); 
 
 
                             break;
                         case 3 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:25: '-'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:25: '-'
                             this.match('-'); 
 
 
                             break;
                         case 4 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:29: '_'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:29: '_'
                             this.match('_'); 
 
 
                             break;
                         case 5 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:33: INTEGER
+                            // /Library/WebServer/Documents/calc/Formula.g:300:33: INTEGER
                             this.mINTEGER(); 
 
 
                             break;
                         case 6 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:41: '#'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:41: '#'
                             this.match('#'); 
 
 
                             break;
                         case 7 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:45: '$'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:45: '$'
                             this.match('$'); 
 
 
                             break;
                         case 8 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:49: '?'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:49: '?'
                             this.match('?'); 
 
 
                             break;
                         case 9 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:53: '&'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:53: '&'
                             this.match('&'); 
 
 
                             break;
                         case 10 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:57: '.'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:57: '.'
                             this.match('.'); 
 
 
                             break;
                         case 11 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:61: ','
+                            // /Library/WebServer/Documents/calc/Formula.g:300:61: ','
                             this.match(','); 
 
 
                             break;
                         case 12 :
-                            // /Library/WebServer/Documents/calc/Formula.g:293:65: '%'
+                            // /Library/WebServer/Documents/calc/Formula.g:300:65: '%'
                             this.match('%'); 
 
 
@@ -1975,10 +1998,10 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                     break;
                 case 3 :
-                    // /Library/WebServer/Documents/calc/Formula.g:294:5: '<' IDENT ( IDENT | ' ' | '-' | '_' | INTEGER )* '>'
+                    // /Library/WebServer/Documents/calc/Formula.g:301:5: '<' IDENT ( IDENT | ' ' | '-' | '_' | INTEGER )* '>'
                     this.match('<'); 
                     this.mIDENT(); 
-                    // /Library/WebServer/Documents/calc/Formula.g:294:15: ( IDENT | ' ' | '-' | '_' | INTEGER )*
+                    // /Library/WebServer/Documents/calc/Formula.g:301:15: ( IDENT | ' ' | '-' | '_' | INTEGER )*
                     loop22:
                     do {
                         var alt22=6;
@@ -2063,31 +2086,31 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt22) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:294:16: IDENT
+                            // /Library/WebServer/Documents/calc/Formula.g:301:16: IDENT
                             this.mIDENT(); 
 
 
                             break;
                         case 2 :
-                            // /Library/WebServer/Documents/calc/Formula.g:294:22: ' '
+                            // /Library/WebServer/Documents/calc/Formula.g:301:22: ' '
                             this.match(' '); 
 
 
                             break;
                         case 3 :
-                            // /Library/WebServer/Documents/calc/Formula.g:294:26: '-'
+                            // /Library/WebServer/Documents/calc/Formula.g:301:26: '-'
                             this.match('-'); 
 
 
                             break;
                         case 4 :
-                            // /Library/WebServer/Documents/calc/Formula.g:294:30: '_'
+                            // /Library/WebServer/Documents/calc/Formula.g:301:30: '_'
                             this.match('_'); 
 
 
                             break;
                         case 5 :
-                            // /Library/WebServer/Documents/calc/Formula.g:294:34: INTEGER
+                            // /Library/WebServer/Documents/calc/Formula.g:301:34: INTEGER
                             this.mINTEGER(); 
 
 
@@ -2117,11 +2140,11 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.COMMENT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:298:5: ( '/*' ( options {greedy=false; } : . )* '*/' )
-            // /Library/WebServer/Documents/calc/Formula.g:298:9: '/*' ( options {greedy=false; } : . )* '*/'
+            // /Library/WebServer/Documents/calc/Formula.g:305:5: ( '/*' ( options {greedy=false; } : . )* '*/' )
+            // /Library/WebServer/Documents/calc/Formula.g:305:9: '/*' ( options {greedy=false; } : . )* '*/'
             this.match("/*"); 
 
-            // /Library/WebServer/Documents/calc/Formula.g:298:14: ( options {greedy=false; } : . )*
+            // /Library/WebServer/Documents/calc/Formula.g:305:14: ( options {greedy=false; } : . )*
             loop24:
             do {
                 var alt24=2;
@@ -2146,7 +2169,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 switch (alt24) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:298:42: .
+                    // /Library/WebServer/Documents/calc/Formula.g:305:42: .
                     this.matchAny(); 
 
 
@@ -2176,9 +2199,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.LINE_COMMENT;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:302:5: ( ( '//' | '#' ) (~ ( '\\n' | '\\r' ) )* )
-            // /Library/WebServer/Documents/calc/Formula.g:302:7: ( '//' | '#' ) (~ ( '\\n' | '\\r' ) )*
-            // /Library/WebServer/Documents/calc/Formula.g:302:7: ( '//' | '#' )
+            // /Library/WebServer/Documents/calc/Formula.g:309:5: ( ( '//' | '#' ) (~ ( '\\n' | '\\r' ) )* )
+            // /Library/WebServer/Documents/calc/Formula.g:309:7: ( '//' | '#' ) (~ ( '\\n' | '\\r' ) )*
+            // /Library/WebServer/Documents/calc/Formula.g:309:7: ( '//' | '#' )
             var alt25=2;
             var LA25_0 = this.input.LA(1);
 
@@ -2196,14 +2219,14 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt25) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:302:8: '//'
+                    // /Library/WebServer/Documents/calc/Formula.g:309:8: '//'
                     this.match("//"); 
 
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:302:13: '#'
+                    // /Library/WebServer/Documents/calc/Formula.g:309:13: '#'
                     this.match('#'); 
 
 
@@ -2211,7 +2234,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
             }
 
-            // /Library/WebServer/Documents/calc/Formula.g:302:18: (~ ( '\\n' | '\\r' ) )*
+            // /Library/WebServer/Documents/calc/Formula.g:309:18: (~ ( '\\n' | '\\r' ) )*
             loop26:
             do {
                 var alt26=2;
@@ -2224,7 +2247,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 switch (alt26) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:302:19: ~ ( '\\n' | '\\r' )
+                    // /Library/WebServer/Documents/calc/Formula.g:309:19: ~ ( '\\n' | '\\r' )
                     if ( (this.input.LA(1)>='\u0000' && this.input.LA(1)<='\t')||(this.input.LA(1)>='\u000B' && this.input.LA(1)<='\f')||(this.input.LA(1)>='\u000E' && this.input.LA(1)<='\uFFFF') ) {
                         this.input.consume();
 
@@ -2260,9 +2283,9 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.WS;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:308:2: ( ( ' ' | '\\t' | '\\u000C' )+ )
-            // /Library/WebServer/Documents/calc/Formula.g:308:5: ( ' ' | '\\t' | '\\u000C' )+
-            // /Library/WebServer/Documents/calc/Formula.g:308:5: ( ' ' | '\\t' | '\\u000C' )+
+            // /Library/WebServer/Documents/calc/Formula.g:315:2: ( ( ' ' | '\\t' | '\\u000C' )+ )
+            // /Library/WebServer/Documents/calc/Formula.g:315:5: ( ' ' | '\\t' | '\\u000C' )+
+            // /Library/WebServer/Documents/calc/Formula.g:315:5: ( ' ' | '\\t' | '\\u000C' )+
             var cnt27=0;
             loop27:
             do {
@@ -2315,8 +2338,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start A
     mA: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:312:11: ( ( 'a' | 'A' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:312:12: ( 'a' | 'A' )
+            // /Library/WebServer/Documents/calc/Formula.g:319:11: ( ( 'a' | 'A' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:319:12: ( 'a' | 'A' )
             if ( this.input.LA(1)=='A'||this.input.LA(1)=='a' ) {
                 this.input.consume();
 
@@ -2338,8 +2361,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start B
     mB: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:313:11: ( ( 'b' | 'B' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:313:12: ( 'b' | 'B' )
+            // /Library/WebServer/Documents/calc/Formula.g:320:11: ( ( 'b' | 'B' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:320:12: ( 'b' | 'B' )
             if ( this.input.LA(1)=='B'||this.input.LA(1)=='b' ) {
                 this.input.consume();
 
@@ -2361,8 +2384,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start C
     mC: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:314:11: ( ( 'c' | 'C' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:314:12: ( 'c' | 'C' )
+            // /Library/WebServer/Documents/calc/Formula.g:321:11: ( ( 'c' | 'C' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:321:12: ( 'c' | 'C' )
             if ( this.input.LA(1)=='C'||this.input.LA(1)=='c' ) {
                 this.input.consume();
 
@@ -2384,8 +2407,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start D
     mD: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:315:11: ( ( 'd' | 'D' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:315:12: ( 'd' | 'D' )
+            // /Library/WebServer/Documents/calc/Formula.g:322:11: ( ( 'd' | 'D' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:322:12: ( 'd' | 'D' )
             if ( this.input.LA(1)=='D'||this.input.LA(1)=='d' ) {
                 this.input.consume();
 
@@ -2407,8 +2430,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start E
     mE: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:316:11: ( ( 'e' | 'E' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:316:12: ( 'e' | 'E' )
+            // /Library/WebServer/Documents/calc/Formula.g:323:11: ( ( 'e' | 'E' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:323:12: ( 'e' | 'E' )
             if ( this.input.LA(1)=='E'||this.input.LA(1)=='e' ) {
                 this.input.consume();
 
@@ -2430,8 +2453,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start F
     mF: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:317:11: ( ( 'f' | 'F' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:317:12: ( 'f' | 'F' )
+            // /Library/WebServer/Documents/calc/Formula.g:324:11: ( ( 'f' | 'F' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:324:12: ( 'f' | 'F' )
             if ( this.input.LA(1)=='F'||this.input.LA(1)=='f' ) {
                 this.input.consume();
 
@@ -2453,8 +2476,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start G
     mG: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:318:11: ( ( 'g' | 'G' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:318:12: ( 'g' | 'G' )
+            // /Library/WebServer/Documents/calc/Formula.g:325:11: ( ( 'g' | 'G' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:325:12: ( 'g' | 'G' )
             if ( this.input.LA(1)=='G'||this.input.LA(1)=='g' ) {
                 this.input.consume();
 
@@ -2476,8 +2499,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start H
     mH: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:319:11: ( ( 'h' | 'H' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:319:12: ( 'h' | 'H' )
+            // /Library/WebServer/Documents/calc/Formula.g:326:11: ( ( 'h' | 'H' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:326:12: ( 'h' | 'H' )
             if ( this.input.LA(1)=='H'||this.input.LA(1)=='h' ) {
                 this.input.consume();
 
@@ -2499,8 +2522,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start I
     mI: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:320:11: ( ( 'i' | 'I' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:320:12: ( 'i' | 'I' )
+            // /Library/WebServer/Documents/calc/Formula.g:327:11: ( ( 'i' | 'I' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:327:12: ( 'i' | 'I' )
             if ( this.input.LA(1)=='I'||this.input.LA(1)=='i' ) {
                 this.input.consume();
 
@@ -2522,8 +2545,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start J
     mJ: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:321:11: ( ( 'j' | 'J' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:321:12: ( 'j' | 'J' )
+            // /Library/WebServer/Documents/calc/Formula.g:328:11: ( ( 'j' | 'J' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:328:12: ( 'j' | 'J' )
             if ( this.input.LA(1)=='J'||this.input.LA(1)=='j' ) {
                 this.input.consume();
 
@@ -2545,8 +2568,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start K
     mK: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:322:11: ( ( 'k' | 'K' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:322:12: ( 'k' | 'K' )
+            // /Library/WebServer/Documents/calc/Formula.g:329:11: ( ( 'k' | 'K' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:329:12: ( 'k' | 'K' )
             if ( this.input.LA(1)=='K'||this.input.LA(1)=='k' ) {
                 this.input.consume();
 
@@ -2568,8 +2591,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start L
     mL: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:323:11: ( ( 'l' | 'L' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:323:12: ( 'l' | 'L' )
+            // /Library/WebServer/Documents/calc/Formula.g:330:11: ( ( 'l' | 'L' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:330:12: ( 'l' | 'L' )
             if ( this.input.LA(1)=='L'||this.input.LA(1)=='l' ) {
                 this.input.consume();
 
@@ -2591,8 +2614,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start M
     mM: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:324:11: ( ( 'm' | 'M' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:324:12: ( 'm' | 'M' )
+            // /Library/WebServer/Documents/calc/Formula.g:331:11: ( ( 'm' | 'M' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:331:12: ( 'm' | 'M' )
             if ( this.input.LA(1)=='M'||this.input.LA(1)=='m' ) {
                 this.input.consume();
 
@@ -2614,8 +2637,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start N
     mN: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:325:11: ( ( 'n' | 'N' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:325:12: ( 'n' | 'N' )
+            // /Library/WebServer/Documents/calc/Formula.g:332:11: ( ( 'n' | 'N' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:332:12: ( 'n' | 'N' )
             if ( this.input.LA(1)=='N'||this.input.LA(1)=='n' ) {
                 this.input.consume();
 
@@ -2637,8 +2660,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start O
     mO: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:326:11: ( ( 'o' | 'O' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:326:12: ( 'o' | 'O' )
+            // /Library/WebServer/Documents/calc/Formula.g:333:11: ( ( 'o' | 'O' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:333:12: ( 'o' | 'O' )
             if ( this.input.LA(1)=='O'||this.input.LA(1)=='o' ) {
                 this.input.consume();
 
@@ -2660,8 +2683,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start P
     mP: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:327:11: ( ( 'p' | 'P' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:327:12: ( 'p' | 'P' )
+            // /Library/WebServer/Documents/calc/Formula.g:334:11: ( ( 'p' | 'P' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:334:12: ( 'p' | 'P' )
             if ( this.input.LA(1)=='P'||this.input.LA(1)=='p' ) {
                 this.input.consume();
 
@@ -2683,8 +2706,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start Q
     mQ: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:328:11: ( ( 'q' | 'Q' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:328:12: ( 'q' | 'Q' )
+            // /Library/WebServer/Documents/calc/Formula.g:335:11: ( ( 'q' | 'Q' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:335:12: ( 'q' | 'Q' )
             if ( this.input.LA(1)=='Q'||this.input.LA(1)=='q' ) {
                 this.input.consume();
 
@@ -2706,8 +2729,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start R
     mR: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:329:11: ( ( 'r' | 'R' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:329:12: ( 'r' | 'R' )
+            // /Library/WebServer/Documents/calc/Formula.g:336:11: ( ( 'r' | 'R' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:336:12: ( 'r' | 'R' )
             if ( this.input.LA(1)=='R'||this.input.LA(1)=='r' ) {
                 this.input.consume();
 
@@ -2729,8 +2752,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start S
     mS: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:330:11: ( ( 's' | 'S' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:330:12: ( 's' | 'S' )
+            // /Library/WebServer/Documents/calc/Formula.g:337:11: ( ( 's' | 'S' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:337:12: ( 's' | 'S' )
             if ( this.input.LA(1)=='S'||this.input.LA(1)=='s' ) {
                 this.input.consume();
 
@@ -2752,8 +2775,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start T
     mT: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:331:11: ( ( 't' | 'T' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:331:12: ( 't' | 'T' )
+            // /Library/WebServer/Documents/calc/Formula.g:338:11: ( ( 't' | 'T' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:338:12: ( 't' | 'T' )
             if ( this.input.LA(1)=='T'||this.input.LA(1)=='t' ) {
                 this.input.consume();
 
@@ -2775,8 +2798,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start U
     mU: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:332:11: ( ( 'u' | 'U' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:332:12: ( 'u' | 'U' )
+            // /Library/WebServer/Documents/calc/Formula.g:339:11: ( ( 'u' | 'U' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:339:12: ( 'u' | 'U' )
             if ( this.input.LA(1)=='U'||this.input.LA(1)=='u' ) {
                 this.input.consume();
 
@@ -2798,8 +2821,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start V
     mV: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:333:11: ( ( 'v' | 'V' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:333:12: ( 'v' | 'V' )
+            // /Library/WebServer/Documents/calc/Formula.g:340:11: ( ( 'v' | 'V' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:340:12: ( 'v' | 'V' )
             if ( this.input.LA(1)=='V'||this.input.LA(1)=='v' ) {
                 this.input.consume();
 
@@ -2821,8 +2844,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start W
     mW: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:334:11: ( ( 'w' | 'W' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:334:12: ( 'w' | 'W' )
+            // /Library/WebServer/Documents/calc/Formula.g:341:11: ( ( 'w' | 'W' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:341:12: ( 'w' | 'W' )
             if ( this.input.LA(1)=='W'||this.input.LA(1)=='w' ) {
                 this.input.consume();
 
@@ -2844,8 +2867,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start X
     mX: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:335:11: ( ( 'x' | 'X' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:335:12: ( 'x' | 'X' )
+            // /Library/WebServer/Documents/calc/Formula.g:342:11: ( ( 'x' | 'X' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:342:12: ( 'x' | 'X' )
             if ( this.input.LA(1)=='X'||this.input.LA(1)=='x' ) {
                 this.input.consume();
 
@@ -2867,8 +2890,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start Y
     mY: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:336:11: ( ( 'y' | 'Y' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:336:12: ( 'y' | 'Y' )
+            // /Library/WebServer/Documents/calc/Formula.g:343:11: ( ( 'y' | 'Y' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:343:12: ( 'y' | 'Y' )
             if ( this.input.LA(1)=='Y'||this.input.LA(1)=='y' ) {
                 this.input.consume();
 
@@ -2890,8 +2913,8 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR start Z
     mZ: function()  {
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:337:11: ( ( 'z' | 'Z' ) )
-            // /Library/WebServer/Documents/calc/Formula.g:337:12: ( 'z' | 'Z' )
+            // /Library/WebServer/Documents/calc/Formula.g:344:11: ( ( 'z' | 'Z' ) )
+            // /Library/WebServer/Documents/calc/Formula.g:344:12: ( 'z' | 'Z' )
             if ( this.input.LA(1)=='Z'||this.input.LA(1)=='z' ) {
                 this.input.consume();
 
@@ -2911,43 +2934,43 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
     // $ANTLR end "Z",
 
     mTokens: function() {
-        // /Library/WebServer/Documents/calc/Formula.g:1:8: ( T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | NEWLINE | WHILESTATEMENT | FORSTATEMENT | FROMSTATEMENT | INSTATEMENT | TOSTATEMENT | BYSTATEMENT | LOOPSTATEMENT | IFSTATEMENT | THENSTATEMENT | ELSESTATEMENT | FUNCTIONSTATEMENT | ENDBLOCK | RETURNSTATEMENT | OR | AND | EQUALS | NOTEQUALS | LT | LTEQ | GT | GTEQ | PLUS | MINUS | MULT | DIV | MOD | POW | NOT | LARR | RARR | INTEGER | FLOAT | TRUE | FALSE | IDENT | PRIMITIVE | COMMENT | LINE_COMMENT | WS )
-        var alt28=46;
+        // /Library/WebServer/Documents/calc/Formula.g:1:8: ( T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | NEWLINE | WHILESTATEMENT | FORSTATEMENT | FROMSTATEMENT | INSTATEMENT | TOSTATEMENT | BYSTATEMENT | LOOPSTATEMENT | IFSTATEMENT | THENSTATEMENT | ELSESTATEMENT | FUNCTIONSTATEMENT | ENDBLOCK | RETURNSTATEMENT | OR | AND | EQUALS | NOTEQUALS | LT | LTEQ | GT | GTEQ | PLUS | MINUS | MULT | DIV | MOD | POW | NOT | LARR | RARR | INTEGER | FLOAT | TRUE | FALSE | PER | IDENT | PRIMITIVE | COMMENT | LINE_COMMENT | WS )
+        var alt28=47;
         alt28 = this.dfa28.predict(this.input);
         switch (alt28) {
             case 1 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:10: T__87
-                this.mT__87(); 
-
-
-                break;
-            case 2 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:16: T__88
+                // /Library/WebServer/Documents/calc/Formula.g:1:10: T__88
                 this.mT__88(); 
 
 
                 break;
-            case 3 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:22: T__89
+            case 2 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:16: T__89
                 this.mT__89(); 
 
 
                 break;
-            case 4 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:28: T__90
+            case 3 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:22: T__90
                 this.mT__90(); 
 
 
                 break;
-            case 5 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:34: T__91
+            case 4 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:28: T__91
                 this.mT__91(); 
 
 
                 break;
-            case 6 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:40: T__92
+            case 5 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:34: T__92
                 this.mT__92(); 
+
+
+                break;
+            case 6 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:40: T__93
+                this.mT__93(); 
 
 
                 break;
@@ -3162,31 +3185,37 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                 break;
             case 42 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:336: IDENT
-                this.mIDENT(); 
+                // /Library/WebServer/Documents/calc/Formula.g:1:336: PER
+                this.mPER(); 
 
 
                 break;
             case 43 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:342: PRIMITIVE
-                this.mPRIMITIVE(); 
+                // /Library/WebServer/Documents/calc/Formula.g:1:340: IDENT
+                this.mIDENT(); 
 
 
                 break;
             case 44 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:352: COMMENT
-                this.mCOMMENT(); 
+                // /Library/WebServer/Documents/calc/Formula.g:1:346: PRIMITIVE
+                this.mPRIMITIVE(); 
 
 
                 break;
             case 45 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:360: LINE_COMMENT
-                this.mLINE_COMMENT(); 
+                // /Library/WebServer/Documents/calc/Formula.g:1:356: COMMENT
+                this.mCOMMENT(); 
 
 
                 break;
             case 46 :
-                // /Library/WebServer/Documents/calc/Formula.g:1:373: WS
+                // /Library/WebServer/Documents/calc/Formula.g:1:364: LINE_COMMENT
+                this.mLINE_COMMENT(); 
+
+
+                break;
+            case 47 :
+                // /Library/WebServer/Documents/calc/Formula.g:1:377: WS
                 this.mWS(); 
 
 
@@ -3200,220 +3229,228 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
 org.antlr.lang.augmentObject(FormulaLexer, {
     DFA28_eotS:
-        "\u0004\uffff\u0001\u002a\u0003\uffff\u0008\u0023\u0001\uffff\u0001"+
-    "\u0023\u0001\uffff\u0001\u0023\u0001\uffff\u0001\u003c\u0001\u003e\u0003"+
-    "\uffff\u0001\u0040\u0001\uffff\u0001\u0023\u0001\uffff\u0001\u0023\u0002"+
-    "\uffff\u0001\u0043\u0009\uffff\u0005\u0023\u0001\u0049\u0001\u004a\u0001"+
-    "\u004b\u0002\u0023\u0001\u004e\u0004\u0023\u0001\u0010\u0001\u0023\u0005"+
-    "\uffff\u0002\u0023\u0001\uffff\u0001\u0023\u0001\u0057\u0003\u0023\u0003"+
-    "\uffff\u0002\u0023\u0001\uffff\u0002\u0023\u0001\u005f\u0001\u0023\u0001"+
-    "\u0012\u0001\u001b\u0001\u003c\u0001\u0023\u0001\uffff\u0001\u0062\u0002"+
-    "\u0023\u0001\u0065\u0001\u0066\u0001\u0067\u0001\u0068\u0001\uffff\u0001"+
-    "\u0023\u0001\u006a\u0001\uffff\u0001\u0023\u0001\u006c\u0004\uffff\u0001"+
-    "\u0023\u0001\uffff\u0001\u0023\u0001\uffff\u0001\u006f\u0001\u0023\u0001"+
-    "\uffff\u0001\u0071\u0001\uffff",
+        "\u0004\uffff\u0001\u002b\u0003\uffff\u0008\u0024\u0001\uffff\u0001"+
+    "\u0024\u0001\uffff\u0001\u0024\u0001\uffff\u0001\u003d\u0001\u003f\u0003"+
+    "\uffff\u0001\u0041\u0001\uffff\u0001\u0024\u0001\uffff\u0001\u0024\u0002"+
+    "\uffff\u0001\u0044\u0001\uffff\u0001\u0024\u0008\uffff\u0005\u0024\u0001"+
+    "\u004b\u0001\u004c\u0001\u004d\u0002\u0024\u0001\u0050\u0004\u0024\u0001"+
+    "\u0010\u0001\u0024\u0005\uffff\u0002\u0024\u0001\uffff\u0002\u0024\u0001"+
+    "\u005a\u0003\u0024\u0003\uffff\u0002\u0024\u0001\uffff\u0002\u0024\u0001"+
+    "\u0062\u0001\u0024\u0001\u0012\u0001\u001b\u0001\u003d\u0001\u0064\u0001"+
+    "\u0024\u0001\uffff\u0001\u0066\u0002\u0024\u0001\u0069\u0001\u006a\u0001"+
+    "\u006b\u0001\u006c\u0001\uffff\u0001\u0024\u0001\uffff\u0001\u006e\u0001"+
+    "\uffff\u0001\u0024\u0001\u0070\u0004\uffff\u0001\u0024\u0001\uffff\u0001"+
+    "\u0024\u0001\uffff\u0001\u0073\u0001\u0024\u0001\uffff\u0001\u0075\u0001"+
+    "\uffff",
     DFA28_eofS:
-        "\u0072\uffff",
+        "\u0076\uffff",
     DFA28_minS:
         "\u0001\u0009\u0003\uffff\u0001\u002d\u0003\uffff\u0001\u0048\u0001"+
     "\u0041\u0001\u0046\u0001\u0048\u0001\u0059\u0001\u004f\u0001\u004c\u0001"+
     "\u0045\u0001\uffff\u0001\u0052\u0001\uffff\u0001\u004e\u0001\uffff\u0002"+
     "\u003d\u0003\uffff\u0001\u002a\u0001\uffff\u0001\u004f\u0001\uffff\u0001"+
-    "\u004f\u0002\uffff\u0001\u002e\u0009\uffff\u0001\u0049\u0001\u0052\u0001"+
-    "\u004f\u0001\u004e\u0001\u004c\u0003\u0030\u0001\u0045\u0001\u0055\u0001"+
-    "\u0030\u0001\u004f\u0001\u0053\u0001\u0044\u0001\u0054\u0001\u0030\u0001"+
-    "\u0044\u0005\uffff\u0001\u0044\u0001\u0054\u0001\uffff\u0001\u004c\u0001"+
-    "\u0030\u0001\u004d\u0001\u0043\u0001\u0053\u0003\uffff\u0001\u004e\u0001"+
-    "\u0045\u0001\uffff\u0001\u0050\u0001\u0045\u0001\u0030\u0001\u0055\u0003"+
-    "\u0030\u0001\u0045\u0001\uffff\u0001\u0030\u0001\u0054\u0001\u0045\u0004"+
-    "\u0030\u0001\uffff\u0001\u0052\u0001\u0030\u0001\uffff\u0001\u0049\u0001"+
-    "\u0030\u0004\uffff\u0001\u004e\u0001\uffff\u0001\u004f\u0001\uffff\u0001"+
-    "\u0030\u0001\u004e\u0001\uffff\u0001\u0030\u0001\uffff",
+    "\u004f\u0002\uffff\u0001\u002e\u0001\uffff\u0001\u0045\u0008\uffff\u0001"+
+    "\u0049\u0001\u0052\u0001\u004f\u0001\u004e\u0001\u004c\u0003\u0030\u0001"+
+    "\u0045\u0001\u0055\u0001\u0030\u0001\u004f\u0001\u0053\u0001\u0044\u0001"+
+    "\u0054\u0001\u0030\u0001\u0044\u0005\uffff\u0001\u0044\u0001\u0054\u0001"+
+    "\uffff\u0001\u0052\u0001\u004c\u0001\u0030\u0001\u004d\u0001\u0043\u0001"+
+    "\u0053\u0003\uffff\u0001\u004e\u0001\u0045\u0001\uffff\u0001\u0050\u0001"+
+    "\u0045\u0001\u0030\u0001\u0055\u0004\u0030\u0001\u0045\u0001\uffff\u0001"+
+    "\u0030\u0001\u0054\u0001\u0045\u0004\u0030\u0001\uffff\u0001\u0052\u0001"+
+    "\uffff\u0001\u0030\u0001\uffff\u0001\u0049\u0001\u0030\u0004\uffff\u0001"+
+    "\u004e\u0001\uffff\u0001\u004f\u0001\uffff\u0001\u0030\u0001\u004e\u0001"+
+    "\uffff\u0001\u0030\u0001\uffff",
     DFA28_maxS:
         "\u0001\u00bb\u0003\uffff\u0001\u007a\u0003\uffff\u0001\u0068\u0001"+
     "\u0075\u0001\u006e\u0001\u0072\u0001\u0079\u0001\u006f\u0001\u006e\u0001"+
     "\u0065\u0001\uffff\u0001\u0072\u0001\uffff\u0001\u006e\u0001\uffff\u0001"+
     "\u003d\u0001\u003e\u0003\uffff\u0001\u002f\u0001\uffff\u0001\u006f\u0001"+
-    "\uffff\u0001\u006f\u0002\uffff\u0001\u0039\u0009\uffff\u0001\u0069\u0001"+
-    "\u0072\u0001\u006f\u0001\u006e\u0001\u006c\u0003\u007a\u0001\u0065\u0001"+
-    "\u0075\u0001\u007a\u0001\u006f\u0001\u0073\u0001\u0064\u0001\u0074\u0001"+
-    "\u007a\u0001\u0064\u0005\uffff\u0001\u0064\u0001\u0074\u0001\uffff\u0001"+
-    "\u006c\u0001\u007a\u0001\u006d\u0001\u0063\u0001\u0073\u0003\uffff\u0001"+
-    "\u006e\u0001\u0065\u0001\uffff\u0001\u0070\u0001\u0065\u0001\u007a\u0001"+
-    "\u0075\u0003\u007a\u0001\u0065\u0001\uffff\u0001\u007a\u0001\u0074\u0001"+
-    "\u0065\u0004\u007a\u0001\uffff\u0001\u0072\u0001\u007a\u0001\uffff\u0001"+
-    "\u0069\u0001\u007a\u0004\uffff\u0001\u006e\u0001\uffff\u0001\u006f\u0001"+
-    "\uffff\u0001\u007a\u0001\u006e\u0001\uffff\u0001\u007a\u0001\uffff",
+    "\uffff\u0001\u006f\u0002\uffff\u0001\u0039\u0001\uffff\u0001\u0065\u0008"+
+    "\uffff\u0001\u0069\u0001\u0072\u0001\u006f\u0001\u006e\u0001\u006c\u0003"+
+    "\u007a\u0001\u0065\u0001\u0075\u0001\u007a\u0001\u006f\u0001\u0073\u0001"+
+    "\u0064\u0001\u0074\u0001\u007a\u0001\u0064\u0005\uffff\u0001\u0064\u0001"+
+    "\u0074\u0001\uffff\u0001\u0072\u0001\u006c\u0001\u007a\u0001\u006d\u0001"+
+    "\u0063\u0001\u0073\u0003\uffff\u0001\u006e\u0001\u0065\u0001\uffff\u0001"+
+    "\u0070\u0001\u0065\u0001\u007a\u0001\u0075\u0004\u007a\u0001\u0065\u0001"+
+    "\uffff\u0001\u007a\u0001\u0074\u0001\u0065\u0004\u007a\u0001\uffff\u0001"+
+    "\u0072\u0001\uffff\u0001\u007a\u0001\uffff\u0001\u0069\u0001\u007a\u0004"+
+    "\uffff\u0001\u006e\u0001\uffff\u0001\u006f\u0001\uffff\u0001\u007a\u0001"+
+    "\u006e\u0001\uffff\u0001\u007a\u0001\uffff",
     DFA28_acceptS:
         "\u0001\uffff\u0001\u0001\u0001\u0002\u0001\u0003\u0001\uffff\u0001"+
     "\u0005\u0001\u0006\u0001\u0007\u0008\uffff\u0001\u0015\u0001\uffff\u0001"+
     "\u0016\u0001\uffff\u0001\u0017\u0002\uffff\u0001\u001d\u0001\u001e\u0001"+
     "\u001f\u0001\uffff\u0001\u0021\u0001\uffff\u0001\u0022\u0001\uffff\u0001"+
-    "\u0024\u0001\u0025\u0001\uffff\u0001\u0027\u0001\u002a\u0001\u002b\u0001"+
-    "\u002d\u0001\u002e\u0001\u0004\u0001\u0018\u0001\u001a\u0001\u0019\u0011"+
-    "\uffff\u0001\u0023\u0001\u001c\u0001\u001b\u0001\u002c\u0001\u0020\u0002"+
-    "\uffff\u0001\u0026\u0005\uffff\u0001\u000b\u0001\u000f\u0001\u000c\u0002"+
-    "\uffff\u0001\u000d\u0008\uffff\u0001\u0009\u0007\uffff\u0001\u0013\u0002"+
-    "\uffff\u0001\u000a\u0002\uffff\u0001\u0010\u0001\u0028\u0001\u000e\u0001"+
-    "\u0011\u0001\uffff\u0001\u0008\u0001\uffff\u0001\u0029\u0002\uffff\u0001"+
-    "\u0014\u0001\uffff\u0001\u0012",
+    "\u0024\u0001\u0025\u0001\uffff\u0001\u0027\u0001\uffff\u0001\u002b\u0001"+
+    "\u002c\u0001\u002e\u0001\u002f\u0001\u0004\u0001\u0018\u0001\u001a\u0001"+
+    "\u0019\u0011\uffff\u0001\u0023\u0001\u001c\u0001\u001b\u0001\u002d\u0001"+
+    "\u0020\u0002\uffff\u0001\u0026\u0006\uffff\u0001\u000b\u0001\u000f\u0001"+
+    "\u000c\u0002\uffff\u0001\u000d\u0009\uffff\u0001\u0009\u0007\uffff\u0001"+
+    "\u0013\u0001\uffff\u0001\u002a\u0001\uffff\u0001\u000a\u0002\uffff\u0001"+
+    "\u0010\u0001\u0028\u0001\u000e\u0001\u0011\u0001\uffff\u0001\u0008\u0001"+
+    "\uffff\u0001\u0029\u0002\uffff\u0001\u0014\u0001\uffff\u0001\u0012",
     DFA28_specialS:
-        "\u0072\uffff}>",
+        "\u0076\uffff}>",
     DFA28_transitionS: [
-            "\u0001\u0026\u0001\u0007\u0001\uffff\u0001\u0026\u0001\u0007"+
-            "\u0012\uffff\u0001\u0026\u0001\u0015\u0001\uffff\u0001\u0025"+
+            "\u0001\u0027\u0001\u0007\u0001\uffff\u0001\u0027\u0001\u0007"+
+            "\u0012\uffff\u0001\u0027\u0001\u0015\u0001\uffff\u0001\u0026"+
             "\u0001\uffff\u0001\u001b\u0001\u0012\u0001\uffff\u0001\u0001"+
             "\u0001\u0003\u0001\u0019\u0001\u0017\u0001\u0002\u0001\u0018"+
             "\u0001\u0022\u0001\u001a\u000a\u0021\u0002\uffff\u0001\u0004"+
             "\u0001\u0014\u0001\u0016\u0002\uffff\u0001\u0013\u0001\u000c"+
-            "\u0002\u0023\u0001\u000e\u0001\u0009\u0002\u0023\u0001\u000a"+
-            "\u0002\u0023\u0001\u000d\u0001\u001c\u0001\u001e\u0001\u0011"+
-            "\u0002\u0023\u0001\u000f\u0001\u0023\u0001\u000b\u0002\u0023"+
-            "\u0001\u0008\u0003\u0023\u0001\u0024\u0002\uffff\u0001\u001d"+
-            "\u0002\uffff\u0001\u0013\u0001\u000c\u0002\u0023\u0001\u000e"+
-            "\u0001\u0009\u0002\u0023\u0001\u000a\u0002\u0023\u0001\u000d"+
-            "\u0001\u001c\u0001\u001e\u0001\u0011\u0002\u0023\u0001\u000f"+
-            "\u0001\u0023\u0001\u000b\u0002\u0023\u0001\u0008\u0003\u0023"+
-            "\u0001\u0005\u0001\u0010\u0001\u0006\u002d\uffff\u0001\u001f"+
-            "\u000f\uffff\u0001\u0020",
+            "\u0002\u0024\u0001\u000e\u0001\u0009\u0002\u0024\u0001\u000a"+
+            "\u0002\u0024\u0001\u000d\u0001\u001c\u0001\u001e\u0001\u0011"+
+            "\u0001\u0023\u0001\u0024\u0001\u000f\u0001\u0024\u0001\u000b"+
+            "\u0002\u0024\u0001\u0008\u0003\u0024\u0001\u0025\u0002\uffff"+
+            "\u0001\u001d\u0002\uffff\u0001\u0013\u0001\u000c\u0002\u0024"+
+            "\u0001\u000e\u0001\u0009\u0002\u0024\u0001\u000a\u0002\u0024"+
+            "\u0001\u000d\u0001\u001c\u0001\u001e\u0001\u0011\u0001\u0023"+
+            "\u0001\u0024\u0001\u000f\u0001\u0024\u0001\u000b\u0002\u0024"+
+            "\u0001\u0008\u0003\u0024\u0001\u0005\u0001\u0010\u0001\u0006"+
+            "\u002d\uffff\u0001\u001f\u000f\uffff\u0001\u0020",
             "",
             "",
             "",
-            "\u0001\u0027\u000e\uffff\u0001\u001f\u0001\u0029\u0001\u0028"+
-            "\u0002\uffff\u001a\u0024\u0006\uffff\u001a\u0024",
+            "\u0001\u0028\u000e\uffff\u0001\u001f\u0001\u002a\u0001\u0029"+
+            "\u0002\uffff\u001a\u0025\u0006\uffff\u001a\u0025",
             "",
             "",
             "",
-            "\u0001\u002b\u001f\uffff\u0001\u002b",
-            "\u0001\u002f\u000d\uffff\u0001\u002c\u0002\uffff\u0001\u002d"+
-            "\u0002\uffff\u0001\u002e\u000b\uffff\u0001\u002f\u000d\uffff"+
-            "\u0001\u002c\u0002\uffff\u0001\u002d\u0002\uffff\u0001\u002e",
-            "\u0001\u0031\u0007\uffff\u0001\u0030\u0017\uffff\u0001\u0031"+
-            "\u0007\uffff\u0001\u0030",
-            "\u0001\u0033\u0006\uffff\u0001\u0032\u0002\uffff\u0001\u0034"+
-            "\u0015\uffff\u0001\u0033\u0006\uffff\u0001\u0032\u0002\uffff"+
-            "\u0001\u0034",
-            "\u0001\u0035\u001f\uffff\u0001\u0035",
+            "\u0001\u002c\u001f\uffff\u0001\u002c",
+            "\u0001\u0030\u000d\uffff\u0001\u002d\u0002\uffff\u0001\u002e"+
+            "\u0002\uffff\u0001\u002f\u000b\uffff\u0001\u0030\u000d\uffff"+
+            "\u0001\u002d\u0002\uffff\u0001\u002e\u0002\uffff\u0001\u002f",
+            "\u0001\u0032\u0007\uffff\u0001\u0031\u0017\uffff\u0001\u0032"+
+            "\u0007\uffff\u0001\u0031",
+            "\u0001\u0034\u0006\uffff\u0001\u0033\u0002\uffff\u0001\u0035"+
+            "\u0015\uffff\u0001\u0034\u0006\uffff\u0001\u0033\u0002\uffff"+
+            "\u0001\u0035",
             "\u0001\u0036\u001f\uffff\u0001\u0036",
-            "\u0001\u0037\u0001\uffff\u0001\u0038\u001d\uffff\u0001\u0037"+
-            "\u0001\uffff\u0001\u0038",
-            "\u0001\u0039\u001f\uffff\u0001\u0039",
-            "",
+            "\u0001\u0037\u001f\uffff\u0001\u0037",
+            "\u0001\u0038\u0001\uffff\u0001\u0039\u001d\uffff\u0001\u0038"+
+            "\u0001\uffff\u0001\u0039",
             "\u0001\u003a\u001f\uffff\u0001\u003a",
             "",
             "\u0001\u003b\u001f\uffff\u0001\u003b",
             "",
-            "\u0001\u0028",
-            "\u0001\u003d\u0001\u0020",
+            "\u0001\u003c\u001f\uffff\u0001\u003c",
+            "",
+            "\u0001\u0029",
+            "\u0001\u003e\u0001\u0020",
             "",
             "",
             "",
-            "\u0001\u003f\u0004\uffff\u0001\u0025",
-            "",
-            "\u0001\u0041\u001f\uffff\u0001\u0041",
+            "\u0001\u0040\u0004\uffff\u0001\u0026",
             "",
             "\u0001\u0042\u001f\uffff\u0001\u0042",
+            "",
+            "\u0001\u0043\u001f\uffff\u0001\u0043",
             "",
             "",
             "\u0001\u0022\u0001\uffff\u000a\u0021",
             "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "\u0001\u0044\u001f\uffff\u0001\u0044",
             "\u0001\u0045\u001f\uffff\u0001\u0045",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "\u0001\u0046\u001f\uffff\u0001\u0046",
             "\u0001\u0047\u001f\uffff\u0001\u0047",
             "\u0001\u0048\u001f\uffff\u0001\u0048",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u0001\u004c\u001f\uffff\u0001\u004c",
-            "\u0001\u004d\u001f\uffff\u0001\u004d",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "\u0001\u0049\u001f\uffff\u0001\u0049",
+            "\u0001\u004a\u001f\uffff\u0001\u004a",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u0001\u004e\u001f\uffff\u0001\u004e",
             "\u0001\u004f\u001f\uffff\u0001\u004f",
-            "\u0001\u0050\u001f\uffff\u0001\u0050",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "\u0001\u0051\u001f\uffff\u0001\u0051",
             "\u0001\u0052\u001f\uffff\u0001\u0052",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
             "\u0001\u0053\u001f\uffff\u0001\u0053",
-            "",
-            "",
-            "",
-            "",
-            "",
             "\u0001\u0054\u001f\uffff\u0001\u0054",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "\u0001\u0055\u001f\uffff\u0001\u0055",
             "",
+            "",
+            "",
+            "",
+            "",
             "\u0001\u0056\u001f\uffff\u0001\u0056",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "\u0001\u0057\u001f\uffff\u0001\u0057",
+            "",
             "\u0001\u0058\u001f\uffff\u0001\u0058",
             "\u0001\u0059\u001f\uffff\u0001\u0059",
-            "\u0001\u005a\u001f\uffff\u0001\u005a",
-            "",
-            "",
-            "",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "\u0001\u005b\u001f\uffff\u0001\u005b",
             "\u0001\u005c\u001f\uffff\u0001\u005c",
-            "",
             "\u0001\u005d\u001f\uffff\u0001\u005d",
+            "",
+            "",
+            "",
             "\u0001\u005e\u001f\uffff\u0001\u005e",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "\u0001\u005f\u001f\uffff\u0001\u005f",
+            "",
             "\u0001\u0060\u001f\uffff\u0001\u0060",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
             "\u0001\u0061\u001f\uffff\u0001\u0061",
-            "",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "\u0001\u0063\u001f\uffff\u0001\u0063",
-            "\u0001\u0064\u001f\uffff\u0001\u0064",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u0001\u0065\u001f\uffff\u0001\u0065",
             "",
-            "\u0001\u0069\u001f\uffff\u0001\u0069",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "",
-            "\u0001\u006b\u001f\uffff\u0001\u006b",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "",
-            "",
-            "",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u0001\u0067\u001f\uffff\u0001\u0067",
+            "\u0001\u0068\u001f\uffff\u0001\u0068",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "",
             "\u0001\u006d\u001f\uffff\u0001\u006d",
             "",
-            "\u0001\u006e\u001f\uffff\u0001\u006e",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
-            "\u0001\u0070\u001f\uffff\u0001\u0070",
+            "\u0001\u006f\u001f\uffff\u0001\u006f",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             "",
-            "\u000a\u0023\u0007\uffff\u001a\u0023\u0004\uffff\u0001\u0023"+
-            "\u0001\uffff\u001a\u0023",
+            "",
+            "",
+            "",
+            "\u0001\u0071\u001f\uffff\u0001\u0071",
+            "",
+            "\u0001\u0072\u001f\uffff\u0001\u0072",
+            "",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
+            "\u0001\u0074\u001f\uffff\u0001\u0074",
+            "",
+            "\u000a\u0024\u0007\uffff\u001a\u0024\u0004\uffff\u0001\u0024"+
+            "\u0001\uffff\u001a\u0024",
             ""
     ]
 });
@@ -3456,7 +3493,7 @@ FormulaLexer.DFA28 = function(recognizer) {
 
 org.antlr.lang.extend(FormulaLexer.DFA28, org.antlr.runtime.DFA, {
     getDescription: function() {
-        return "1:1: Tokens : ( T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | NEWLINE | WHILESTATEMENT | FORSTATEMENT | FROMSTATEMENT | INSTATEMENT | TOSTATEMENT | BYSTATEMENT | LOOPSTATEMENT | IFSTATEMENT | THENSTATEMENT | ELSESTATEMENT | FUNCTIONSTATEMENT | ENDBLOCK | RETURNSTATEMENT | OR | AND | EQUALS | NOTEQUALS | LT | LTEQ | GT | GTEQ | PLUS | MINUS | MULT | DIV | MOD | POW | NOT | LARR | RARR | INTEGER | FLOAT | TRUE | FALSE | IDENT | PRIMITIVE | COMMENT | LINE_COMMENT | WS );";
+        return "1:1: Tokens : ( T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | NEWLINE | WHILESTATEMENT | FORSTATEMENT | FROMSTATEMENT | INSTATEMENT | TOSTATEMENT | BYSTATEMENT | LOOPSTATEMENT | IFSTATEMENT | THENSTATEMENT | ELSESTATEMENT | FUNCTIONSTATEMENT | ENDBLOCK | RETURNSTATEMENT | OR | AND | EQUALS | NOTEQUALS | LT | LTEQ | GT | GTEQ | PLUS | MINUS | MULT | DIV | MOD | POW | NOT | LARR | RARR | INTEGER | FLOAT | TRUE | FALSE | PER | IDENT | PRIMITIVE | COMMENT | LINE_COMMENT | WS );";
     },
     dummy: null
 });

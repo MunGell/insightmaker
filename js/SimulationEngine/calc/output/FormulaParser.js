@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2012-12-05 14:17:47
+// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2012-12-22 06:27:00
 
 var FormulaParser = function(input, state) {
     if (!state) {
@@ -21,12 +21,12 @@ var FormulaParser = function(input, state) {
 
 org.antlr.lang.augmentObject(FormulaParser, {
     EOF: -1,
-    T__87: 87,
     T__88: 88,
     T__89: 89,
     T__90: 90,
     T__91: 91,
     T__92: 92,
+    T__93: 93,
     NEGATE: 4,
     ASSIGN: 5,
     FUNCALL: 6,
@@ -100,27 +100,28 @@ org.antlr.lang.augmentObject(FormulaParser, {
     FLOAT: 74,
     TRUE: 75,
     FALSE: 76,
-    COMMENT: 77,
-    LINE_COMMENT: 78,
-    WS: 79,
-    G: 80,
-    J: 81,
-    K: 82,
-    Q: 83,
-    V: 84,
-    X: 85,
-    Z: 86
+    PER: 77,
+    COMMENT: 78,
+    LINE_COMMENT: 79,
+    WS: 80,
+    G: 81,
+    J: 82,
+    K: 83,
+    Q: 84,
+    V: 85,
+    X: 86,
+    Z: 87
 });
 
 (function(){
 // public class variables
 var EOF= -1,
-    T__87= 87,
     T__88= 88,
     T__89= 89,
     T__90= 90,
     T__91= 91,
     T__92= 92,
+    T__93= 93,
     NEGATE= 4,
     ASSIGN= 5,
     FUNCALL= 6,
@@ -194,16 +195,17 @@ var EOF= -1,
     FLOAT= 74,
     TRUE= 75,
     FALSE= 76,
-    COMMENT= 77,
-    LINE_COMMENT= 78,
-    WS= 79,
-    G= 80,
-    J= 81,
-    K= 82,
-    Q= 83,
-    V= 84,
-    X= 85,
-    Z= 86;
+    PER= 77,
+    COMMENT= 78,
+    LINE_COMMENT= 79,
+    WS= 80,
+    G= 81,
+    J= 82,
+    K= 83,
+    Q= 84,
+    V= 85,
+    X= 86,
+    Z= 87;
 
 // public instance methods/vars
 org.antlr.lang.extend(FormulaParser, org.antlr.runtime.Parser, {
@@ -287,7 +289,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                 var alt4=2;
                 var LA4_0 = this.input.LA(1);
 
-                if ( (LA4_0==WHILESTATEMENT||LA4_0==FORSTATEMENT||LA4_0==IFSTATEMENT||LA4_0==FUNCTIONSTATEMENT||(LA4_0>=RETURNSTATEMENT && LA4_0<=IDENT)||LA4_0==PRIMITIVE||LA4_0==MINUS||(LA4_0>=NOT && LA4_0<=LARR)||(LA4_0>=INTEGER && LA4_0<=FALSE)||LA4_0==87||LA4_0==91) ) {
+                if ( (LA4_0==WHILESTATEMENT||LA4_0==FORSTATEMENT||LA4_0==IFSTATEMENT||LA4_0==FUNCTIONSTATEMENT||(LA4_0>=RETURNSTATEMENT && LA4_0<=IDENT)||LA4_0==PRIMITIVE||LA4_0==MINUS||(LA4_0>=NOT && LA4_0<=LARR)||(LA4_0>=INTEGER && LA4_0<=FALSE)||LA4_0==88||LA4_0==92) ) {
                     alt4=1;
                 }
 
@@ -698,7 +700,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                 var alt7=2;
                 var LA7_0 = this.input.LA(1);
 
-                if ( (LA7_0==WHILESTATEMENT||LA7_0==FORSTATEMENT||LA7_0==IFSTATEMENT||LA7_0==FUNCTIONSTATEMENT||(LA7_0>=RETURNSTATEMENT && LA7_0<=IDENT)||LA7_0==PRIMITIVE||LA7_0==MINUS||(LA7_0>=NOT && LA7_0<=LARR)||(LA7_0>=INTEGER && LA7_0<=FALSE)||LA7_0==87||LA7_0==91) ) {
+                if ( (LA7_0==WHILESTATEMENT||LA7_0==FORSTATEMENT||LA7_0==IFSTATEMENT||LA7_0==FUNCTIONSTATEMENT||(LA7_0>=RETURNSTATEMENT && LA7_0<=IDENT)||LA7_0==PRIMITIVE||LA7_0==MINUS||(LA7_0>=NOT && LA7_0<=LARR)||(LA7_0>=INTEGER && LA7_0<=FALSE)||LA7_0==88||LA7_0==92) ) {
                     alt7=1;
                 }
 
@@ -1286,7 +1288,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: logicalExpression, innerBlock, IDENT
+            // elements: innerBlock, logicalExpression, IDENT
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1730,8 +1732,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var stream_IDENT=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token IDENT");
         var stream_EQUALS=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token EQUALS");
         var stream_NEWLINE=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token NEWLINE");
+        var stream_90=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 90");
         var stream_ENDBLOCK=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token ENDBLOCK");
-        var stream_87=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 87");
         var stream_88=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 88");
         var stream_89=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 89");
         var stream_innerBlock=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule innerBlock");
@@ -1745,8 +1747,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             IDENT61=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_functionDef692); if (this.state.failed) return retval; 
             if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT61);
 
-            char_literal62=this.match(this.input,87,FormulaParser.FOLLOW_87_in_functionDef694); if (this.state.failed) return retval; 
-            if ( this.state.backtracking===0 ) stream_87.add(char_literal62);
+            char_literal62=this.match(this.input,88,FormulaParser.FOLLOW_88_in_functionDef694); if (this.state.failed) return retval; 
+            if ( this.state.backtracking===0 ) stream_88.add(char_literal62);
 
             // /Library/WebServer/Documents/calc/Formula.g:129:32: ( IDENT ( EQUALS number | ( ',' IDENT )* ) ( ',' IDENT EQUALS number )* )?
             var alt20=2;
@@ -1768,7 +1770,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     if ( (LA18_0==EQUALS) ) {
                         alt18=1;
                     }
-                    else if ( ((LA18_0>=88 && LA18_0<=89)) ) {
+                    else if ( ((LA18_0>=89 && LA18_0<=90)) ) {
                         alt18=2;
                     }
                     else {
@@ -1801,13 +1803,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                 var alt17=2;
                                 var LA17_0 = this.input.LA(1);
 
-                                if ( (LA17_0==88) ) {
+                                if ( (LA17_0==89) ) {
                                     var LA17_1 = this.input.LA(2);
 
                                     if ( (LA17_1==IDENT) ) {
                                         var LA17_3 = this.input.LA(3);
 
-                                        if ( ((LA17_3>=88 && LA17_3<=89)) ) {
+                                        if ( ((LA17_3>=89 && LA17_3<=90)) ) {
                                             alt17=1;
                                         }
 
@@ -1821,8 +1823,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                 switch (alt17) {
                                 case 1 :
                                     // /Library/WebServer/Documents/calc/Formula.g:129:58: ',' IDENT
-                                    char_literal66=this.match(this.input,88,FormulaParser.FOLLOW_88_in_functionDef708); if (this.state.failed) return retval; 
-                                    if ( this.state.backtracking===0 ) stream_88.add(char_literal66);
+                                    char_literal66=this.match(this.input,89,FormulaParser.FOLLOW_89_in_functionDef708); if (this.state.failed) return retval; 
+                                    if ( this.state.backtracking===0 ) stream_89.add(char_literal66);
 
                                     IDENT67=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_functionDef710); if (this.state.failed) return retval; 
                                     if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT67);
@@ -1848,7 +1850,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         var alt19=2;
                         var LA19_0 = this.input.LA(1);
 
-                        if ( (LA19_0==88) ) {
+                        if ( (LA19_0==89) ) {
                             alt19=1;
                         }
 
@@ -1856,8 +1858,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         switch (alt19) {
                         case 1 :
                             // /Library/WebServer/Documents/calc/Formula.g:129:73: ',' IDENT EQUALS number
-                            char_literal68=this.match(this.input,88,FormulaParser.FOLLOW_88_in_functionDef717); if (this.state.failed) return retval; 
-                            if ( this.state.backtracking===0 ) stream_88.add(char_literal68);
+                            char_literal68=this.match(this.input,89,FormulaParser.FOLLOW_89_in_functionDef717); if (this.state.failed) return retval; 
+                            if ( this.state.backtracking===0 ) stream_89.add(char_literal68);
 
                             IDENT69=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_functionDef719); if (this.state.failed) return retval; 
                             if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT69);
@@ -1886,8 +1888,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
             }
 
-            char_literal72=this.match(this.input,89,FormulaParser.FOLLOW_89_in_functionDef730); if (this.state.failed) return retval; 
-            if ( this.state.backtracking===0 ) stream_89.add(char_literal72);
+            char_literal72=this.match(this.input,90,FormulaParser.FOLLOW_90_in_functionDef730); if (this.state.failed) return retval; 
+            if ( this.state.backtracking===0 ) stream_90.add(char_literal72);
 
             // /Library/WebServer/Documents/calc/Formula.g:129:106: ( NEWLINE )+
             var cnt21=0;
@@ -1937,7 +1939,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: innerBlock, number, IDENT
+            // elements: IDENT, innerBlock, number
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2068,9 +2070,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var string_literal93_tree=null;
         var stream_IDENT=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token IDENT");
         var stream_EQUALS=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token EQUALS");
+        var stream_91=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 91");
         var stream_90=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 90");
         var stream_PRIMITIVE=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token PRIMITIVE");
-        var stream_87=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 87");
         var stream_88=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 88");
         var stream_89=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 89");
         var stream_number=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule number");
@@ -2083,10 +2085,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             if ( (LA27_0==IDENT) ) {
                 var LA27_1 = this.input.LA(2);
 
-                if ( (LA27_1==87) ) {
+                if ( (LA27_1==88) ) {
                     alt27=1;
                 }
-                else if ( (LA27_1==90) ) {
+                else if ( (LA27_1==91) ) {
                     alt27=2;
                 }
                 else {
@@ -2113,8 +2115,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     IDENT77=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_assignment775); if (this.state.failed) return retval; 
                     if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT77);
 
-                    char_literal78=this.match(this.input,87,FormulaParser.FOLLOW_87_in_assignment777); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_87.add(char_literal78);
+                    char_literal78=this.match(this.input,88,FormulaParser.FOLLOW_88_in_assignment777); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_88.add(char_literal78);
 
                     // /Library/WebServer/Documents/calc/Formula.g:134:12: ( IDENT ( EQUALS number | ( ',' IDENT )* ) ( ',' IDENT EQUALS number )* )?
                     var alt25=2;
@@ -2136,7 +2138,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                             if ( (LA23_0==EQUALS) ) {
                                 alt23=1;
                             }
-                            else if ( ((LA23_0>=88 && LA23_0<=89)) ) {
+                            else if ( ((LA23_0>=89 && LA23_0<=90)) ) {
                                 alt23=2;
                             }
                             else {
@@ -2169,13 +2171,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                         var alt22=2;
                                         var LA22_0 = this.input.LA(1);
 
-                                        if ( (LA22_0==88) ) {
+                                        if ( (LA22_0==89) ) {
                                             var LA22_1 = this.input.LA(2);
 
                                             if ( (LA22_1==IDENT) ) {
                                                 var LA22_3 = this.input.LA(3);
 
-                                                if ( ((LA22_3>=88 && LA22_3<=89)) ) {
+                                                if ( ((LA22_3>=89 && LA22_3<=90)) ) {
                                                     alt22=1;
                                                 }
 
@@ -2189,8 +2191,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                         switch (alt22) {
                                         case 1 :
                                             // /Library/WebServer/Documents/calc/Formula.g:134:38: ',' IDENT
-                                            char_literal82=this.match(this.input,88,FormulaParser.FOLLOW_88_in_assignment791); if (this.state.failed) return retval; 
-                                            if ( this.state.backtracking===0 ) stream_88.add(char_literal82);
+                                            char_literal82=this.match(this.input,89,FormulaParser.FOLLOW_89_in_assignment791); if (this.state.failed) return retval; 
+                                            if ( this.state.backtracking===0 ) stream_89.add(char_literal82);
 
                                             IDENT83=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_assignment793); if (this.state.failed) return retval; 
                                             if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT83);
@@ -2216,7 +2218,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                 var alt24=2;
                                 var LA24_0 = this.input.LA(1);
 
-                                if ( (LA24_0==88) ) {
+                                if ( (LA24_0==89) ) {
                                     alt24=1;
                                 }
 
@@ -2224,8 +2226,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                                 switch (alt24) {
                                 case 1 :
                                     // /Library/WebServer/Documents/calc/Formula.g:134:53: ',' IDENT EQUALS number
-                                    char_literal84=this.match(this.input,88,FormulaParser.FOLLOW_88_in_assignment800); if (this.state.failed) return retval; 
-                                    if ( this.state.backtracking===0 ) stream_88.add(char_literal84);
+                                    char_literal84=this.match(this.input,89,FormulaParser.FOLLOW_89_in_assignment800); if (this.state.failed) return retval; 
+                                    if ( this.state.backtracking===0 ) stream_89.add(char_literal84);
 
                                     IDENT85=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_assignment802); if (this.state.failed) return retval; 
                                     if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT85);
@@ -2254,11 +2256,11 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     }
 
-                    char_literal88=this.match(this.input,89,FormulaParser.FOLLOW_89_in_assignment813); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_89.add(char_literal88);
+                    char_literal88=this.match(this.input,90,FormulaParser.FOLLOW_90_in_assignment813); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_90.add(char_literal88);
 
-                    string_literal89=this.match(this.input,90,FormulaParser.FOLLOW_90_in_assignment815); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_90.add(string_literal89);
+                    string_literal89=this.match(this.input,91,FormulaParser.FOLLOW_91_in_assignment815); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_91.add(string_literal89);
 
                     this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_assignment817);
                     logicalExpression90=this.logicalExpression();
@@ -2269,7 +2271,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: logicalExpression, number, IDENT
+                    // elements: number, logicalExpression, IDENT
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2363,8 +2365,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     }
 
-                    string_literal93=this.match(this.input,90,FormulaParser.FOLLOW_90_in_assignment853); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_90.add(string_literal93);
+                    string_literal93=this.match(this.input,91,FormulaParser.FOLLOW_91_in_assignment853); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_91.add(string_literal93);
 
                     this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_assignment855);
                     logicalExpression94=this.logicalExpression();
@@ -2375,7 +2377,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: logicalExpression, PRIMITIVE, IDENT
+                    // elements: IDENT, PRIMITIVE, logicalExpression
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2449,7 +2451,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:139:1: logicalExpression : booleanAndExpression ( OR booleanAndExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:138:1: logicalExpression : booleanAndExpression ( OR booleanAndExpression )* ;
     // $ANTLR start "logicalExpression"
     logicalExpression: function() {
         var retval = new FormulaParser.logicalExpression_return();
@@ -2464,17 +2466,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var OR96_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:140:2: ( booleanAndExpression ( OR booleanAndExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:140:4: booleanAndExpression ( OR booleanAndExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:139:2: ( booleanAndExpression ( OR booleanAndExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:139:4: booleanAndExpression ( OR booleanAndExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_booleanAndExpression_in_logicalExpression884);
+            this.pushFollow(FormulaParser.FOLLOW_booleanAndExpression_in_logicalExpression882);
             booleanAndExpression95=this.booleanAndExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, booleanAndExpression95.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:140:25: ( OR booleanAndExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:139:25: ( OR booleanAndExpression )*
             loop28:
             do {
                 var alt28=2;
@@ -2487,13 +2489,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt28) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:140:26: OR booleanAndExpression
-                    OR96=this.match(this.input,OR,FormulaParser.FOLLOW_OR_in_logicalExpression887); if (this.state.failed) return retval;
+                    // /Library/WebServer/Documents/calc/Formula.g:139:26: OR booleanAndExpression
+                    OR96=this.match(this.input,OR,FormulaParser.FOLLOW_OR_in_logicalExpression885); if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) {
                     OR96_tree = this.adaptor.create(OR96);
                     root_0 = this.adaptor.becomeRoot(OR96_tree, root_0);
                     }
-                    this.pushFollow(FormulaParser.FOLLOW_booleanAndExpression_in_logicalExpression890);
+                    this.pushFollow(FormulaParser.FOLLOW_booleanAndExpression_in_logicalExpression888);
                     booleanAndExpression97=this.booleanAndExpression();
 
                     this.state._fsp--;
@@ -2544,7 +2546,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:145:1: booleanAndExpression : equalityExpression ( AND equalityExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:144:1: booleanAndExpression : equalityExpression ( AND equalityExpression )* ;
     // $ANTLR start "booleanAndExpression"
     booleanAndExpression: function() {
         var retval = new FormulaParser.booleanAndExpression_return();
@@ -2559,17 +2561,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var AND99_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:146:2: ( equalityExpression ( AND equalityExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:146:4: equalityExpression ( AND equalityExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:145:2: ( equalityExpression ( AND equalityExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:145:4: equalityExpression ( AND equalityExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_equalityExpression_in_booleanAndExpression921);
+            this.pushFollow(FormulaParser.FOLLOW_equalityExpression_in_booleanAndExpression919);
             equalityExpression98=this.equalityExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, equalityExpression98.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:146:23: ( AND equalityExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:145:23: ( AND equalityExpression )*
             loop29:
             do {
                 var alt29=2;
@@ -2582,13 +2584,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt29) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:146:24: AND equalityExpression
-                    AND99=this.match(this.input,AND,FormulaParser.FOLLOW_AND_in_booleanAndExpression924); if (this.state.failed) return retval;
+                    // /Library/WebServer/Documents/calc/Formula.g:145:24: AND equalityExpression
+                    AND99=this.match(this.input,AND,FormulaParser.FOLLOW_AND_in_booleanAndExpression922); if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) {
                     AND99_tree = this.adaptor.create(AND99);
                     root_0 = this.adaptor.becomeRoot(AND99_tree, root_0);
                     }
-                    this.pushFollow(FormulaParser.FOLLOW_equalityExpression_in_booleanAndExpression927);
+                    this.pushFollow(FormulaParser.FOLLOW_equalityExpression_in_booleanAndExpression925);
                     equalityExpression100=this.equalityExpression();
 
                     this.state._fsp--;
@@ -2639,7 +2641,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:151:1: equalityExpression : relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:150:1: equalityExpression : relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )* ;
     // $ANTLR start "equalityExpression"
     equalityExpression: function() {
         var retval = new FormulaParser.equalityExpression_return();
@@ -2654,17 +2656,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set102_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:152:2: ( relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:152:4: relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:151:2: ( relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:151:4: relationalExpression ( ( EQUALS | NOTEQUALS ) relationalExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_relationalExpression_in_equalityExpression958);
+            this.pushFollow(FormulaParser.FOLLOW_relationalExpression_in_equalityExpression956);
             relationalExpression101=this.relationalExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, relationalExpression101.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:152:25: ( ( EQUALS | NOTEQUALS ) relationalExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:151:25: ( ( EQUALS | NOTEQUALS ) relationalExpression )*
             loop30:
             do {
                 var alt30=2;
@@ -2677,7 +2679,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt30) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:152:26: ( EQUALS | NOTEQUALS ) relationalExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:151:26: ( EQUALS | NOTEQUALS ) relationalExpression
                     
                     set102=this.input.LT(1);
                     if ( this.input.LA(1)==EQUALS||this.input.LA(1)==NOTEQUALS ) {
@@ -2691,7 +2693,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         throw mse;
                     }
 
-                    this.pushFollow(FormulaParser.FOLLOW_relationalExpression_in_equalityExpression968);
+                    this.pushFollow(FormulaParser.FOLLOW_relationalExpression_in_equalityExpression966);
                     relationalExpression103=this.relationalExpression();
 
                     this.state._fsp--;
@@ -2742,7 +2744,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:162:1: relationalExpression : additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:161:1: relationalExpression : additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )* ;
     // $ANTLR start "relationalExpression"
     relationalExpression: function() {
         var retval = new FormulaParser.relationalExpression_return();
@@ -2757,17 +2759,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set105_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:163:2: ( additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:163:4: additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:162:2: ( additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:162:4: additiveExpression ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_relationalExpression1010);
+            this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_relationalExpression1008);
             additiveExpression104=this.additiveExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, additiveExpression104.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:163:23: ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:162:23: ( ( LT | LTEQ | GT | GTEQ ) additiveExpression )*
             loop31:
             do {
                 var alt31=2;
@@ -2780,7 +2782,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt31) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:163:25: ( LT | LTEQ | GT | GTEQ ) additiveExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:162:25: ( LT | LTEQ | GT | GTEQ ) additiveExpression
                     
                     set105=this.input.LT(1);
                     if ( (this.input.LA(1)>=LT && this.input.LA(1)<=GTEQ) ) {
@@ -2794,7 +2796,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         throw mse;
                     }
 
-                    this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_relationalExpression1025);
+                    this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_relationalExpression1023);
                     additiveExpression106=this.additiveExpression();
 
                     this.state._fsp--;
@@ -2845,7 +2847,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:171:1: additiveExpression : multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:170:1: additiveExpression : multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )* ;
     // $ANTLR start "additiveExpression"
     additiveExpression: function() {
         var retval = new FormulaParser.additiveExpression_return();
@@ -2860,17 +2862,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set108_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:172:2: ( multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:172:4: multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:171:2: ( multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:171:4: multiplicativeExpression ( ( PLUS | MINUS ) multiplicativeExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_multiplicativeExpression_in_additiveExpression1068);
+            this.pushFollow(FormulaParser.FOLLOW_multiplicativeExpression_in_additiveExpression1066);
             multiplicativeExpression107=this.multiplicativeExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, multiplicativeExpression107.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:172:29: ( ( PLUS | MINUS ) multiplicativeExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:171:29: ( ( PLUS | MINUS ) multiplicativeExpression )*
             loop32:
             do {
                 var alt32=2;
@@ -2883,8 +2885,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt32) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:172:31: ( PLUS | MINUS ) multiplicativeExpression
-                   
+                    // /Library/WebServer/Documents/calc/Formula.g:171:31: ( PLUS | MINUS ) multiplicativeExpression
+                    
                     set108=this.input.LT(1);
                     if ( (this.input.LA(1)>=PLUS && this.input.LA(1)<=MINUS) ) {
                         this.input.consume();
@@ -2897,7 +2899,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         throw mse;
                     }
 
-                    this.pushFollow(FormulaParser.FOLLOW_multiplicativeExpression_in_additiveExpression1079);
+                    this.pushFollow(FormulaParser.FOLLOW_multiplicativeExpression_in_additiveExpression1077);
                     multiplicativeExpression109=this.multiplicativeExpression();
 
                     this.state._fsp--;
@@ -2948,7 +2950,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:178:1: multiplicativeExpression : negationExpression ( ( MULT | DIV | MOD ) negationExpression )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:177:1: multiplicativeExpression : negationExpression ( ( MULT | DIV | MOD ) negationExpression )* ;
     // $ANTLR start "multiplicativeExpression"
     multiplicativeExpression: function() {
         var retval = new FormulaParser.multiplicativeExpression_return();
@@ -2963,17 +2965,17 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set111_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:179:2: ( negationExpression ( ( MULT | DIV | MOD ) negationExpression )* )
-            // /Library/WebServer/Documents/calc/Formula.g:179:4: negationExpression ( ( MULT | DIV | MOD ) negationExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:178:2: ( negationExpression ( ( MULT | DIV | MOD ) negationExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:178:4: negationExpression ( ( MULT | DIV | MOD ) negationExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_negationExpression_in_multiplicativeExpression1109);
+            this.pushFollow(FormulaParser.FOLLOW_negationExpression_in_multiplicativeExpression1107);
             negationExpression110=this.negationExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, negationExpression110.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:179:23: ( ( MULT | DIV | MOD ) negationExpression )*
+            // /Library/WebServer/Documents/calc/Formula.g:178:23: ( ( MULT | DIV | MOD ) negationExpression )*
             loop33:
             do {
                 var alt33=2;
@@ -2986,7 +2988,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt33) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:179:25: ( MULT | DIV | MOD ) negationExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:178:25: ( MULT | DIV | MOD ) negationExpression
                     
                     set111=this.input.LT(1);
                     if ( (this.input.LA(1)>=MULT && this.input.LA(1)<=MOD) ) {
@@ -3000,7 +3002,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         throw mse;
                     }
 
-                    this.pushFollow(FormulaParser.FOLLOW_negationExpression_in_multiplicativeExpression1122);
+                    this.pushFollow(FormulaParser.FOLLOW_negationExpression_in_multiplicativeExpression1120);
                     negationExpression112=this.negationExpression();
 
                     this.state._fsp--;
@@ -3051,7 +3053,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:186:1: negationExpression : ( MINUS powerExpression -> ^( NEGATE powerExpression ) | powerExpression );
+    // /Library/WebServer/Documents/calc/Formula.g:185:1: negationExpression : ( MINUS powerExpression -> ^( NEGATE powerExpression ) | powerExpression );
     // $ANTLR start "negationExpression"
     negationExpression: function() {
         var retval = new FormulaParser.negationExpression_return();
@@ -3067,14 +3069,14 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var stream_MINUS=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token MINUS");
         var stream_powerExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule powerExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:187:2: ( MINUS powerExpression -> ^( NEGATE powerExpression ) | powerExpression )
+            // /Library/WebServer/Documents/calc/Formula.g:186:2: ( MINUS powerExpression -> ^( NEGATE powerExpression ) | powerExpression )
             var alt34=2;
             var LA34_0 = this.input.LA(1);
 
             if ( (LA34_0==MINUS) ) {
                 alt34=1;
             }
-            else if ( (LA34_0==IDENT||LA34_0==PRIMITIVE||(LA34_0>=NOT && LA34_0<=LARR)||(LA34_0>=INTEGER && LA34_0<=FALSE)||LA34_0==87||LA34_0==91) ) {
+            else if ( (LA34_0==IDENT||LA34_0==PRIMITIVE||(LA34_0>=NOT && LA34_0<=LARR)||(LA34_0>=INTEGER && LA34_0<=FALSE)||LA34_0==88||LA34_0==92) ) {
                 alt34=2;
             }
             else {
@@ -3086,11 +3088,11 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             }
             switch (alt34) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:187:4: MINUS powerExpression
-                    MINUS113=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_negationExpression1167); if (this.state.failed) return retval; 
+                    // /Library/WebServer/Documents/calc/Formula.g:186:4: MINUS powerExpression
+                    MINUS113=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_negationExpression1165); if (this.state.failed) return retval; 
                     if ( this.state.backtracking===0 ) stream_MINUS.add(MINUS113);
 
-                    this.pushFollow(FormulaParser.FOLLOW_powerExpression_in_negationExpression1169);
+                    this.pushFollow(FormulaParser.FOLLOW_powerExpression_in_negationExpression1167);
                     powerExpression114=this.powerExpression();
 
                     this.state._fsp--;
@@ -3109,9 +3111,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 187:26: -> ^( NEGATE powerExpression )
+                    // 186:26: -> ^( NEGATE powerExpression )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:187:29: ^( NEGATE powerExpression )
+                        // /Library/WebServer/Documents/calc/Formula.g:186:29: ^( NEGATE powerExpression )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(NEGATE, "NEGATE"), root_1);
@@ -3127,10 +3129,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:188:3: powerExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:187:3: powerExpression
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_powerExpression_in_negationExpression1183);
+                    this.pushFollow(FormulaParser.FOLLOW_powerExpression_in_negationExpression1181);
                     powerExpression115=this.powerExpression();
 
                     this.state._fsp--;
@@ -3174,7 +3176,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:190:1: powerExpression : unaryExpression ( POW unaryOrNegate )* -> ^( POWER unaryExpression ( unaryOrNegate )* ) ;
+    // /Library/WebServer/Documents/calc/Formula.g:189:1: powerExpression : unaryExpression ( POW unaryOrNegate )* -> ^( POWER unaryExpression ( unaryOrNegate )* ) ;
     // $ANTLR start "powerExpression"
     powerExpression: function() {
         var retval = new FormulaParser.powerExpression_return();
@@ -3191,15 +3193,15 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var stream_unaryOrNegate=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unaryOrNegate");
         var stream_unaryExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unaryExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:191:2: ( unaryExpression ( POW unaryOrNegate )* -> ^( POWER unaryExpression ( unaryOrNegate )* ) )
-            // /Library/WebServer/Documents/calc/Formula.g:191:4: unaryExpression ( POW unaryOrNegate )*
-            this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_powerExpression1194);
+            // /Library/WebServer/Documents/calc/Formula.g:190:2: ( unaryExpression ( POW unaryOrNegate )* -> ^( POWER unaryExpression ( unaryOrNegate )* ) )
+            // /Library/WebServer/Documents/calc/Formula.g:190:4: unaryExpression ( POW unaryOrNegate )*
+            this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_powerExpression1192);
             unaryExpression116=this.unaryExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) stream_unaryExpression.add(unaryExpression116.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:191:20: ( POW unaryOrNegate )*
+            // /Library/WebServer/Documents/calc/Formula.g:190:20: ( POW unaryOrNegate )*
             loop35:
             do {
                 var alt35=2;
@@ -3212,11 +3214,11 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                 switch (alt35) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:191:21: POW unaryOrNegate
-                    POW117=this.match(this.input,POW,FormulaParser.FOLLOW_POW_in_powerExpression1197); if (this.state.failed) return retval; 
+                    // /Library/WebServer/Documents/calc/Formula.g:190:21: POW unaryOrNegate
+                    POW117=this.match(this.input,POW,FormulaParser.FOLLOW_POW_in_powerExpression1195); if (this.state.failed) return retval; 
                     if ( this.state.backtracking===0 ) stream_POW.add(POW117);
 
-                    this.pushFollow(FormulaParser.FOLLOW_unaryOrNegate_in_powerExpression1199);
+                    this.pushFollow(FormulaParser.FOLLOW_unaryOrNegate_in_powerExpression1197);
                     unaryOrNegate118=this.unaryOrNegate();
 
                     this.state._fsp--;
@@ -3244,15 +3246,15 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = this.adaptor.nil();
-            // 191:43: -> ^( POWER unaryExpression ( unaryOrNegate )* )
+            // 190:43: -> ^( POWER unaryExpression ( unaryOrNegate )* )
             {
-                // /Library/WebServer/Documents/calc/Formula.g:191:47: ^( POWER unaryExpression ( unaryOrNegate )* )
+                // /Library/WebServer/Documents/calc/Formula.g:190:47: ^( POWER unaryExpression ( unaryOrNegate )* )
                 {
                 var root_1 = this.adaptor.nil();
                 root_1 = this.adaptor.becomeRoot(this.adaptor.create(POWER, "POWER"), root_1);
 
                 this.adaptor.addChild(root_1, stream_unaryExpression.nextTree());
-                // /Library/WebServer/Documents/calc/Formula.g:191:71: ( unaryOrNegate )*
+                // /Library/WebServer/Documents/calc/Formula.g:190:71: ( unaryOrNegate )*
                 while ( stream_unaryOrNegate.hasNext() ) {
                     this.adaptor.addChild(root_1, stream_unaryOrNegate.nextTree());
 
@@ -3300,7 +3302,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:194:1: unaryOrNegate : ( unaryExpression | MINUS unaryExpression -> ^( NEGATE unaryExpression ) );
+    // /Library/WebServer/Documents/calc/Formula.g:193:1: unaryOrNegate : ( unaryExpression | MINUS unaryExpression -> ^( NEGATE unaryExpression ) );
     // $ANTLR start "unaryOrNegate"
     unaryOrNegate: function() {
         var retval = new FormulaParser.unaryOrNegate_return();
@@ -3316,11 +3318,11 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var stream_MINUS=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token MINUS");
         var stream_unaryExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unaryExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:195:2: ( unaryExpression | MINUS unaryExpression -> ^( NEGATE unaryExpression ) )
+            // /Library/WebServer/Documents/calc/Formula.g:194:2: ( unaryExpression | MINUS unaryExpression -> ^( NEGATE unaryExpression ) )
             var alt36=2;
             var LA36_0 = this.input.LA(1);
 
-            if ( (LA36_0==IDENT||LA36_0==PRIMITIVE||(LA36_0>=NOT && LA36_0<=LARR)||(LA36_0>=INTEGER && LA36_0<=FALSE)||LA36_0==87||LA36_0==91) ) {
+            if ( (LA36_0==IDENT||LA36_0==PRIMITIVE||(LA36_0>=NOT && LA36_0<=LARR)||(LA36_0>=INTEGER && LA36_0<=FALSE)||LA36_0==88||LA36_0==92) ) {
                 alt36=1;
             }
             else if ( (LA36_0==MINUS) ) {
@@ -3335,10 +3337,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             }
             switch (alt36) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:195:4: unaryExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:194:4: unaryExpression
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_unaryOrNegate1226);
+                    this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_unaryOrNegate1224);
                     unaryExpression119=this.unaryExpression();
 
                     this.state._fsp--;
@@ -3348,11 +3350,11 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:196:3: MINUS unaryExpression
-                    MINUS120=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_unaryOrNegate1232); if (this.state.failed) return retval; 
+                    // /Library/WebServer/Documents/calc/Formula.g:195:3: MINUS unaryExpression
+                    MINUS120=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_unaryOrNegate1230); if (this.state.failed) return retval; 
                     if ( this.state.backtracking===0 ) stream_MINUS.add(MINUS120);
 
-                    this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_unaryOrNegate1234);
+                    this.pushFollow(FormulaParser.FOLLOW_unaryExpression_in_unaryOrNegate1232);
                     unaryExpression121=this.unaryExpression();
 
                     this.state._fsp--;
@@ -3371,9 +3373,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 196:25: -> ^( NEGATE unaryExpression )
+                    // 195:25: -> ^( NEGATE unaryExpression )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:196:28: ^( NEGATE unaryExpression )
+                        // /Library/WebServer/Documents/calc/Formula.g:195:28: ^( NEGATE unaryExpression )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(NEGATE, "NEGATE"), root_1);
@@ -3423,7 +3425,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:201:1: unaryExpression : ( NOT primaryExpression | primaryExpression );
+    // /Library/WebServer/Documents/calc/Formula.g:200:1: unaryExpression : ( NOT primaryExpression | primaryExpression );
     // $ANTLR start "unaryExpression"
     unaryExpression: function() {
         var retval = new FormulaParser.unaryExpression_return();
@@ -3438,14 +3440,14 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var NOT122_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:202:2: ( NOT primaryExpression | primaryExpression )
+            // /Library/WebServer/Documents/calc/Formula.g:201:2: ( NOT primaryExpression | primaryExpression )
             var alt37=2;
             var LA37_0 = this.input.LA(1);
 
             if ( (LA37_0==NOT) ) {
                 alt37=1;
             }
-            else if ( (LA37_0==IDENT||LA37_0==PRIMITIVE||LA37_0==LARR||(LA37_0>=INTEGER && LA37_0<=FALSE)||LA37_0==87||LA37_0==91) ) {
+            else if ( (LA37_0==IDENT||LA37_0==PRIMITIVE||LA37_0==LARR||(LA37_0>=INTEGER && LA37_0<=FALSE)||LA37_0==88||LA37_0==92) ) {
                 alt37=2;
             }
             else {
@@ -3457,15 +3459,15 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             }
             switch (alt37) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:202:4: NOT primaryExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:201:4: NOT primaryExpression
                     root_0 = this.adaptor.nil();
 
-                    NOT122=this.match(this.input,NOT,FormulaParser.FOLLOW_NOT_in_unaryExpression1262); if (this.state.failed) return retval;
+                    NOT122=this.match(this.input,NOT,FormulaParser.FOLLOW_NOT_in_unaryExpression1260); if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) {
                     NOT122_tree = this.adaptor.create(NOT122);
                     root_0 = this.adaptor.becomeRoot(NOT122_tree, root_0);
                     }
-                    this.pushFollow(FormulaParser.FOLLOW_primaryExpression_in_unaryExpression1265);
+                    this.pushFollow(FormulaParser.FOLLOW_primaryExpression_in_unaryExpression1263);
                     primaryExpression123=this.primaryExpression();
 
                     this.state._fsp--;
@@ -3475,10 +3477,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:204:8: primaryExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:203:8: primaryExpression
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_primaryExpression_in_unaryExpression1277);
+                    this.pushFollow(FormulaParser.FOLLOW_primaryExpression_in_unaryExpression1275);
                     primaryExpression124=this.primaryExpression();
 
                     this.state._fsp--;
@@ -3522,7 +3524,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:209:1: primaryExpression : ( '(' logicalExpression ')' | value );
+    // /Library/WebServer/Documents/calc/Formula.g:208:1: primaryExpression : ( '(' logicalExpression ')' | value );
     // $ANTLR start "primaryExpression"
     primaryExpression: function() {
         var retval = new FormulaParser.primaryExpression_return();
@@ -3539,14 +3541,14 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var char_literal127_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:210:2: ( '(' logicalExpression ')' | value )
+            // /Library/WebServer/Documents/calc/Formula.g:209:2: ( '(' logicalExpression ')' | value )
             var alt38=2;
             var LA38_0 = this.input.LA(1);
 
-            if ( (LA38_0==87) ) {
+            if ( (LA38_0==88) ) {
                 alt38=1;
             }
-            else if ( (LA38_0==IDENT||LA38_0==PRIMITIVE||LA38_0==LARR||(LA38_0>=INTEGER && LA38_0<=FALSE)||LA38_0==91) ) {
+            else if ( (LA38_0==IDENT||LA38_0==PRIMITIVE||LA38_0==LARR||(LA38_0>=INTEGER && LA38_0<=FALSE)||LA38_0==92) ) {
                 alt38=2;
             }
             else {
@@ -3558,25 +3560,25 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             }
             switch (alt38) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:210:4: '(' logicalExpression ')'
+                    // /Library/WebServer/Documents/calc/Formula.g:209:4: '(' logicalExpression ')'
                     root_0 = this.adaptor.nil();
 
-                    char_literal125=this.match(this.input,87,FormulaParser.FOLLOW_87_in_primaryExpression1308); if (this.state.failed) return retval;
-                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_primaryExpression1311);
+                    char_literal125=this.match(this.input,88,FormulaParser.FOLLOW_88_in_primaryExpression1306); if (this.state.failed) return retval;
+                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_primaryExpression1309);
                     logicalExpression126=this.logicalExpression();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, logicalExpression126.getTree());
-                    char_literal127=this.match(this.input,89,FormulaParser.FOLLOW_89_in_primaryExpression1313); if (this.state.failed) return retval;
+                    char_literal127=this.match(this.input,90,FormulaParser.FOLLOW_90_in_primaryExpression1311); if (this.state.failed) return retval;
 
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:211:4: value
+                    // /Library/WebServer/Documents/calc/Formula.g:210:4: value
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_value_in_primaryExpression1319);
+                    this.pushFollow(FormulaParser.FOLLOW_value_in_primaryExpression1317);
                     value128=this.value();
 
                     this.state._fsp--;
@@ -3620,7 +3622,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:214:1: value : ( number | bool | funOrIdent | primitive | material | array );
+    // /Library/WebServer/Documents/calc/Formula.g:213:1: value : ( number | bool | funOrIdent | primitive | material | array );
     // $ANTLR start "value"
     value: function() {
         var retval = new FormulaParser.value_return();
@@ -3637,7 +3639,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:215:2: ( number | bool | funOrIdent | primitive | material | array )
+            // /Library/WebServer/Documents/calc/Formula.g:214:2: ( number | bool | funOrIdent | primitive | material | array )
             var alt39=6;
             switch ( this.input.LA(1) ) {
             case INTEGER:
@@ -3654,7 +3656,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             case PRIMITIVE:
                 alt39=4;
                 break;
-            case 91:
+            case 92:
                 alt39=5;
                 break;
             case LARR:
@@ -3670,10 +3672,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
             switch (alt39) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:215:5: number
+                    // /Library/WebServer/Documents/calc/Formula.g:214:5: number
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_number_in_value1333);
+                    this.pushFollow(FormulaParser.FOLLOW_number_in_value1331);
                     number129=this.number();
 
                     this.state._fsp--;
@@ -3683,10 +3685,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:216:4: bool
+                    // /Library/WebServer/Documents/calc/Formula.g:215:4: bool
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_bool_in_value1338);
+                    this.pushFollow(FormulaParser.FOLLOW_bool_in_value1336);
                     bool130=this.bool();
 
                     this.state._fsp--;
@@ -3696,10 +3698,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 3 :
-                    // /Library/WebServer/Documents/calc/Formula.g:217:4: funOrIdent
+                    // /Library/WebServer/Documents/calc/Formula.g:216:4: funOrIdent
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_funOrIdent_in_value1343);
+                    this.pushFollow(FormulaParser.FOLLOW_funOrIdent_in_value1341);
                     funOrIdent131=this.funOrIdent();
 
                     this.state._fsp--;
@@ -3709,10 +3711,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 4 :
-                    // /Library/WebServer/Documents/calc/Formula.g:218:4: primitive
+                    // /Library/WebServer/Documents/calc/Formula.g:217:4: primitive
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_primitive_in_value1348);
+                    this.pushFollow(FormulaParser.FOLLOW_primitive_in_value1346);
                     primitive132=this.primitive();
 
                     this.state._fsp--;
@@ -3722,10 +3724,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 5 :
-                    // /Library/WebServer/Documents/calc/Formula.g:219:4: material
+                    // /Library/WebServer/Documents/calc/Formula.g:218:4: material
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_material_in_value1353);
+                    this.pushFollow(FormulaParser.FOLLOW_material_in_value1351);
                     material133=this.material();
 
                     this.state._fsp--;
@@ -3735,10 +3737,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 6 :
-                    // /Library/WebServer/Documents/calc/Formula.g:220:4: array
+                    // /Library/WebServer/Documents/calc/Formula.g:219:4: array
                     root_0 = this.adaptor.nil();
 
-                    this.pushFollow(FormulaParser.FOLLOW_array_in_value1358);
+                    this.pushFollow(FormulaParser.FOLLOW_array_in_value1356);
                     array134=this.array();
 
                     this.state._fsp--;
@@ -3782,7 +3784,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:223:1: array : LARR ( logicalExpression ( ',' logicalExpression )* )? RARR -> ^( ARRAY ( logicalExpression )* ) ;
+    // /Library/WebServer/Documents/calc/Formula.g:222:1: array : LARR ( logicalExpression ( ',' logicalExpression )* )? RARR -> ^( ARRAY ( logicalExpression )* ) ;
     // $ANTLR start "array"
     array: function() {
         var retval = new FormulaParser.array_return();
@@ -3801,48 +3803,48 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var RARR139_tree=null;
         var stream_RARR=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token RARR");
         var stream_LARR=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token LARR");
-        var stream_88=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 88");
+        var stream_89=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 89");
         var stream_logicalExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule logicalExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:224:2: ( LARR ( logicalExpression ( ',' logicalExpression )* )? RARR -> ^( ARRAY ( logicalExpression )* ) )
-            // /Library/WebServer/Documents/calc/Formula.g:224:4: LARR ( logicalExpression ( ',' logicalExpression )* )? RARR
-            LARR135=this.match(this.input,LARR,FormulaParser.FOLLOW_LARR_in_array1369); if (this.state.failed) return retval; 
+            // /Library/WebServer/Documents/calc/Formula.g:223:2: ( LARR ( logicalExpression ( ',' logicalExpression )* )? RARR -> ^( ARRAY ( logicalExpression )* ) )
+            // /Library/WebServer/Documents/calc/Formula.g:223:4: LARR ( logicalExpression ( ',' logicalExpression )* )? RARR
+            LARR135=this.match(this.input,LARR,FormulaParser.FOLLOW_LARR_in_array1367); if (this.state.failed) return retval; 
             if ( this.state.backtracking===0 ) stream_LARR.add(LARR135);
 
-            // /Library/WebServer/Documents/calc/Formula.g:224:9: ( logicalExpression ( ',' logicalExpression )* )?
+            // /Library/WebServer/Documents/calc/Formula.g:223:9: ( logicalExpression ( ',' logicalExpression )* )?
             var alt41=2;
             var LA41_0 = this.input.LA(1);
 
-            if ( (LA41_0==IDENT||LA41_0==PRIMITIVE||LA41_0==MINUS||(LA41_0>=NOT && LA41_0<=LARR)||(LA41_0>=INTEGER && LA41_0<=FALSE)||LA41_0==87||LA41_0==91) ) {
+            if ( (LA41_0==IDENT||LA41_0==PRIMITIVE||LA41_0==MINUS||(LA41_0>=NOT && LA41_0<=LARR)||(LA41_0>=INTEGER && LA41_0<=FALSE)||LA41_0==88||LA41_0==92) ) {
                 alt41=1;
             }
             switch (alt41) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:224:10: logicalExpression ( ',' logicalExpression )*
-                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_array1372);
+                    // /Library/WebServer/Documents/calc/Formula.g:223:10: logicalExpression ( ',' logicalExpression )*
+                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_array1370);
                     logicalExpression136=this.logicalExpression();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) stream_logicalExpression.add(logicalExpression136.getTree());
-                    // /Library/WebServer/Documents/calc/Formula.g:224:28: ( ',' logicalExpression )*
+                    // /Library/WebServer/Documents/calc/Formula.g:223:28: ( ',' logicalExpression )*
                     loop40:
                     do {
                         var alt40=2;
                         var LA40_0 = this.input.LA(1);
 
-                        if ( (LA40_0==88) ) {
+                        if ( (LA40_0==89) ) {
                             alt40=1;
                         }
 
 
                         switch (alt40) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:224:29: ',' logicalExpression
-                            char_literal137=this.match(this.input,88,FormulaParser.FOLLOW_88_in_array1375); if (this.state.failed) return retval; 
-                            if ( this.state.backtracking===0 ) stream_88.add(char_literal137);
+                            // /Library/WebServer/Documents/calc/Formula.g:223:29: ',' logicalExpression
+                            char_literal137=this.match(this.input,89,FormulaParser.FOLLOW_89_in_array1373); if (this.state.failed) return retval; 
+                            if ( this.state.backtracking===0 ) stream_89.add(char_literal137);
 
-                            this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_array1377);
+                            this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_array1375);
                             logicalExpression138=this.logicalExpression();
 
                             this.state._fsp--;
@@ -3863,7 +3865,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
             }
 
-            RARR139=this.match(this.input,RARR,FormulaParser.FOLLOW_RARR_in_array1383); if (this.state.failed) return retval; 
+            RARR139=this.match(this.input,RARR,FormulaParser.FOLLOW_RARR_in_array1381); if (this.state.failed) return retval; 
             if ( this.state.backtracking===0 ) stream_RARR.add(RARR139);
 
 
@@ -3879,14 +3881,14 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = this.adaptor.nil();
-            // 224:60: -> ^( ARRAY ( logicalExpression )* )
+            // 223:60: -> ^( ARRAY ( logicalExpression )* )
             {
-                // /Library/WebServer/Documents/calc/Formula.g:224:63: ^( ARRAY ( logicalExpression )* )
+                // /Library/WebServer/Documents/calc/Formula.g:223:63: ^( ARRAY ( logicalExpression )* )
                 {
                 var root_1 = this.adaptor.nil();
                 root_1 = this.adaptor.becomeRoot(this.adaptor.create(ARRAY, "ARRAY"), root_1);
 
-                // /Library/WebServer/Documents/calc/Formula.g:224:71: ( logicalExpression )*
+                // /Library/WebServer/Documents/calc/Formula.g:223:71: ( logicalExpression )*
                 while ( stream_logicalExpression.hasNext() ) {
                     this.adaptor.addChild(root_1, stream_logicalExpression.nextTree());
 
@@ -3934,7 +3936,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:230:1: number : ( INTEGER | FLOAT );
+    // /Library/WebServer/Documents/calc/Formula.g:229:1: number : ( INTEGER | FLOAT );
     // $ANTLR start "number"
     number: function() {
         var retval = new FormulaParser.number_return();
@@ -3947,7 +3949,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set140_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:230:8: ( INTEGER | FLOAT )
+            // /Library/WebServer/Documents/calc/Formula.g:229:8: ( INTEGER | FLOAT )
             // /Library/WebServer/Documents/calc/Formula.g:
             root_0 = this.adaptor.nil();
 
@@ -3999,7 +4001,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:240:1: bool : ( TRUE | FALSE );
+    // /Library/WebServer/Documents/calc/Formula.g:239:1: bool : ( TRUE | FALSE );
     // $ANTLR start "bool"
     bool: function() {
         var retval = new FormulaParser.bool_return();
@@ -4012,7 +4014,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         var set141_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:241:2: ( TRUE | FALSE )
+            // /Library/WebServer/Documents/calc/Formula.g:240:2: ( TRUE | FALSE )
             // /Library/WebServer/Documents/calc/Formula.g:
             root_0 = this.adaptor.nil();
 
@@ -4064,7 +4066,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:253:1: material : '{' additiveExpression unitMultiplicativeExpression '}' -> ^( MATERIAL unitMultiplicativeExpression additiveExpression ) ;
+    // /Library/WebServer/Documents/calc/Formula.g:252:1: material : '{' additiveExpression unitMultiplicativeExpression '}' -> ^( MATERIAL unitMultiplicativeExpression additiveExpression ) ;
     // $ANTLR start "material"
     material: function() {
         var retval = new FormulaParser.material_return();
@@ -4079,35 +4081,35 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var char_literal142_tree=null;
         var char_literal145_tree=null;
+        var stream_93=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 93");
         var stream_92=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 92");
-        var stream_91=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 91");
         var stream_unitMultiplicativeExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unitMultiplicativeExpression");
         var stream_additiveExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule additiveExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:253:9: ( '{' additiveExpression unitMultiplicativeExpression '}' -> ^( MATERIAL unitMultiplicativeExpression additiveExpression ) )
-            // /Library/WebServer/Documents/calc/Formula.g:253:12: '{' additiveExpression unitMultiplicativeExpression '}'
-            char_literal142=this.match(this.input,91,FormulaParser.FOLLOW_91_in_material1571); if (this.state.failed) return retval; 
-            if ( this.state.backtracking===0 ) stream_91.add(char_literal142);
+            // /Library/WebServer/Documents/calc/Formula.g:252:9: ( '{' additiveExpression unitMultiplicativeExpression '}' -> ^( MATERIAL unitMultiplicativeExpression additiveExpression ) )
+            // /Library/WebServer/Documents/calc/Formula.g:252:12: '{' additiveExpression unitMultiplicativeExpression '}'
+            char_literal142=this.match(this.input,92,FormulaParser.FOLLOW_92_in_material1569); if (this.state.failed) return retval; 
+            if ( this.state.backtracking===0 ) stream_92.add(char_literal142);
 
-            this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_material1573);
+            this.pushFollow(FormulaParser.FOLLOW_additiveExpression_in_material1571);
             additiveExpression143=this.additiveExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) stream_additiveExpression.add(additiveExpression143.getTree());
-            this.pushFollow(FormulaParser.FOLLOW_unitMultiplicativeExpression_in_material1575);
+            this.pushFollow(FormulaParser.FOLLOW_unitMultiplicativeExpression_in_material1573);
             unitMultiplicativeExpression144=this.unitMultiplicativeExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) stream_unitMultiplicativeExpression.add(unitMultiplicativeExpression144.getTree());
-            char_literal145=this.match(this.input,92,FormulaParser.FOLLOW_92_in_material1577); if (this.state.failed) return retval; 
-            if ( this.state.backtracking===0 ) stream_92.add(char_literal145);
+            char_literal145=this.match(this.input,93,FormulaParser.FOLLOW_93_in_material1575); if (this.state.failed) return retval; 
+            if ( this.state.backtracking===0 ) stream_93.add(char_literal145);
 
 
 
             // AST REWRITE
-            // elements: unitMultiplicativeExpression, additiveExpression
+            // elements: additiveExpression, unitMultiplicativeExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -4117,9 +4119,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = this.adaptor.nil();
-            // 253:68: -> ^( MATERIAL unitMultiplicativeExpression additiveExpression )
+            // 252:68: -> ^( MATERIAL unitMultiplicativeExpression additiveExpression )
             {
-                // /Library/WebServer/Documents/calc/Formula.g:253:71: ^( MATERIAL unitMultiplicativeExpression additiveExpression )
+                // /Library/WebServer/Documents/calc/Formula.g:252:71: ^( MATERIAL unitMultiplicativeExpression additiveExpression )
                 {
                 var root_1 = this.adaptor.nil();
                 root_1 = this.adaptor.becomeRoot(this.adaptor.create(MATERIAL, "MATERIAL"), root_1);
@@ -4168,7 +4170,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:256:1: unitMultiplicativeExpression : unitClump ( ( MULT | DIV ) unitClump )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:259:1: unitMultiplicativeExpression : unitInnerMultiplicativeExpression ( PER unitInnerMultiplicativeExpression )* ;
     // $ANTLR start "unitMultiplicativeExpression"
     unitMultiplicativeExpression: function() {
         var retval = new FormulaParser.unitMultiplicativeExpression_return();
@@ -4176,42 +4178,137 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var set147 = null;
-         var unitClump146 = null;
-         var unitClump148 = null;
+        var PER147 = null;
+         var unitInnerMultiplicativeExpression146 = null;
+         var unitInnerMultiplicativeExpression148 = null;
 
-        var set147_tree=null;
+        var PER147_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:257:2: ( unitClump ( ( MULT | DIV ) unitClump )* )
-            // /Library/WebServer/Documents/calc/Formula.g:257:4: unitClump ( ( MULT | DIV ) unitClump )*
+            // /Library/WebServer/Documents/calc/Formula.g:260:2: ( unitInnerMultiplicativeExpression ( PER unitInnerMultiplicativeExpression )* )
+            // /Library/WebServer/Documents/calc/Formula.g:260:4: unitInnerMultiplicativeExpression ( PER unitInnerMultiplicativeExpression )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_unitClump_in_unitMultiplicativeExpression1598);
-            unitClump146=this.unitClump();
+            this.pushFollow(FormulaParser.FOLLOW_unitInnerMultiplicativeExpression_in_unitMultiplicativeExpression1612);
+            unitInnerMultiplicativeExpression146=this.unitInnerMultiplicativeExpression();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
-            if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitClump146.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:257:14: ( ( MULT | DIV ) unitClump )*
+            if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitInnerMultiplicativeExpression146.getTree());
+            // /Library/WebServer/Documents/calc/Formula.g:260:38: ( PER unitInnerMultiplicativeExpression )*
             loop42:
             do {
                 var alt42=2;
                 var LA42_0 = this.input.LA(1);
 
-                if ( ((LA42_0>=MULT && LA42_0<=DIV)) ) {
+                if ( (LA42_0==PER) ) {
                     alt42=1;
                 }
 
 
                 switch (alt42) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:257:16: ( MULT | DIV ) unitClump
+                    // /Library/WebServer/Documents/calc/Formula.g:260:40: PER unitInnerMultiplicativeExpression
+                    PER147=this.match(this.input,PER,FormulaParser.FOLLOW_PER_in_unitMultiplicativeExpression1616); if (this.state.failed) return retval;
+                    if ( this.state.backtracking===0 ) {
+                    PER147_tree = this.adaptor.create(PER147);
+                    root_0 = this.adaptor.becomeRoot(PER147_tree, root_0);
+                    }
+                    this.pushFollow(FormulaParser.FOLLOW_unitInnerMultiplicativeExpression_in_unitMultiplicativeExpression1619);
+                    unitInnerMultiplicativeExpression148=this.unitInnerMultiplicativeExpression();
+
+                    this.state._fsp--;
+                    if (this.state.failed) return retval;
+                    if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitInnerMultiplicativeExpression148.getTree());
+
+
+                    break;
+
+                default :
+                    break loop42;
+                }
+            } while (true);
+
+
+
+
+            retval.stop = this.input.LT(-1);
+
+            if ( this.state.backtracking===0 ) {
+
+            retval.tree = this.adaptor.rulePostProcessing(root_0);
+            this.adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+            }
+        }
+        catch (re) {
+            if (re instanceof org.antlr.runtime.RecognitionException) {
+                this.reportError(re);
+                this.recover(this.input,re);
+                retval.tree = this.adaptor.errorNode(this.input, retval.start, this.input.LT(-1), re);
+            } else {
+                throw re;
+            }
+        }
+        finally {
+        }
+        return retval;
+    },
+
+    // inline static return class
+    unitInnerMultiplicativeExpression_return: (function() {
+        FormulaParser.unitInnerMultiplicativeExpression_return = function(){};
+        org.antlr.lang.extend(FormulaParser.unitInnerMultiplicativeExpression_return,
+                          org.antlr.runtime.ParserRuleReturnScope,
+        {
+            getTree: function() { return this.tree; }
+        });
+        return;
+    })(),
+
+    // /Library/WebServer/Documents/calc/Formula.g:263:1: unitInnerMultiplicativeExpression : unitClump ( ( MULT | DIV ) unitClump )* ;
+    // $ANTLR start "unitInnerMultiplicativeExpression"
+    unitInnerMultiplicativeExpression: function() {
+        var retval = new FormulaParser.unitInnerMultiplicativeExpression_return();
+        retval.start = this.input.LT(1);
+
+        var root_0 = null;
+
+        var set150 = null;
+         var unitClump149 = null;
+         var unitClump151 = null;
+
+        var set150_tree=null;
+
+        try {
+            // /Library/WebServer/Documents/calc/Formula.g:264:2: ( unitClump ( ( MULT | DIV ) unitClump )* )
+            // /Library/WebServer/Documents/calc/Formula.g:264:4: unitClump ( ( MULT | DIV ) unitClump )*
+            root_0 = this.adaptor.nil();
+
+            this.pushFollow(FormulaParser.FOLLOW_unitClump_in_unitInnerMultiplicativeExpression1635);
+            unitClump149=this.unitClump();
+
+            this.state._fsp--;
+            if (this.state.failed) return retval;
+            if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitClump149.getTree());
+            // /Library/WebServer/Documents/calc/Formula.g:264:14: ( ( MULT | DIV ) unitClump )*
+            loop43:
+            do {
+                var alt43=2;
+                var LA43_0 = this.input.LA(1);
+
+                if ( ((LA43_0>=MULT && LA43_0<=DIV)) ) {
+                    alt43=1;
+                }
+
+
+                switch (alt43) {
+                case 1 :
+                    // /Library/WebServer/Documents/calc/Formula.g:264:16: ( MULT | DIV ) unitClump
                     
-                    set147=this.input.LT(1);
+                    set150=this.input.LT(1);
                     if ( (this.input.LA(1)>=MULT && this.input.LA(1)<=DIV) ) {
                         this.input.consume();
-                        if ( this.state.backtracking===0 ) root_0 = this.adaptor.becomeRoot(this.adaptor.create(set147), root_0);
+                        if ( this.state.backtracking===0 ) root_0 = this.adaptor.becomeRoot(this.adaptor.create(set150), root_0);
                         this.state.errorRecovery=false;this.state.failed=false;
                     }
                     else {
@@ -4220,18 +4317,18 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         throw mse;
                     }
 
-                    this.pushFollow(FormulaParser.FOLLOW_unitClump_in_unitMultiplicativeExpression1609);
-                    unitClump148=this.unitClump();
+                    this.pushFollow(FormulaParser.FOLLOW_unitClump_in_unitInnerMultiplicativeExpression1646);
+                    unitClump151=this.unitClump();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
-                    if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitClump148.getTree());
+                    if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unitClump151.getTree());
 
 
                     break;
 
                 default :
-                    break loop42;
+                    break loop43;
                 }
             } while (true);
 
@@ -4271,7 +4368,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:260:1: unitClump : ( ( INTEGER DIV ) unitPowerExpression -> ^( UNITCLUMP unitPowerExpression NEGATE ) | unitPowerExpression -> ^( UNITCLUMP unitPowerExpression ) );
+    // /Library/WebServer/Documents/calc/Formula.g:267:1: unitClump : ( ( INTEGER DIV ) unitPowerExpression -> ^( UNITCLUMP unitPowerExpression NEGATE ) | unitPowerExpression -> ^( UNITCLUMP unitPowerExpression ) );
     // $ANTLR start "unitClump"
     unitClump: function() {
         var retval = new FormulaParser.unitClump_return();
@@ -4279,54 +4376,54 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var INTEGER149 = null;
-        var DIV150 = null;
-         var unitPowerExpression151 = null;
-         var unitPowerExpression152 = null;
+        var INTEGER152 = null;
+        var DIV153 = null;
+         var unitPowerExpression154 = null;
+         var unitPowerExpression155 = null;
 
-        var INTEGER149_tree=null;
-        var DIV150_tree=null;
+        var INTEGER152_tree=null;
+        var DIV153_tree=null;
         var stream_INTEGER=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token INTEGER");
         var stream_DIV=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token DIV");
         var stream_unitPowerExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unitPowerExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:261:2: ( ( INTEGER DIV ) unitPowerExpression -> ^( UNITCLUMP unitPowerExpression NEGATE ) | unitPowerExpression -> ^( UNITCLUMP unitPowerExpression ) )
-            var alt43=2;
-            var LA43_0 = this.input.LA(1);
+            // /Library/WebServer/Documents/calc/Formula.g:268:2: ( ( INTEGER DIV ) unitPowerExpression -> ^( UNITCLUMP unitPowerExpression NEGATE ) | unitPowerExpression -> ^( UNITCLUMP unitPowerExpression ) )
+            var alt44=2;
+            var LA44_0 = this.input.LA(1);
 
-            if ( (LA43_0==INTEGER) ) {
-                alt43=1;
+            if ( (LA44_0==INTEGER) ) {
+                alt44=1;
             }
-            else if ( (LA43_0==IDENT||LA43_0==87) ) {
-                alt43=2;
+            else if ( (LA44_0==IDENT||LA44_0==88) ) {
+                alt44=2;
             }
             else {
                 if (this.state.backtracking>0) {this.state.failed=true; return retval;}
                 var nvae =
-                    new org.antlr.runtime.NoViableAltException("", 43, 0, this.input);
+                    new org.antlr.runtime.NoViableAltException("", 44, 0, this.input);
 
                 throw nvae;
             }
-            switch (alt43) {
+            switch (alt44) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:261:4: ( INTEGER DIV ) unitPowerExpression
-                    // /Library/WebServer/Documents/calc/Formula.g:261:4: ( INTEGER DIV )
-                    // /Library/WebServer/Documents/calc/Formula.g:261:5: INTEGER DIV
-                    INTEGER149=this.match(this.input,INTEGER,FormulaParser.FOLLOW_INTEGER_in_unitClump1624); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_INTEGER.add(INTEGER149);
+                    // /Library/WebServer/Documents/calc/Formula.g:268:4: ( INTEGER DIV ) unitPowerExpression
+                    // /Library/WebServer/Documents/calc/Formula.g:268:4: ( INTEGER DIV )
+                    // /Library/WebServer/Documents/calc/Formula.g:268:5: INTEGER DIV
+                    INTEGER152=this.match(this.input,INTEGER,FormulaParser.FOLLOW_INTEGER_in_unitClump1662); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_INTEGER.add(INTEGER152);
 
-                    DIV150=this.match(this.input,DIV,FormulaParser.FOLLOW_DIV_in_unitClump1626); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_DIV.add(DIV150);
-
-
+                    DIV153=this.match(this.input,DIV,FormulaParser.FOLLOW_DIV_in_unitClump1664); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_DIV.add(DIV153);
 
 
-                    this.pushFollow(FormulaParser.FOLLOW_unitPowerExpression_in_unitClump1629);
-                    unitPowerExpression151=this.unitPowerExpression();
+
+
+                    this.pushFollow(FormulaParser.FOLLOW_unitPowerExpression_in_unitClump1667);
+                    unitPowerExpression154=this.unitPowerExpression();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
-                    if ( this.state.backtracking===0 ) stream_unitPowerExpression.add(unitPowerExpression151.getTree());
+                    if ( this.state.backtracking===0 ) stream_unitPowerExpression.add(unitPowerExpression154.getTree());
 
 
                     // AST REWRITE
@@ -4340,9 +4437,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 261:38: -> ^( UNITCLUMP unitPowerExpression NEGATE )
+                    // 268:38: -> ^( UNITCLUMP unitPowerExpression NEGATE )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:261:41: ^( UNITCLUMP unitPowerExpression NEGATE )
+                        // /Library/WebServer/Documents/calc/Formula.g:268:41: ^( UNITCLUMP unitPowerExpression NEGATE )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(UNITCLUMP, "UNITCLUMP"), root_1);
@@ -4359,13 +4456,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:262:5: unitPowerExpression
-                    this.pushFollow(FormulaParser.FOLLOW_unitPowerExpression_in_unitClump1645);
-                    unitPowerExpression152=this.unitPowerExpression();
+                    // /Library/WebServer/Documents/calc/Formula.g:269:5: unitPowerExpression
+                    this.pushFollow(FormulaParser.FOLLOW_unitPowerExpression_in_unitClump1683);
+                    unitPowerExpression155=this.unitPowerExpression();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
-                    if ( this.state.backtracking===0 ) stream_unitPowerExpression.add(unitPowerExpression152.getTree());
+                    if ( this.state.backtracking===0 ) stream_unitPowerExpression.add(unitPowerExpression155.getTree());
 
 
                     // AST REWRITE
@@ -4379,9 +4476,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 262:25: -> ^( UNITCLUMP unitPowerExpression )
+                    // 269:25: -> ^( UNITCLUMP unitPowerExpression )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:262:28: ^( UNITCLUMP unitPowerExpression )
+                        // /Library/WebServer/Documents/calc/Formula.g:269:28: ^( UNITCLUMP unitPowerExpression )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(UNITCLUMP, "UNITCLUMP"), root_1);
@@ -4431,7 +4528,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:265:1: unitPowerExpression : unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )* ;
+    // /Library/WebServer/Documents/calc/Formula.g:272:1: unitPowerExpression : unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )* ;
     // $ANTLR start "unitPowerExpression"
     unitPowerExpression: function() {
         var retval = new FormulaParser.unitPowerExpression_return();
@@ -4439,59 +4536,59 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var POW154 = null;
-        var MINUS155 = null;
-        var set156 = null;
-         var unit153 = null;
+        var POW157 = null;
+        var MINUS158 = null;
+        var set159 = null;
+         var unit156 = null;
 
-        var POW154_tree=null;
-        var MINUS155_tree=null;
-        var set156_tree=null;
+        var POW157_tree=null;
+        var MINUS158_tree=null;
+        var set159_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:266:2: ( unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )* )
-            // /Library/WebServer/Documents/calc/Formula.g:266:5: unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )*
+            // /Library/WebServer/Documents/calc/Formula.g:273:2: ( unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )* )
+            // /Library/WebServer/Documents/calc/Formula.g:273:5: unit ( POW ( MINUS )? ( INTEGER | FLOAT ) )*
             root_0 = this.adaptor.nil();
 
-            this.pushFollow(FormulaParser.FOLLOW_unit_in_unitPowerExpression1666);
-            unit153=this.unit();
+            this.pushFollow(FormulaParser.FOLLOW_unit_in_unitPowerExpression1704);
+            unit156=this.unit();
 
             this.state._fsp--;
             if (this.state.failed) return retval;
-            if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unit153.getTree());
-            // /Library/WebServer/Documents/calc/Formula.g:266:10: ( POW ( MINUS )? ( INTEGER | FLOAT ) )*
-            loop45:
+            if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, unit156.getTree());
+            // /Library/WebServer/Documents/calc/Formula.g:273:10: ( POW ( MINUS )? ( INTEGER | FLOAT ) )*
+            loop46:
             do {
-                var alt45=2;
-                var LA45_0 = this.input.LA(1);
+                var alt46=2;
+                var LA46_0 = this.input.LA(1);
 
-                if ( (LA45_0==POW) ) {
-                    alt45=1;
+                if ( (LA46_0==POW) ) {
+                    alt46=1;
                 }
 
 
-                switch (alt45) {
+                switch (alt46) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:266:12: POW ( MINUS )? ( INTEGER | FLOAT )
-                    POW154=this.match(this.input,POW,FormulaParser.FOLLOW_POW_in_unitPowerExpression1670); if (this.state.failed) return retval;
+                    // /Library/WebServer/Documents/calc/Formula.g:273:12: POW ( MINUS )? ( INTEGER | FLOAT )
+                    POW157=this.match(this.input,POW,FormulaParser.FOLLOW_POW_in_unitPowerExpression1708); if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) {
-                    POW154_tree = this.adaptor.create(POW154);
-                    root_0 = this.adaptor.becomeRoot(POW154_tree, root_0);
+                    POW157_tree = this.adaptor.create(POW157);
+                    root_0 = this.adaptor.becomeRoot(POW157_tree, root_0);
                     }
-                    // /Library/WebServer/Documents/calc/Formula.g:266:17: ( MINUS )?
-                    var alt44=2;
-                    var LA44_0 = this.input.LA(1);
+                    // /Library/WebServer/Documents/calc/Formula.g:273:17: ( MINUS )?
+                    var alt45=2;
+                    var LA45_0 = this.input.LA(1);
 
-                    if ( (LA44_0==MINUS) ) {
-                        alt44=1;
+                    if ( (LA45_0==MINUS) ) {
+                        alt45=1;
                     }
-                    switch (alt44) {
+                    switch (alt45) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:266:17: MINUS
-                            MINUS155=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_unitPowerExpression1673); if (this.state.failed) return retval;
+                            // /Library/WebServer/Documents/calc/Formula.g:273:17: MINUS
+                            MINUS158=this.match(this.input,MINUS,FormulaParser.FOLLOW_MINUS_in_unitPowerExpression1711); if (this.state.failed) return retval;
                             if ( this.state.backtracking===0 ) {
-                            MINUS155_tree = this.adaptor.create(MINUS155);
-                            this.adaptor.addChild(root_0, MINUS155_tree);
+                            MINUS158_tree = this.adaptor.create(MINUS158);
+                            this.adaptor.addChild(root_0, MINUS158_tree);
                             }
 
 
@@ -4499,10 +4596,10 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     }
 
-                    set156=this.input.LT(1);
+                    set159=this.input.LT(1);
                     if ( (this.input.LA(1)>=INTEGER && this.input.LA(1)<=FLOAT) ) {
                         this.input.consume();
-                        if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, this.adaptor.create(set156));
+                        if ( this.state.backtracking===0 ) this.adaptor.addChild(root_0, this.adaptor.create(set159));
                         this.state.errorRecovery=false;this.state.failed=false;
                     }
                     else {
@@ -4516,7 +4613,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     break;
 
                 default :
-                    break loop45;
+                    break loop46;
                 }
             } while (true);
 
@@ -4556,7 +4653,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:269:1: unit : ( IDENT ( IDENT )* -> ^( UNIT ( IDENT )+ ) | '(' unitMultiplicativeExpression ')' -> ^( UNITCLUMP unitMultiplicativeExpression ) );
+    // /Library/WebServer/Documents/calc/Formula.g:276:1: unit : ( IDENT ( IDENT )* -> ^( UNIT ( IDENT )+ ) | '(' unitMultiplicativeExpression ')' -> ^( UNITCLUMP unitMultiplicativeExpression ) );
     // $ANTLR start "unit"
     unit: function() {
         var retval = new FormulaParser.unit_return();
@@ -4564,67 +4661,67 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var IDENT157 = null;
-        var IDENT158 = null;
-        var char_literal159 = null;
-        var char_literal161 = null;
-         var unitMultiplicativeExpression160 = null;
+        var IDENT160 = null;
+        var IDENT161 = null;
+        var char_literal162 = null;
+        var char_literal164 = null;
+         var unitMultiplicativeExpression163 = null;
 
-        var IDENT157_tree=null;
-        var IDENT158_tree=null;
-        var char_literal159_tree=null;
-        var char_literal161_tree=null;
+        var IDENT160_tree=null;
+        var IDENT161_tree=null;
+        var char_literal162_tree=null;
+        var char_literal164_tree=null;
         var stream_IDENT=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token IDENT");
-        var stream_87=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 87");
-        var stream_89=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 89");
+        var stream_90=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 90");
+        var stream_88=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 88");
         var stream_unitMultiplicativeExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule unitMultiplicativeExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:269:6: ( IDENT ( IDENT )* -> ^( UNIT ( IDENT )+ ) | '(' unitMultiplicativeExpression ')' -> ^( UNITCLUMP unitMultiplicativeExpression ) )
-            var alt47=2;
-            var LA47_0 = this.input.LA(1);
+            // /Library/WebServer/Documents/calc/Formula.g:276:6: ( IDENT ( IDENT )* -> ^( UNIT ( IDENT )+ ) | '(' unitMultiplicativeExpression ')' -> ^( UNITCLUMP unitMultiplicativeExpression ) )
+            var alt48=2;
+            var LA48_0 = this.input.LA(1);
 
-            if ( (LA47_0==IDENT) ) {
-                alt47=1;
+            if ( (LA48_0==IDENT) ) {
+                alt48=1;
             }
-            else if ( (LA47_0==87) ) {
-                alt47=2;
+            else if ( (LA48_0==88) ) {
+                alt48=2;
             }
             else {
                 if (this.state.backtracking>0) {this.state.failed=true; return retval;}
                 var nvae =
-                    new org.antlr.runtime.NoViableAltException("", 47, 0, this.input);
+                    new org.antlr.runtime.NoViableAltException("", 48, 0, this.input);
 
                 throw nvae;
             }
-            switch (alt47) {
+            switch (alt48) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:269:8: IDENT ( IDENT )*
-                    IDENT157=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_unit1693); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT157);
+                    // /Library/WebServer/Documents/calc/Formula.g:276:8: IDENT ( IDENT )*
+                    IDENT160=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_unit1731); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT160);
 
-                    // /Library/WebServer/Documents/calc/Formula.g:269:14: ( IDENT )*
-                    loop46:
+                    // /Library/WebServer/Documents/calc/Formula.g:276:14: ( IDENT )*
+                    loop47:
                     do {
-                        var alt46=2;
-                        var LA46_0 = this.input.LA(1);
+                        var alt47=2;
+                        var LA47_0 = this.input.LA(1);
 
-                        if ( (LA46_0==IDENT) ) {
-                            alt46=1;
+                        if ( (LA47_0==IDENT) ) {
+                            alt47=1;
                         }
 
 
-                        switch (alt46) {
+                        switch (alt47) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:269:15: IDENT
-                            IDENT158=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_unit1696); if (this.state.failed) return retval; 
-                            if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT158);
+                            // /Library/WebServer/Documents/calc/Formula.g:276:15: IDENT
+                            IDENT161=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_unit1734); if (this.state.failed) return retval; 
+                            if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT161);
 
 
 
                             break;
 
                         default :
-                            break loop46;
+                            break loop47;
                         }
                     } while (true);
 
@@ -4641,9 +4738,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 269:23: -> ^( UNIT ( IDENT )+ )
+                    // 276:23: -> ^( UNIT ( IDENT )+ )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:269:26: ^( UNIT ( IDENT )+ )
+                        // /Library/WebServer/Documents/calc/Formula.g:276:26: ^( UNIT ( IDENT )+ )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(UNIT, "UNIT"), root_1);
@@ -4666,18 +4763,18 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:270:5: '(' unitMultiplicativeExpression ')'
-                    char_literal159=this.match(this.input,87,FormulaParser.FOLLOW_87_in_unit1713); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_87.add(char_literal159);
+                    // /Library/WebServer/Documents/calc/Formula.g:277:5: '(' unitMultiplicativeExpression ')'
+                    char_literal162=this.match(this.input,88,FormulaParser.FOLLOW_88_in_unit1751); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_88.add(char_literal162);
 
-                    this.pushFollow(FormulaParser.FOLLOW_unitMultiplicativeExpression_in_unit1715);
-                    unitMultiplicativeExpression160=this.unitMultiplicativeExpression();
+                    this.pushFollow(FormulaParser.FOLLOW_unitMultiplicativeExpression_in_unit1753);
+                    unitMultiplicativeExpression163=this.unitMultiplicativeExpression();
 
                     this.state._fsp--;
                     if (this.state.failed) return retval;
-                    if ( this.state.backtracking===0 ) stream_unitMultiplicativeExpression.add(unitMultiplicativeExpression160.getTree());
-                    char_literal161=this.match(this.input,89,FormulaParser.FOLLOW_89_in_unit1717); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_89.add(char_literal161);
+                    if ( this.state.backtracking===0 ) stream_unitMultiplicativeExpression.add(unitMultiplicativeExpression163.getTree());
+                    char_literal164=this.match(this.input,90,FormulaParser.FOLLOW_90_in_unit1755); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_90.add(char_literal164);
 
 
 
@@ -4692,9 +4789,9 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 270:42: -> ^( UNITCLUMP unitMultiplicativeExpression )
+                    // 277:42: -> ^( UNITCLUMP unitMultiplicativeExpression )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:270:45: ^( UNITCLUMP unitMultiplicativeExpression )
+                        // /Library/WebServer/Documents/calc/Formula.g:277:45: ^( UNITCLUMP unitMultiplicativeExpression )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(UNITCLUMP, "UNITCLUMP"), root_1);
@@ -4744,7 +4841,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:278:1: funOrIdent : ( ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' -> ^( FUNCALL IDENT ( logicalExpression )* ) | IDENT );
+    // /Library/WebServer/Documents/calc/Formula.g:285:1: funOrIdent : ( ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' -> ^( FUNCALL IDENT ( logicalExpression )* ) | IDENT );
     // $ANTLR start "funOrIdent"
     funOrIdent: function() {
         var retval = new FormulaParser.funOrIdent_return();
@@ -4752,42 +4849,42 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var IDENT162 = null;
-        var char_literal163 = null;
-        var char_literal165 = null;
-        var char_literal167 = null;
-        var IDENT168 = null;
-         var logicalExpression164 = null;
-         var logicalExpression166 = null;
+        var IDENT165 = null;
+        var char_literal166 = null;
+        var char_literal168 = null;
+        var char_literal170 = null;
+        var IDENT171 = null;
+         var logicalExpression167 = null;
+         var logicalExpression169 = null;
 
-        var IDENT162_tree=null;
-        var char_literal163_tree=null;
-        var char_literal165_tree=null;
-        var char_literal167_tree=null;
-        var IDENT168_tree=null;
+        var IDENT165_tree=null;
+        var char_literal166_tree=null;
+        var char_literal168_tree=null;
+        var char_literal170_tree=null;
+        var IDENT171_tree=null;
         var stream_IDENT=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token IDENT");
-        var stream_87=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 87");
+        var stream_90=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 90");
         var stream_88=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 88");
         var stream_89=new org.antlr.runtime.tree.RewriteRuleTokenStream(this.adaptor,"token 89");
         var stream_logicalExpression=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"rule logicalExpression");
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:279:2: ( ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' -> ^( FUNCALL IDENT ( logicalExpression )* ) | IDENT )
-            var alt50=2;
-            var LA50_0 = this.input.LA(1);
+            // /Library/WebServer/Documents/calc/Formula.g:286:2: ( ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' -> ^( FUNCALL IDENT ( logicalExpression )* ) | IDENT )
+            var alt51=2;
+            var LA51_0 = this.input.LA(1);
 
-            if ( (LA50_0==IDENT) ) {
-                var LA50_1 = this.input.LA(2);
+            if ( (LA51_0==IDENT) ) {
+                var LA51_1 = this.input.LA(2);
 
                 if ( (this.synpred1_Formula()) ) {
-                    alt50=1;
+                    alt51=1;
                 }
                 else if ( (true) ) {
-                    alt50=2;
+                    alt51=2;
                 }
                 else {
                     if (this.state.backtracking>0) {this.state.failed=true; return retval;}
                     var nvae =
-                        new org.antlr.runtime.NoViableAltException("", 50, 1, this.input);
+                        new org.antlr.runtime.NoViableAltException("", 51, 1, this.input);
 
                     throw nvae;
                 }
@@ -4795,64 +4892,64 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             else {
                 if (this.state.backtracking>0) {this.state.failed=true; return retval;}
                 var nvae =
-                    new org.antlr.runtime.NoViableAltException("", 50, 0, this.input);
+                    new org.antlr.runtime.NoViableAltException("", 51, 0, this.input);
 
                 throw nvae;
             }
-            switch (alt50) {
+            switch (alt51) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:279:4: ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')'
-                    IDENT162=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_funOrIdent1763); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT162);
+                    // /Library/WebServer/Documents/calc/Formula.g:286:4: ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )=> IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')'
+                    IDENT165=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_funOrIdent1801); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_IDENT.add(IDENT165);
 
-                    char_literal163=this.match(this.input,87,FormulaParser.FOLLOW_87_in_funOrIdent1765); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_87.add(char_literal163);
+                    char_literal166=this.match(this.input,88,FormulaParser.FOLLOW_88_in_funOrIdent1803); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_88.add(char_literal166);
 
-                    // /Library/WebServer/Documents/calc/Formula.g:279:79: ( logicalExpression ( ',' logicalExpression )* )?
-                    var alt49=2;
-                    var LA49_0 = this.input.LA(1);
+                    // /Library/WebServer/Documents/calc/Formula.g:286:79: ( logicalExpression ( ',' logicalExpression )* )?
+                    var alt50=2;
+                    var LA50_0 = this.input.LA(1);
 
-                    if ( (LA49_0==IDENT||LA49_0==PRIMITIVE||LA49_0==MINUS||(LA49_0>=NOT && LA49_0<=LARR)||(LA49_0>=INTEGER && LA49_0<=FALSE)||LA49_0==87||LA49_0==91) ) {
-                        alt49=1;
+                    if ( (LA50_0==IDENT||LA50_0==PRIMITIVE||LA50_0==MINUS||(LA50_0>=NOT && LA50_0<=LARR)||(LA50_0>=INTEGER && LA50_0<=FALSE)||LA50_0==88||LA50_0==92) ) {
+                        alt50=1;
                     }
-                    switch (alt49) {
+                    switch (alt50) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:279:81: logicalExpression ( ',' logicalExpression )*
-                            this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_funOrIdent1769);
-                            logicalExpression164=this.logicalExpression();
+                            // /Library/WebServer/Documents/calc/Formula.g:286:81: logicalExpression ( ',' logicalExpression )*
+                            this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_funOrIdent1807);
+                            logicalExpression167=this.logicalExpression();
 
                             this.state._fsp--;
                             if (this.state.failed) return retval;
-                            if ( this.state.backtracking===0 ) stream_logicalExpression.add(logicalExpression164.getTree());
-                            // /Library/WebServer/Documents/calc/Formula.g:279:99: ( ',' logicalExpression )*
-                            loop48:
+                            if ( this.state.backtracking===0 ) stream_logicalExpression.add(logicalExpression167.getTree());
+                            // /Library/WebServer/Documents/calc/Formula.g:286:99: ( ',' logicalExpression )*
+                            loop49:
                             do {
-                                var alt48=2;
-                                var LA48_0 = this.input.LA(1);
+                                var alt49=2;
+                                var LA49_0 = this.input.LA(1);
 
-                                if ( (LA48_0==88) ) {
-                                    alt48=1;
+                                if ( (LA49_0==89) ) {
+                                    alt49=1;
                                 }
 
 
-                                switch (alt48) {
+                                switch (alt49) {
                                 case 1 :
-                                    // /Library/WebServer/Documents/calc/Formula.g:279:100: ',' logicalExpression
-                                    char_literal165=this.match(this.input,88,FormulaParser.FOLLOW_88_in_funOrIdent1772); if (this.state.failed) return retval; 
-                                    if ( this.state.backtracking===0 ) stream_88.add(char_literal165);
+                                    // /Library/WebServer/Documents/calc/Formula.g:286:100: ',' logicalExpression
+                                    char_literal168=this.match(this.input,89,FormulaParser.FOLLOW_89_in_funOrIdent1810); if (this.state.failed) return retval; 
+                                    if ( this.state.backtracking===0 ) stream_89.add(char_literal168);
 
-                                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_funOrIdent1774);
-                                    logicalExpression166=this.logicalExpression();
+                                    this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_funOrIdent1812);
+                                    logicalExpression169=this.logicalExpression();
 
                                     this.state._fsp--;
                                     if (this.state.failed) return retval;
-                                    if ( this.state.backtracking===0 ) stream_logicalExpression.add(logicalExpression166.getTree());
+                                    if ( this.state.backtracking===0 ) stream_logicalExpression.add(logicalExpression169.getTree());
 
 
                                     break;
 
                                 default :
-                                    break loop48;
+                                    break loop49;
                                 }
                             } while (true);
 
@@ -4862,8 +4959,8 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     }
 
-                    char_literal167=this.match(this.input,89,FormulaParser.FOLLOW_89_in_funOrIdent1781); if (this.state.failed) return retval; 
-                    if ( this.state.backtracking===0 ) stream_89.add(char_literal167);
+                    char_literal170=this.match(this.input,90,FormulaParser.FOLLOW_90_in_funOrIdent1819); if (this.state.failed) return retval; 
+                    if ( this.state.backtracking===0 ) stream_90.add(char_literal170);
 
 
 
@@ -4878,15 +4975,15 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                     var stream_retval=new org.antlr.runtime.tree.RewriteRuleSubtreeStream(this.adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = this.adaptor.nil();
-                    // 279:131: -> ^( FUNCALL IDENT ( logicalExpression )* )
+                    // 286:131: -> ^( FUNCALL IDENT ( logicalExpression )* )
                     {
-                        // /Library/WebServer/Documents/calc/Formula.g:279:134: ^( FUNCALL IDENT ( logicalExpression )* )
+                        // /Library/WebServer/Documents/calc/Formula.g:286:134: ^( FUNCALL IDENT ( logicalExpression )* )
                         {
                         var root_1 = this.adaptor.nil();
                         root_1 = this.adaptor.becomeRoot(this.adaptor.create(FUNCALL, "FUNCALL"), root_1);
 
                         this.adaptor.addChild(root_1, stream_IDENT.nextNode());
-                        // /Library/WebServer/Documents/calc/Formula.g:279:150: ( logicalExpression )*
+                        // /Library/WebServer/Documents/calc/Formula.g:286:150: ( logicalExpression )*
                         while ( stream_logicalExpression.hasNext() ) {
                             this.adaptor.addChild(root_1, stream_logicalExpression.nextTree());
 
@@ -4902,13 +4999,13 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
                     break;
                 case 2 :
-                    // /Library/WebServer/Documents/calc/Formula.g:280:5: IDENT
+                    // /Library/WebServer/Documents/calc/Formula.g:287:5: IDENT
                     root_0 = this.adaptor.nil();
 
-                    IDENT168=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_funOrIdent1798); if (this.state.failed) return retval;
+                    IDENT171=this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_funOrIdent1836); if (this.state.failed) return retval;
                     if ( this.state.backtracking===0 ) {
-                    IDENT168_tree = this.adaptor.create(IDENT168);
-                    this.adaptor.addChild(root_0, IDENT168_tree);
+                    IDENT171_tree = this.adaptor.create(IDENT171);
+                    this.adaptor.addChild(root_0, IDENT171_tree);
                     }
 
 
@@ -4948,7 +5045,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
         return;
     })(),
 
-    // /Library/WebServer/Documents/calc/Formula.g:288:1: primitive : PRIMITIVE ;
+    // /Library/WebServer/Documents/calc/Formula.g:295:1: primitive : PRIMITIVE ;
     // $ANTLR start "primitive"
     primitive: function() {
         var retval = new FormulaParser.primitive_return();
@@ -4956,19 +5053,19 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         var root_0 = null;
 
-        var PRIMITIVE169 = null;
+        var PRIMITIVE172 = null;
 
-        var PRIMITIVE169_tree=null;
+        var PRIMITIVE172_tree=null;
 
         try {
-            // /Library/WebServer/Documents/calc/Formula.g:289:2: ( PRIMITIVE )
-            // /Library/WebServer/Documents/calc/Formula.g:289:4: PRIMITIVE
+            // /Library/WebServer/Documents/calc/Formula.g:296:2: ( PRIMITIVE )
+            // /Library/WebServer/Documents/calc/Formula.g:296:4: PRIMITIVE
             root_0 = this.adaptor.nil();
 
-            PRIMITIVE169=this.match(this.input,PRIMITIVE,FormulaParser.FOLLOW_PRIMITIVE_in_primitive1854); if (this.state.failed) return retval;
+            PRIMITIVE172=this.match(this.input,PRIMITIVE,FormulaParser.FOLLOW_PRIMITIVE_in_primitive1892); if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) {
-            PRIMITIVE169_tree = this.adaptor.create(PRIMITIVE169);
-            this.adaptor.addChild(root_0, PRIMITIVE169_tree);
+            PRIMITIVE172_tree = this.adaptor.create(PRIMITIVE172);
+            this.adaptor.addChild(root_0, PRIMITIVE172_tree);
             }
 
 
@@ -4997,41 +5094,41 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
     // $ANTLR start "synpred1_Formula"
     synpred1_Formula_fragment: function() {
-        // /Library/WebServer/Documents/calc/Formula.g:279:4: ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )
-        // /Library/WebServer/Documents/calc/Formula.g:279:5: IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')'
-        this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_synpred1_Formula1742); if (this.state.failed) return ;
-        this.match(this.input,87,FormulaParser.FOLLOW_87_in_synpred1_Formula1744); if (this.state.failed) return ;
-        // /Library/WebServer/Documents/calc/Formula.g:279:15: ( logicalExpression ( ',' logicalExpression )* )?
-        var alt52=2;
-        var LA52_0 = this.input.LA(1);
+        // /Library/WebServer/Documents/calc/Formula.g:286:4: ( IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')' )
+        // /Library/WebServer/Documents/calc/Formula.g:286:5: IDENT '(' ( logicalExpression ( ',' logicalExpression )* )? ')'
+        this.match(this.input,IDENT,FormulaParser.FOLLOW_IDENT_in_synpred1_Formula1780); if (this.state.failed) return ;
+        this.match(this.input,88,FormulaParser.FOLLOW_88_in_synpred1_Formula1782); if (this.state.failed) return ;
+        // /Library/WebServer/Documents/calc/Formula.g:286:15: ( logicalExpression ( ',' logicalExpression )* )?
+        var alt53=2;
+        var LA53_0 = this.input.LA(1);
 
-        if ( (LA52_0==IDENT||LA52_0==PRIMITIVE||LA52_0==MINUS||(LA52_0>=NOT && LA52_0<=LARR)||(LA52_0>=INTEGER && LA52_0<=FALSE)||LA52_0==87||LA52_0==91) ) {
-            alt52=1;
+        if ( (LA53_0==IDENT||LA53_0==PRIMITIVE||LA53_0==MINUS||(LA53_0>=NOT && LA53_0<=LARR)||(LA53_0>=INTEGER && LA53_0<=FALSE)||LA53_0==88||LA53_0==92) ) {
+            alt53=1;
         }
-        switch (alt52) {
+        switch (alt53) {
             case 1 :
-                // /Library/WebServer/Documents/calc/Formula.g:279:17: logicalExpression ( ',' logicalExpression )*
-                this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_synpred1_Formula1748);
+                // /Library/WebServer/Documents/calc/Formula.g:286:17: logicalExpression ( ',' logicalExpression )*
+                this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_synpred1_Formula1786);
                 this.logicalExpression();
 
                 this.state._fsp--;
                 if (this.state.failed) return ;
-                // /Library/WebServer/Documents/calc/Formula.g:279:35: ( ',' logicalExpression )*
-                loop51:
+                // /Library/WebServer/Documents/calc/Formula.g:286:35: ( ',' logicalExpression )*
+                loop52:
                 do {
-                    var alt51=2;
-                    var LA51_0 = this.input.LA(1);
+                    var alt52=2;
+                    var LA52_0 = this.input.LA(1);
 
-                    if ( (LA51_0==88) ) {
-                        alt51=1;
+                    if ( (LA52_0==89) ) {
+                        alt52=1;
                     }
 
 
-                    switch (alt51) {
+                    switch (alt52) {
                     case 1 :
-                        // /Library/WebServer/Documents/calc/Formula.g:279:36: ',' logicalExpression
-                        this.match(this.input,88,FormulaParser.FOLLOW_88_in_synpred1_Formula1751); if (this.state.failed) return ;
-                        this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_synpred1_Formula1753);
+                        // /Library/WebServer/Documents/calc/Formula.g:286:36: ',' logicalExpression
+                        this.match(this.input,89,FormulaParser.FOLLOW_89_in_synpred1_Formula1789); if (this.state.failed) return ;
+                        this.pushFollow(FormulaParser.FOLLOW_logicalExpression_in_synpred1_Formula1791);
                         this.logicalExpression();
 
                         this.state._fsp--;
@@ -5041,7 +5138,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                         break;
 
                     default :
-                        break loop51;
+                        break loop52;
                     }
                 } while (true);
 
@@ -5051,7 +5148,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
         }
 
-        this.match(this.input,89,FormulaParser.FOLLOW_89_in_synpred1_Formula1760); if (this.state.failed) return ;
+        this.match(this.input,90,FormulaParser.FOLLOW_90_in_synpred1_Formula1798); if (this.state.failed) return ;
 
 
     },
@@ -5088,9 +5185,9 @@ org.antlr.lang.augmentObject(FormulaParser, {
     "\u0035\u0001\uffff\u0001\u0021\u0001\u0036\u0001\u0015\u0002\uffff\u0002"+
     "\u0035\u0002\u0036\u0002\u0035\u0002\u0036",
     DFA5_maxS:
-        "\u0001\u005b\u0002\u005a\u0002\uffff\u0001\u0035\u0003\uffff\u0001"+
-    "\u005b\u0001\uffff\u0001\u0023\u0001\u0059\u0001\u005a\u0002\uffff\u0002"+
-    "\u005b\u0002\u0059\u0002\u005b\u0002\u0059",
+        "\u0001\u005c\u0002\u005b\u0002\uffff\u0001\u0035\u0003\uffff\u0001"+
+    "\u005c\u0001\uffff\u0001\u0023\u0001\u005a\u0001\u005b\u0002\uffff\u0002"+
+    "\u005c\u0002\u005a\u0002\u005c\u0002\u005a",
     DFA5_acceptS:
         "\u0003\uffff\u0001\u0002\u0001\u0003\u0001\uffff\u0001\u0006\u0001"+
     "\u0007\u0001\u0008\u0001\uffff\u0001\u0001\u0003\uffff\u0001\u0004\u0001"+
@@ -5101,13 +5198,13 @@ org.antlr.lang.augmentObject(FormulaParser, {
             "\u0001\u0004\u0003\uffff\u0001\u0005\u000b\uffff\u0001\u0006"+
             "\u0005\uffff\u0001\u0007\u0002\uffff\u0001\u0008\u0001\u0001"+
             "\u0001\uffff\u0001\u0002\u0009\uffff\u0001\u0003\u0004\uffff"+
-            "\u0002\u0003\u0001\uffff\u0004\u0003\u000a\uffff\u0001\u0003"+
+            "\u0002\u0003\u0001\uffff\u0004\u0003\u000b\uffff\u0001\u0003"+
             "\u0003\uffff\u0001\u0003",
             "\u0001\u0003\u0020\uffff\u0001\u0003\u0001\uffff\u0002\u0003"+
-            "\u0001\uffff\u000b\u0003\u0011\uffff\u0001\u0009\u0002\uffff"+
+            "\u0001\uffff\u000b\u0003\u0012\uffff\u0001\u0009\u0002\uffff"+
             "\u0001\u000a",
             "\u0001\u0003\u0020\uffff\u0001\u0003\u0001\uffff\u0002\u0003"+
-            "\u0001\uffff\u000b\u0003\u0014\uffff\u0001\u000a",
+            "\u0001\uffff\u000b\u0003\u0015\uffff\u0001\u000a",
             "",
             "",
             "\u0001\u000b",
@@ -5115,36 +5212,36 @@ org.antlr.lang.augmentObject(FormulaParser, {
             "",
             "",
             "\u0001\u000c\u0001\uffff\u0001\u0003\u0009\uffff\u0001\u0003"+
-            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000a\uffff"+
+            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000b\uffff"+
             "\u0001\u0003\u0001\uffff\u0001\u000d\u0001\uffff\u0001\u0003",
             "",
             "\u0001\u000e\u0001\uffff\u0001\u000f",
             "\u0001\u0010\u0001\uffff\u0002\u0003\u0001\uffff\u000b\u0003"+
-            "\u0011\uffff\u0001\u0003\u0001\u0011\u0001\u000d",
+            "\u0012\uffff\u0001\u0003\u0001\u0011\u0001\u000d",
             "\u0001\u0003\u0020\uffff\u0001\u0003\u0001\uffff\u0002\u0003"+
-            "\u0001\uffff\u000b\u0003\u0014\uffff\u0001\u000a",
+            "\u0001\uffff\u000b\u0003\u0015\uffff\u0001\u000a",
             "",
             "",
             "\u0001\u0003\u0001\uffff\u0001\u0003\u0009\uffff\u0001\u0003"+
             "\u0004\uffff\u0002\u0003\u0001\uffff\u0002\u0012\u0002\u0003"+
-            "\u000a\uffff\u0001\u0003\u0003\uffff\u0001\u0003",
+            "\u000b\uffff\u0001\u0003\u0003\uffff\u0001\u0003",
             "\u0001\u0013\u0001\uffff\u0001\u0003\u0009\uffff\u0001\u0003"+
-            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000a\uffff"+
+            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000b\uffff"+
             "\u0001\u0003\u0003\uffff\u0001\u0003",
             "\u0001\u0003\u0001\uffff\u0002\u0003\u0001\uffff\u000b\u0003"+
-            "\u0012\uffff\u0001\u0014\u0001\u000d",
+            "\u0013\uffff\u0001\u0014\u0001\u000d",
             "\u0001\u0015\u0001\uffff\u0002\u0003\u0001\uffff\u000b\u0003"+
-            "\u0011\uffff\u0001\u0003\u0001\u0011\u0001\u000d",
+            "\u0012\uffff\u0001\u0003\u0001\u0011\u0001\u000d",
             "\u0001\u0016\u0001\uffff\u0001\u0003\u0009\uffff\u0001\u0003"+
-            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000a\uffff"+
+            "\u0004\uffff\u0002\u0003\u0001\uffff\u0004\u0003\u000b\uffff"+
             "\u0001\u0003\u0003\uffff\u0001\u0003",
             "\u0001\u0003\u0001\uffff\u0001\u0003\u0009\uffff\u0001\u0003"+
             "\u0004\uffff\u0002\u0003\u0001\uffff\u0002\u0017\u0002\u0003"+
-            "\u000a\uffff\u0001\u0003\u0003\uffff\u0001\u0003",
+            "\u000b\uffff\u0001\u0003\u0003\uffff\u0001\u0003",
             "\u0001\u0015\u0001\uffff\u0002\u0003\u0001\uffff\u000b\u0003"+
-            "\u0011\uffff\u0003\u0003",
+            "\u0012\uffff\u0003\u0003",
             "\u0001\u0003\u0001\uffff\u0002\u0003\u0001\uffff\u000b\u0003"+
-            "\u0012\uffff\u0001\u0014\u0001\u000d"
+            "\u0013\uffff\u0001\u0014\u0001\u000d"
     ]
 });
 
@@ -5194,11 +5291,11 @@ org.antlr.lang.extend(FormulaParser.DFA5, org.antlr.runtime.DFA, {
 
 // public class variables
 org.antlr.lang.augmentObject(FormulaParser, {
-    tokenNames: ["<invalid>", "<EOR>", "<DOWN>", "<UP>", "NEGATE", "ASSIGN", "FUNCALL", "MATERIAL", "UNIT", "POWER", "DEFAULTS", "PARAMS", "UNITCLUMP", "ARRAY", "LINES", "WHILE", "IFTHENELSE", "ELSE", "FOR", "FORIN", "FUNCTION", "NEWLINE", "W", "H", "I", "L", "E", "WHILESTATEMENT", "F", "O", "R", "FORSTATEMENT", "M", "FROMSTATEMENT", "N", "INSTATEMENT", "T", "TOSTATEMENT", "B", "Y", "BYSTATEMENT", "P", "LOOPSTATEMENT", "IFSTATEMENT", "THENSTATEMENT", "S", "ELSESTATEMENT", "U", "C", "FUNCTIONSTATEMENT", "D", "ENDBLOCK", "RETURNSTATEMENT", "IDENT", "EQUALS", "PRIMITIVE", "OR", "AND", "A", "NOTEQUALS", "LT", "LTEQ", "GT", "GTEQ", "PLUS", "MINUS", "MULT", "DIV", "MOD", "POW", "NOT", "LARR", "RARR", "INTEGER", "FLOAT", "TRUE", "FALSE", "COMMENT", "LINE_COMMENT", "WS", "G", "J", "K", "Q", "V", "X", "Z", "'('", "','", "')'", "'<-'", "'{'", "'}'"],
-    FOLLOW_NEWLINE_in_lines112: new org.antlr.runtime.BitSet([0x88200000, 0x00B20800,0x08801EC2, 0x00000000]),
+    tokenNames: ["<invalid>", "<EOR>", "<DOWN>", "<UP>", "NEGATE", "ASSIGN", "FUNCALL", "MATERIAL", "UNIT", "POWER", "DEFAULTS", "PARAMS", "UNITCLUMP", "ARRAY", "LINES", "WHILE", "IFTHENELSE", "ELSE", "FOR", "FORIN", "FUNCTION", "NEWLINE", "W", "H", "I", "L", "E", "WHILESTATEMENT", "F", "O", "R", "FORSTATEMENT", "M", "FROMSTATEMENT", "N", "INSTATEMENT", "T", "TOSTATEMENT", "B", "Y", "BYSTATEMENT", "P", "LOOPSTATEMENT", "IFSTATEMENT", "THENSTATEMENT", "S", "ELSESTATEMENT", "U", "C", "FUNCTIONSTATEMENT", "D", "ENDBLOCK", "RETURNSTATEMENT", "IDENT", "EQUALS", "PRIMITIVE", "OR", "AND", "A", "NOTEQUALS", "LT", "LTEQ", "GT", "GTEQ", "PLUS", "MINUS", "MULT", "DIV", "MOD", "POW", "NOT", "LARR", "RARR", "INTEGER", "FLOAT", "TRUE", "FALSE", "PER", "COMMENT", "LINE_COMMENT", "WS", "G", "J", "K", "Q", "V", "X", "Z", "'('", "','", "')'", "'<-'", "'{'", "'}'"],
+    FOLLOW_NEWLINE_in_lines112: new org.antlr.runtime.BitSet([0x88200000, 0x00B20800,0x11001EC2, 0x00000000]),
     FOLLOW_expression_in_lines116: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_lines120: new org.antlr.runtime.BitSet([0x88200000, 0x00B20800,0x08801EC2, 0x00000000]),
-    FOLLOW_EOF_in_lines123: new org.antlr.runtime.BitSet([0x88000000, 0x00B20800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_lines120: new org.antlr.runtime.BitSet([0x88200000, 0x00B20800,0x11001EC2, 0x00000000]),
+    FOLLOW_EOF_in_lines123: new org.antlr.runtime.BitSet([0x88000000, 0x00B20800,0x11001EC2, 0x00000000]),
     FOLLOW_EOF_in_lines128: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_assignment_in_expression390: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_logicalExpression_in_expression396: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
@@ -5208,168 +5305,171 @@ org.antlr.lang.augmentObject(FormulaParser, {
     FOLLOW_ifThenElse_in_expression420: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_functionDef_in_expression426: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_returnExp_in_expression432: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_RETURNSTATEMENT_in_returnExp444: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_RETURNSTATEMENT_in_returnExp444: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_returnExp447: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_expression_in_innerBlock460: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_innerBlock464: new org.antlr.runtime.BitSet([0x88200002, 0x00B20800,0x08801EC2, 0x00000000]),
-    FOLLOW_WHILESTATEMENT_in_whileLoop489: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_innerBlock464: new org.antlr.runtime.BitSet([0x88200002, 0x00B20800,0x11001EC2, 0x00000000]),
+    FOLLOW_WHILESTATEMENT_in_whileLoop489: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_whileLoop491: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_whileLoop493: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_whileLoop493: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_whileLoop496: new org.antlr.runtime.BitSet([0x00000000, 0x00080000]),
     FOLLOW_ENDBLOCK_in_whileLoop499: new org.antlr.runtime.BitSet([0x00000000, 0x00000400]),
     FOLLOW_LOOPSTATEMENT_in_whileLoop501: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_FORSTATEMENT_in_forLoop522: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
     FOLLOW_IDENT_in_forLoop524: new org.antlr.runtime.BitSet([0x00000000, 0x00000002]),
-    FOLLOW_FROMSTATEMENT_in_forLoop526: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_FROMSTATEMENT_in_forLoop526: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_forLoop528: new org.antlr.runtime.BitSet([0x00000000, 0x00000020]),
-    FOLLOW_TOSTATEMENT_in_forLoop530: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_TOSTATEMENT_in_forLoop530: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_forLoop532: new org.antlr.runtime.BitSet([0x00200000, 0x00000100]),
-    FOLLOW_BYSTATEMENT_in_forLoop535: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_BYSTATEMENT_in_forLoop535: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_forLoop537: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_forLoop541: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_forLoop541: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_forLoop544: new org.antlr.runtime.BitSet([0x00000000, 0x00080000]),
     FOLLOW_ENDBLOCK_in_forLoop547: new org.antlr.runtime.BitSet([0x00000000, 0x00000400]),
     FOLLOW_LOOPSTATEMENT_in_forLoop549: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_FORSTATEMENT_in_forInLoop577: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
     FOLLOW_IDENT_in_forInLoop579: new org.antlr.runtime.BitSet([0x00000000, 0x00000008]),
-    FOLLOW_INSTATEMENT_in_forInLoop581: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_INSTATEMENT_in_forInLoop581: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_forInLoop583: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_forInLoop585: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_forInLoop585: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_forInLoop588: new org.antlr.runtime.BitSet([0x00000000, 0x00080000]),
     FOLLOW_ENDBLOCK_in_forInLoop591: new org.antlr.runtime.BitSet([0x00000000, 0x00000400]),
     FOLLOW_LOOPSTATEMENT_in_forInLoop593: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_IFSTATEMENT_in_ifThenElse618: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_IFSTATEMENT_in_ifThenElse618: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_ifThenElse620: new org.antlr.runtime.BitSet([0x00000000, 0x00001000]),
     FOLLOW_THENSTATEMENT_in_ifThenElse622: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_ifThenElse625: new org.antlr.runtime.BitSet([0x88200000, 0x00BA4800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_ifThenElse625: new org.antlr.runtime.BitSet([0x88200000, 0x00BA4800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_ifThenElse628: new org.antlr.runtime.BitSet([0x00000000, 0x00084000]),
     FOLLOW_ELSESTATEMENT_in_ifThenElse632: new org.antlr.runtime.BitSet([0x00000000, 0x00000800]),
-    FOLLOW_IFSTATEMENT_in_ifThenElse634: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_IFSTATEMENT_in_ifThenElse634: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_ifThenElse636: new org.antlr.runtime.BitSet([0x00000000, 0x00001000]),
     FOLLOW_THENSTATEMENT_in_ifThenElse638: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_ifThenElse640: new org.antlr.runtime.BitSet([0x88200000, 0x00BA4800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_ifThenElse640: new org.antlr.runtime.BitSet([0x88200000, 0x00BA4800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_ifThenElse643: new org.antlr.runtime.BitSet([0x00000000, 0x00084000]),
     FOLLOW_ELSESTATEMENT_in_ifThenElse648: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_ifThenElse650: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x08801EC2, 0x00000000]),
+    FOLLOW_NEWLINE_in_ifThenElse650: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_ifThenElse653: new org.antlr.runtime.BitSet([0x00000000, 0x00080000]),
     FOLLOW_ENDBLOCK_in_ifThenElse657: new org.antlr.runtime.BitSet([0x00000000, 0x00000800]),
     FOLLOW_IFSTATEMENT_in_ifThenElse659: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_FUNCTIONSTATEMENT_in_functionDef690: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
-    FOLLOW_IDENT_in_functionDef692: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00800000, 0x00000000]),
-    FOLLOW_87_in_functionDef694: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x02000000, 0x00000000]),
-    FOLLOW_IDENT_in_functionDef697: new org.antlr.runtime.BitSet([0x00000000, 0x00400000,0x03000000, 0x00000000]),
+    FOLLOW_IDENT_in_functionDef692: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000000, 0x00000000]),
+    FOLLOW_88_in_functionDef694: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x04000000, 0x00000000]),
+    FOLLOW_IDENT_in_functionDef697: new org.antlr.runtime.BitSet([0x00000000, 0x00400000,0x06000000, 0x00000000]),
     FOLLOW_EQUALS_in_functionDef701: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
-    FOLLOW_number_in_functionDef703: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_functionDef708: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
-    FOLLOW_IDENT_in_functionDef710: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_functionDef717: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
+    FOLLOW_number_in_functionDef703: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_functionDef708: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
+    FOLLOW_IDENT_in_functionDef710: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_functionDef717: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
     FOLLOW_IDENT_in_functionDef719: new org.antlr.runtime.BitSet([0x00000000, 0x00400000]),
     FOLLOW_EQUALS_in_functionDef721: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
-    FOLLOW_number_in_functionDef723: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_89_in_functionDef730: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
-    FOLLOW_NEWLINE_in_functionDef732: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x08801EC2, 0x00000000]),
+    FOLLOW_number_in_functionDef723: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_90_in_functionDef730: new org.antlr.runtime.BitSet([0x00200000, 0x00000000]),
+    FOLLOW_NEWLINE_in_functionDef732: new org.antlr.runtime.BitSet([0x88200000, 0x00BA0800,0x11001EC2, 0x00000000]),
     FOLLOW_innerBlock_in_functionDef735: new org.antlr.runtime.BitSet([0x00000000, 0x00080000]),
     FOLLOW_ENDBLOCK_in_functionDef738: new org.antlr.runtime.BitSet([0x00000000, 0x00020000]),
     FOLLOW_FUNCTIONSTATEMENT_in_functionDef740: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_IDENT_in_assignment775: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00800000, 0x00000000]),
-    FOLLOW_87_in_assignment777: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x02000000, 0x00000000]),
-    FOLLOW_IDENT_in_assignment780: new org.antlr.runtime.BitSet([0x00000000, 0x00400000,0x03000000, 0x00000000]),
+    FOLLOW_IDENT_in_assignment775: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000000, 0x00000000]),
+    FOLLOW_88_in_assignment777: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x04000000, 0x00000000]),
+    FOLLOW_IDENT_in_assignment780: new org.antlr.runtime.BitSet([0x00000000, 0x00400000,0x06000000, 0x00000000]),
     FOLLOW_EQUALS_in_assignment784: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
-    FOLLOW_number_in_assignment786: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_assignment791: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
-    FOLLOW_IDENT_in_assignment793: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_assignment800: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
+    FOLLOW_number_in_assignment786: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_assignment791: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
+    FOLLOW_IDENT_in_assignment793: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_assignment800: new org.antlr.runtime.BitSet([0x00000000, 0x00200000]),
     FOLLOW_IDENT_in_assignment802: new org.antlr.runtime.BitSet([0x00000000, 0x00400000]),
     FOLLOW_EQUALS_in_assignment804: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
-    FOLLOW_number_in_assignment806: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_89_in_assignment813: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x04000000, 0x00000000]),
-    FOLLOW_90_in_assignment815: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_number_in_assignment806: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_90_in_assignment813: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x08000000, 0x00000000]),
+    FOLLOW_91_in_assignment815: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_assignment817: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_PRIMITIVE_in_assignment845: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x04000000, 0x00000000]),
-    FOLLOW_IDENT_in_assignment849: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x04000000, 0x00000000]),
-    FOLLOW_90_in_assignment853: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
+    FOLLOW_PRIMITIVE_in_assignment845: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x08000000, 0x00000000]),
+    FOLLOW_IDENT_in_assignment849: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x08000000, 0x00000000]),
+    FOLLOW_91_in_assignment853: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
     FOLLOW_logicalExpression_in_assignment855: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_booleanAndExpression_in_logicalExpression884: new org.antlr.runtime.BitSet([0x00000002, 0x01000000]),
-    FOLLOW_OR_in_logicalExpression887: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_booleanAndExpression_in_logicalExpression890: new org.antlr.runtime.BitSet([0x00000002, 0x01000000]),
-    FOLLOW_equalityExpression_in_booleanAndExpression921: new org.antlr.runtime.BitSet([0x00000002, 0x02000000]),
-    FOLLOW_AND_in_booleanAndExpression924: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_equalityExpression_in_booleanAndExpression927: new org.antlr.runtime.BitSet([0x00000002, 0x02000000]),
-    FOLLOW_relationalExpression_in_equalityExpression958: new org.antlr.runtime.BitSet([0x00000002, 0x08400000]),
-    FOLLOW_set_in_equalityExpression961: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_relationalExpression_in_equalityExpression968: new org.antlr.runtime.BitSet([0x00000002, 0x08400000]),
-    FOLLOW_additiveExpression_in_relationalExpression1010: new org.antlr.runtime.BitSet([0x00000002, 0xF0000000]),
-    FOLLOW_set_in_relationalExpression1014: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_additiveExpression_in_relationalExpression1025: new org.antlr.runtime.BitSet([0x00000002, 0xF0000000]),
-    FOLLOW_multiplicativeExpression_in_additiveExpression1068: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000003, 0x00000000]),
-    FOLLOW_set_in_additiveExpression1072: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_multiplicativeExpression_in_additiveExpression1079: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000003, 0x00000000]),
-    FOLLOW_negationExpression_in_multiplicativeExpression1109: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000001C, 0x00000000]),
-    FOLLOW_set_in_multiplicativeExpression1113: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_negationExpression_in_multiplicativeExpression1122: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000001C, 0x00000000]),
-    FOLLOW_MINUS_in_negationExpression1167: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_powerExpression_in_negationExpression1169: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_powerExpression_in_negationExpression1183: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_unaryExpression_in_powerExpression1194: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
-    FOLLOW_POW_in_powerExpression1197: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_unaryOrNegate_in_powerExpression1199: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
-    FOLLOW_unaryExpression_in_unaryOrNegate1226: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_MINUS_in_unaryOrNegate1232: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_unaryExpression_in_unaryOrNegate1234: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_NOT_in_unaryExpression1262: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_primaryExpression_in_unaryExpression1265: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_primaryExpression_in_unaryExpression1277: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_87_in_primaryExpression1308: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_primaryExpression1311: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x02000000, 0x00000000]),
-    FOLLOW_89_in_primaryExpression1313: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_value_in_primaryExpression1319: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_number_in_value1333: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_bool_in_value1338: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_funOrIdent_in_value1343: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_primitive_in_value1348: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_material_in_value1353: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_array_in_value1358: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_LARR_in_array1369: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801FC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_array1372: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000100, 0x00000000]),
-    FOLLOW_88_in_array1375: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_array1377: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000100, 0x00000000]),
-    FOLLOW_RARR_in_array1383: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_booleanAndExpression_in_logicalExpression882: new org.antlr.runtime.BitSet([0x00000002, 0x01000000]),
+    FOLLOW_OR_in_logicalExpression885: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_booleanAndExpression_in_logicalExpression888: new org.antlr.runtime.BitSet([0x00000002, 0x01000000]),
+    FOLLOW_equalityExpression_in_booleanAndExpression919: new org.antlr.runtime.BitSet([0x00000002, 0x02000000]),
+    FOLLOW_AND_in_booleanAndExpression922: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_equalityExpression_in_booleanAndExpression925: new org.antlr.runtime.BitSet([0x00000002, 0x02000000]),
+    FOLLOW_relationalExpression_in_equalityExpression956: new org.antlr.runtime.BitSet([0x00000002, 0x08400000]),
+    FOLLOW_set_in_equalityExpression959: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_relationalExpression_in_equalityExpression966: new org.antlr.runtime.BitSet([0x00000002, 0x08400000]),
+    FOLLOW_additiveExpression_in_relationalExpression1008: new org.antlr.runtime.BitSet([0x00000002, 0xF0000000]),
+    FOLLOW_set_in_relationalExpression1012: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_additiveExpression_in_relationalExpression1023: new org.antlr.runtime.BitSet([0x00000002, 0xF0000000]),
+    FOLLOW_multiplicativeExpression_in_additiveExpression1066: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000003, 0x00000000]),
+    FOLLOW_set_in_additiveExpression1070: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_multiplicativeExpression_in_additiveExpression1077: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000003, 0x00000000]),
+    FOLLOW_negationExpression_in_multiplicativeExpression1107: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000001C, 0x00000000]),
+    FOLLOW_set_in_multiplicativeExpression1111: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_negationExpression_in_multiplicativeExpression1120: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000001C, 0x00000000]),
+    FOLLOW_MINUS_in_negationExpression1165: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_powerExpression_in_negationExpression1167: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_powerExpression_in_negationExpression1181: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_unaryExpression_in_powerExpression1192: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
+    FOLLOW_POW_in_powerExpression1195: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_unaryOrNegate_in_powerExpression1197: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
+    FOLLOW_unaryExpression_in_unaryOrNegate1224: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_MINUS_in_unaryOrNegate1230: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_unaryExpression_in_unaryOrNegate1232: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_NOT_in_unaryExpression1260: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_primaryExpression_in_unaryExpression1263: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_primaryExpression_in_unaryExpression1275: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_88_in_primaryExpression1306: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_primaryExpression1309: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x04000000, 0x00000000]),
+    FOLLOW_90_in_primaryExpression1311: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_value_in_primaryExpression1317: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_number_in_value1331: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_bool_in_value1336: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_funOrIdent_in_value1341: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_primitive_in_value1346: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_material_in_value1351: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_array_in_value1356: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_LARR_in_array1367: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001FC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_array1370: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x02000100, 0x00000000]),
+    FOLLOW_89_in_array1373: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_array1375: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x02000100, 0x00000000]),
+    FOLLOW_RARR_in_array1381: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_set_in_number0: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_set_in_bool0: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_91_in_material1571: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_additiveExpression_in_material1573: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x00800200, 0x00000000]),
-    FOLLOW_unitMultiplicativeExpression_in_material1575: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x10000000, 0x00000000]),
-    FOLLOW_92_in_material1577: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_unitClump_in_unitMultiplicativeExpression1598: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000000C, 0x00000000]),
-    FOLLOW_set_in_unitMultiplicativeExpression1602: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x00800200, 0x00000000]),
-    FOLLOW_unitClump_in_unitMultiplicativeExpression1609: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000000C, 0x00000000]),
-    FOLLOW_INTEGER_in_unitClump1624: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000008, 0x00000000]),
-    FOLLOW_DIV_in_unitClump1626: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x00800200, 0x00000000]),
-    FOLLOW_unitPowerExpression_in_unitClump1629: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_unitPowerExpression_in_unitClump1645: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_unit_in_unitPowerExpression1666: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
-    FOLLOW_POW_in_unitPowerExpression1670: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000602, 0x00000000]),
-    FOLLOW_MINUS_in_unitPowerExpression1673: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
-    FOLLOW_set_in_unitPowerExpression1676: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
-    FOLLOW_IDENT_in_unit1693: new org.antlr.runtime.BitSet([0x00000002, 0x00200000]),
-    FOLLOW_IDENT_in_unit1696: new org.antlr.runtime.BitSet([0x00000002, 0x00200000]),
-    FOLLOW_87_in_unit1713: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x00800200, 0x00000000]),
-    FOLLOW_unitMultiplicativeExpression_in_unit1715: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x02000000, 0x00000000]),
-    FOLLOW_89_in_unit1717: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_IDENT_in_funOrIdent1763: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00800000, 0x00000000]),
-    FOLLOW_87_in_funOrIdent1765: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x0A801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_funOrIdent1769: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_funOrIdent1772: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_funOrIdent1774: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_89_in_funOrIdent1781: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_IDENT_in_funOrIdent1798: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_PRIMITIVE_in_primitive1854: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_IDENT_in_synpred1_Formula1742: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00800000, 0x00000000]),
-    FOLLOW_87_in_synpred1_Formula1744: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x0A801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_synpred1_Formula1748: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_88_in_synpred1_Formula1751: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x08801EC2, 0x00000000]),
-    FOLLOW_logicalExpression_in_synpred1_Formula1753: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x03000000, 0x00000000]),
-    FOLLOW_89_in_synpred1_Formula1760: new org.antlr.runtime.BitSet([0x00000002, 0x00000000])
+    FOLLOW_92_in_material1569: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_additiveExpression_in_material1571: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x01000200, 0x00000000]),
+    FOLLOW_unitMultiplicativeExpression_in_material1573: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x20000000, 0x00000000]),
+    FOLLOW_93_in_material1575: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_unitInnerMultiplicativeExpression_in_unitMultiplicativeExpression1612: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00002000, 0x00000000]),
+    FOLLOW_PER_in_unitMultiplicativeExpression1616: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x01000200, 0x00000000]),
+    FOLLOW_unitInnerMultiplicativeExpression_in_unitMultiplicativeExpression1619: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00002000, 0x00000000]),
+    FOLLOW_unitClump_in_unitInnerMultiplicativeExpression1635: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000000C, 0x00000000]),
+    FOLLOW_set_in_unitInnerMultiplicativeExpression1639: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x01000200, 0x00000000]),
+    FOLLOW_unitClump_in_unitInnerMultiplicativeExpression1646: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x0000000C, 0x00000000]),
+    FOLLOW_INTEGER_in_unitClump1662: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000008, 0x00000000]),
+    FOLLOW_DIV_in_unitClump1664: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x01000200, 0x00000000]),
+    FOLLOW_unitPowerExpression_in_unitClump1667: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_unitPowerExpression_in_unitClump1683: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_unit_in_unitPowerExpression1704: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
+    FOLLOW_POW_in_unitPowerExpression1708: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000602, 0x00000000]),
+    FOLLOW_MINUS_in_unitPowerExpression1711: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000600, 0x00000000]),
+    FOLLOW_set_in_unitPowerExpression1714: new org.antlr.runtime.BitSet([0x00000002, 0x00000000,0x00000020, 0x00000000]),
+    FOLLOW_IDENT_in_unit1731: new org.antlr.runtime.BitSet([0x00000002, 0x00200000]),
+    FOLLOW_IDENT_in_unit1734: new org.antlr.runtime.BitSet([0x00000002, 0x00200000]),
+    FOLLOW_88_in_unit1751: new org.antlr.runtime.BitSet([0x00000000, 0x00200000,0x01000200, 0x00000000]),
+    FOLLOW_unitMultiplicativeExpression_in_unit1753: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x04000000, 0x00000000]),
+    FOLLOW_90_in_unit1755: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_IDENT_in_funOrIdent1801: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000000, 0x00000000]),
+    FOLLOW_88_in_funOrIdent1803: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x15001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_funOrIdent1807: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_funOrIdent1810: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_funOrIdent1812: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_90_in_funOrIdent1819: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_IDENT_in_funOrIdent1836: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_PRIMITIVE_in_primitive1892: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_IDENT_in_synpred1_Formula1780: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x01000000, 0x00000000]),
+    FOLLOW_88_in_synpred1_Formula1782: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x15001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_synpred1_Formula1786: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_89_in_synpred1_Formula1789: new org.antlr.runtime.BitSet([0x00000000, 0x00A00000,0x11001EC2, 0x00000000]),
+    FOLLOW_logicalExpression_in_synpred1_Formula1791: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x06000000, 0x00000000]),
+    FOLLOW_90_in_synpred1_Formula1798: new org.antlr.runtime.BitSet([0x00000002, 0x00000000])
 });
 
 })();
