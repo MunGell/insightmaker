@@ -327,8 +327,8 @@ function innerRunSimulation(silent) {
 }
 
 function createUnitStore(u) {
-	if (u.toLowerCase() == "unitless") {
-		return new UnitStore([""],[1]);
+	if (u.trim() == "" || u.trim().toLowerCase() == "unitless") {
+		return undefined;
 	}
 	return simpleEquation("{1 " + u + "}").units;
 }
@@ -481,6 +481,8 @@ function finishSim(res, displayInformation) {
 				agentKeys.push(key);
 				if(res[id].dataMode == "float"){
 					renderers.push(commaStr);
+				}else if(res[id].dataMode == "agents"){
+					renderers.push(function(){return "Agent Population";});
 				}else{
 					renderers.push(undefined);
 				}
@@ -660,7 +662,7 @@ function getDNA(cell){
 		}
 		for (var i = 0; i < data.length; i++) {
 			var b = data[i].split(",");
-			inp.push(new Material(sn(Ext.String.trim(b[0])), myU.clone()));
+			inp.push(new Material(sn(Ext.String.trim(b[0])), myU?myU.clone():undefined));
 			out.push(new Material(sn(Ext.String.trim(b[1]))));
 		}
 		dna.inputs = inp;
@@ -671,7 +673,7 @@ function getDNA(cell){
 		if (type != "Transition" && type != "Action") {
 			var u = cell.getAttribute("Units");
 			try {
-				if (type != "Flow" || u.toLowerCase() != "unitless") {
+				if (type != "Flow" || (u.trim() != "" && u.trim().toLowerCase() != "unitless")) {
 					dna.units = createUnitStore(u);
 				} else {
 					dna.units = new UnitStore([timeUnits],[-1]);

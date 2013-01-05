@@ -236,11 +236,11 @@ Ext.EquationWindow = function(args) {
 	["Unique", "Unique(##Vector$$)", "Returns a vector with duplicates removed.", ["Unique(<<1, 1, 2, 3>>)", "<<1, 2, 3>>"]],
 	["Union", "Union(##Vector 1$$, ##Vector 2$$)", "Returns the combined elements of two vectors (with duplicates removed).", ["Union(<<1, 2>>, <<2, 3>>)", "<<1, 2, 3>>"]],
 	["Intersection", "Intersection(##Vector 1$$, ##Vector 2$$)", "Returns the elements that exist in both vectors.", ["Intersection(<<1, 2>>, <<2, 3>>)", "<<2>>"]],
-	["Difference", "Difference(##Vector 1$$, ##Vector 2$$)", "Returns the elements that exist in only one of the vectors.", ["Difference(<<1, 2>>, <<2, 3>>)", "<<1, 3>>"]],
+	["Difference", "Difference(##Vector 1$$, ##Vector 2$$)", "Returns the elements that exist in only one of the two vectors.", ["Difference(<<1, 2>>, <<2, 3>>)", "<<1, 3>>"]],
 	["Sort", "Sort(##Vector$$)", "Sorts a vector from smallest value to largest value.", ["Sort(<<1, 3, 2>>)", "<<1, 2, 3>>"]],
 	["Reverse", "Reverse(##Vector$$)", "Reverses the ordering of elements in a vector.", ["Reverse(<<1, 2, 3>>)", "<<3, 2, 1>>"]],
-	["Select", "Select(##Vector$$, ##Items$$)", "Subsets a vector. Items can be a single index (starting with index 1) or a vector of true false values.", ["Select(<<1, 4, 9>>, 2)", "4"]],
-	["Sample", "Sample(##Vector$$, ##Sample Size$$, ##Allow Repeats$$)", "Takes a random sample from a vector. Allow repeats is false by default.", ["Sample(<<1, 4, 9>>, 2)", "<<9, 1>>"]],
+	["Select", "Select(##Vector$$, ##Items$$)", "Subsets a vector. Items can be a single index (starting with index 1) or a vector of true/false values of equal length to the Vector.", ["Select(<<1, 4, 9>>, 2)", "4"]],
+	["Sample", "Sample(##Vector$$, ##Sample Size$$, ##Allow Repeats=False$$)", "Takes a random sample from a vector. Allow Repeats specified if the same index can be sampled multiple time and is false by default.", ["Sample(<<1, 4, 9>>, 2)", "<<9, 1>>"]],
 	["IndexOf", "IndexOf(##Vector$$, ##Needle$$)", "Returns the position of the needle within the vector (starting with index 1). If the needle is not found, 0 is returned.", ["IndexOf(<<1, 4, 9>>, 9)", "3"]],
 	["Contains", "Contains(##Vector$$, ##Needle$$)", "Returns true if the needle is in the vector. Otherwise returns false.", ["Contains(<<1, 4, 9>>, 9)", "true"]],
 	["Repeat", "Repeat(##x^2$$, ##Times$$)", "Creates a new vector by repeating a function a specified expression a number of times. <i>x</i> refers to the current index.", ["Repeat(x+1, 3)", "<<2, 3, 4>>"]],
@@ -251,7 +251,7 @@ Ext.EquationWindow = function(args) {
 	[["If Then Else", "IfThenElse(##Test Condition$$, ##Value if True$$, ##Value if False$$)", "Tests a condition and returns one value if the condition is true and another value if the condition is false.", ["IfThenElse(20 > 10, 7, 5)", "7"]],
 	["Pulse", "Pulse(##Time$$, ##Height$$, ##Width=0$$, ##Repeat=-1$$)", "Creates a pulse input at the specified time with the specified Height and Width. Height defaults to 1 and Width defaults to 0. Repeat is optional and will create a pulse train if specified.", "Pulse({10 Years}, 5, 2)"],
 	["Step", "Step(##Start$$, ##Height=1$$)", "Creates an input that is initially set to 0 and after the time of Start is set to Height. Height defaults to 1.", "Step({10 Years}, 5)"],
-	["Ramp", "Ramp(##Start$$, ##Finish$$, ##Height=1$$)", "Creates a ramp input which moves linearly from 0 to Height between the Start and Finish times. Before Start, the value is 0; after Finish the value is Height. Height defaults to 1.", "Ramp({10 Year}, {20 Years}, 5)"],
+	["Ramp", "Ramp(##Start$$, ##Finish$$, ##Height=1$$)", "Creates a ramp input which moves linearly from 0 to Height between the Start and Finish times. Before Start, the value is 0; after Finish, the value is Height. Height defaults to 1.", "Ramp({10 Year}, {20 Years}, 5)"],
 	["Stop", "Stop()", "Immediately terminates the simulation. Often used in combination with an IfThenElse statement.", "IfThenElse(rand < 0.01, Stop(), 0)"]
 	]]
 	

@@ -33,18 +33,6 @@ varBank["pi"] = new Material(3.14159265358979323846264338);
 varBank["phi"] = new Material(1.61803399);
 
 
-if(! Primitive){
-	var Primitive = function(){
-		this.v = new Material(0);
-		this.value = function(){
-			return this.v.fullClone();
-		};
-		this.setValue = function(newValue){
-			this.v = newValue;
-		};
-	}
-	primitiveBank["test"] = new Primitive();
-}
 if(! Agent){
 	var Agent = function(){}
 }
@@ -146,6 +134,28 @@ Vector.prototype.equals = function(vec){
 		}
 	}
 	return true;
+}
+
+
+if(! Primitive){
+	var Primitive = function(n){
+		this.v = n;
+	}
+	Primitive.prototype.value = function(){
+		return this.v.fullClone();
+	};
+	Primitive.prototype.setValue = function(newValue){
+		this.v = newValue;
+		return newValue;
+	};
+	Primitive.prototype.toNum = function(){
+		return this.v.fullClone();
+	};
+	Primitive.prototype.toString = function(){
+		return "Primitive Reference";
+	};
+	primitiveBank["test"] = new Primitive(new Material(3));
+	primitiveBank["test vector"] = new Primitive(new Vector([new Material(1), new Material(2), new Material(3)]));	
 }
 
 function strictEquals(a,b){
@@ -297,6 +307,9 @@ function negate(x){
 	
 	if((typeof x == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
+	}
+	if((x instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
 	}
 	
 	return new Material(fn["-"](x.value), x.units?x.units.clone():undefined);
@@ -478,11 +491,13 @@ funcEvalMap["GTEQ"] = function(node, scope) {
 
 function greaterThanEq(lhs, rhs){
 	
+	
 	if(lhs instanceof Vector){
 		return lhs.combine(rhs, greaterThanEq, false);
 	}else if(rhs instanceof Vector){
 		return rhs.combine(lhs, greaterThanEq, true);
 	}
+	
 	
 	if (! unitsEqual(lhs.units, rhs.units)) {
 		var scale = convertUnits(rhs.units, lhs.units);
@@ -509,6 +524,9 @@ function plus(lhs, rhs){
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
+	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -540,6 +558,9 @@ function minus(lhs, rhs){
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
+	}
 	
 	if (! unitsEqual(lhs.units, rhs.units)) {
 		var scale = convertUnits(rhs.units, lhs.units);
@@ -568,6 +589,10 @@ function mult(lhs, rhs){
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
+	}
+	
 	
 	var x = new Material(fn["*"](lhs.value, rhs.value));
 	if(lhs.units && rhs.units){
@@ -597,6 +622,9 @@ function div(lhs, rhs){
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
+	}
 	
 	var x = new Material(fn["/"](lhs.value, rhs.value));
 	if(lhs.units && rhs.units){
@@ -607,6 +635,9 @@ function div(lhs, rhs){
 		x.units = lhs.units.clone();
 	}else if(rhs.units){
 		x.units = rhs.units.clone();
+		for(var i = 0; i < x.units.exponents.length; i++){
+			x.units.exponents[i] = -x.units.exponents[i];
+		}
 	}
 	
 	return x;
@@ -641,6 +672,9 @@ function power(lhs, rhs){
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
 	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
+	}
 	if(lhs.units){
 		for (var i = 0; i < lhs.units.exponents.length; i++) {
 			lhs.units.exponents[i] = lhs.units.exponents[i] * rhs.value;
@@ -667,6 +701,9 @@ function doMod(lhs, rhs){
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
 		throw "MSG: Cannot convert Booleans to Numbers.";
+	}
+	if((lhs instanceof Agent) || (rhs instanceof Agent)){
+		throw "MSG: Cannot convert Agents to Numbers.";
 	}
 	
 	if (unitless(rhs.units)) {
@@ -864,24 +901,40 @@ funcEvalMap["FUNCTION"] = function(node, scope) {
 
 funcEvalMap["ASSIGN"] = function(node, scope) {
 	//console.log(node);
-	if(node.children[0] instanceof PrimitiveStore){
-		var x = evaluateNode(node.children[1], scope);
-		node.children[0].primitive.setValue(x);
-		return x;
-	}else{
-		var varName = node.children[0].text;
-		var x = evaluateNode(node.children[1], scope);
-		var origScope = scope;
-		while(scope["-parent"] !== null){
-			if(isDefined(scope[varName])){
-				break;
+	var items = node.children.length-1;
+	var x = evaluateNode(node.children[node.children.length-1], scope);
+	if(items>1 && (!(x instanceof Vector) || x.items.length<items)){
+		throw "MSG: Too few elements returned for assignment.";
+	}
+	for(var i=0; i<items; i++){
+		if(node.children[i] instanceof PrimitiveStore){
+			if(items==1){
+				node.children[i].primitive.setValue(x);
+			}else{
+				node.children[i].primitive.setValue(x.items[i]);
 			}
-			scope = scope["-parent"];
+		}else{
+			var varName = node.children[i].text;
+			var origScope = scope;
+			while(scope["-parent"] !== null){
+				if(isDefined(scope[varName])){
+					break;
+				}
+				scope = scope["-parent"];
+			}
+			if(scope["-parent"]===null && isUndefined(scope[varName])){
+				scope = origScope;
+			}
+			if(items==1){
+				scope[varName] = x;
+			}else{
+				scope[varName] = x.items[i];
+			}
 		}
-		if(scope["-parent"]===null && isUndefined(scope[varName])){
-			scope = origScope;
-		}
-		scope[varName] = x;
+	}
+	if(items>1){
+		return new Vector(x.items.slice(0,items));
+	}else{
 		return x;
 	}
 };
@@ -1006,6 +1059,9 @@ trimEvalMap["TRUE"] = function(node) {
 };
 trimEvalMap["FALSE"] = function(node) {
 	return false;
+};
+trimEvalMap["STRING"] = function(node) {
+	return node.origText.substr(1, node.origText.length-2).replace(/\\n/g,"\n").replace(/\\r/g,"\r");
 };
 trimEvalMap["INTEGER"] = function(node) {
 	return new Material(sn("#e"+node.text));

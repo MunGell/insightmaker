@@ -298,6 +298,7 @@ var simulate = function(model, silent, callback){
 			//console.log(v);//XXX fixme
 			
 			if(v instanceof Agents){
+				item.results[v.id].dataMode = "agents";
 				item.results[v.id].results.push({current: v.collectData()});
 			}else{
 

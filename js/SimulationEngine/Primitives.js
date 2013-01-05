@@ -564,7 +564,7 @@ Agents.method("states", function() {
 	return this.stateIds.slice(0);
 });
 Agents.method("toNum", function(){
-	return this;
+	throw("MSG: ["+clean(this.dna.name)+"] is a population of agents and cannot be used as a direct value in equations.");
 });
 Agents.method("add", function(base){
 	this.size = 1 + parseInt(this.size, 10);
@@ -622,6 +622,7 @@ Agents.method("add", function(base){
 	simulate.agentsChanged = true;
 });
 
+
 function Agent() {
 	Primitive.call(this);
 	this.index = null;
@@ -635,10 +636,11 @@ function Agent() {
 }
 Agent.inherits(Primitive);
 Agent.method("toString", function(){
-	return "Agent";
+	return "Agent "+(this.index+1);
 })
 Agent.method("toNum", function(){
 	return this;
+	//throw("MSG: Invalid attempt to use an agent as a valued primitive.");
 });
 Agent.method("updateStates", function() {
 	this.states = [];
@@ -746,7 +748,7 @@ Stock.method("stepForward", function() {
 	if (this.level.length > 1) {
 		for (var i = this.level.length - 1; i > 0; i--) {
 			this.level[i] = plus(this.level[i], this.level[i - 1]);
-			this.level[i - 1] = new Material(0, this.dna.units.clone());
+			this.level[i - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 		}
 	}
 });
@@ -768,7 +770,7 @@ Stock.method("setDelay", function( ){
 Stock.method("setBuckets", function( count ){
 	this.level = [];
 	for(var i = 0; i < count; i++){
-		this.level.push(new Material(0, this.dna.units.clone()));
+		this.level.push(new Material(0, this.dna.units?this.dna.units.clone():undefined));
 	}
 });
 Stock.method("setInitialValue", function() {
@@ -804,10 +806,10 @@ Stock.method("setInitialValue", function() {
 	}
 	
 	if (this.dna.nonNegative && init.value < 0) {
-		init = new Material(0, this.dna.units.clone());
+		init = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 	}
 	if (unitless(init.units)) {
-		init.units = this.dna.units.clone();
+		init.units = this.dna.units?this.dna.units.clone():undefined;
 	}
 
 	//this.testUnits(init);
@@ -827,17 +829,17 @@ Stock.method("setInitialValue", function() {
 Stock.method("subtract", function(amnt) {
 	this.level[this.level.length - 1] = minus(this.level[this.level.length - 1], amnt);
 	if (this.dna.nonNegative && this.level[this.level.length - 1].value < 0) {
-		this.level[this.level.length - 1] = new Material(0, this.dna.units.clone());
+		this.level[this.level.length - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 	}
 });
 Stock.method("add", function(amnt) {
 	this.level[0] = plus(this.level[0], amnt);
 	if (this.dna.nonNegative && this.level[0].value < 0) {
-		this.level[0] = new Material(0, this.dna.units.clone());
+		this.level[0] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 	}
 });
 Stock.method("totalContents", function() {
-	var res = new Material(0, this.dna.units.clone());
+	var res = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 	for (var i = 0; i < this.level.length; i++) {;
 		res = plus(res, this.level[i]);
 	}
@@ -895,7 +897,7 @@ Converter.method("getInputValue", function(){
   }
 );
 Converter.method("calculateValue", function() {
-	return new Material(this.getOutputValue(), this.dna.units.clone());
+	return new Material(this.getOutputValue(), this.dna.units?this.dna.units.clone():undefined);
 });
 Converter.method("getOutputValue", function() {
 	//console.log("---")
@@ -959,7 +961,7 @@ Variable.method("calculateValue", function() {
 	//console.log(this.name);
 	//console.log(this.equation);
 	//try{
-		var x = evaluateTree(this.equation, varBank).toNum();
+		var x = evaluateTree(this.equation, varBank);
 		//}catch(err){
 		//	console.log(this.dna.name);
 		//	throw "calc value error";
@@ -977,7 +979,7 @@ Variable.method("calculateValue", function() {
 	//	error("Cannot set a variable value to a vector.", this, true)
 	}
 	if(unitless(x.units)) {
-		x.units = this.dna.units.clone();
+		x.units = this.dna.units?this.dna.units.clone():undefined;
 	}
 	return x;
 });
@@ -1003,7 +1005,7 @@ Flow.method("calculateValue", function() {
 	if ((!this.dna.onlyPositive) || sr.value >= 0) {
 		return sr;
 	} else {
-		return new Material(0, this.dna.units.clone());
+		return new Material(0, this.dna.units?this.dna.units.clone():undefined);
 	}
 });
 Flow.method("clean", function() {
@@ -1045,7 +1047,7 @@ Flow.method("predict", function() {
 		
 		//console.log(this.primaryRate.units);
 		if (unitless(this.primaryRate.units)) {
-			this.primaryRate.units = this.dna.units.clone();
+			this.primaryRate.units = this.dna.units?this.dna.units.clone():undefined;
 		}
 		//console.log("---")
 //		console.log(this.primaryRate)
