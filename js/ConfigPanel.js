@@ -264,6 +264,7 @@ function handleGridEnables(gstore, selectedPrimitive) {
         if (selectedPrimitive.value.nodeName != "Converter") {
             getGridRecord(store, 'SliderMax').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
             getGridRecord(store, 'SliderMin').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
+            getGridRecord(store, 'SliderStep').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
         }
     }
 }

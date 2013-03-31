@@ -239,7 +239,8 @@ Ext.ConverterWindow = function(args)
                 position: 'bottom',
                 fields: ["xVal"],
                 title: "Input (" + clean(sourceName) + ")",
-                grid: true,maximum: getXRange()[1],/*minimum: getXRange()[0],*/
+                grid: true,
+				maximum: getXRange()[1],/*minimum: getXRange()[0],*/
 				labelTitle: {
 					font: '14px Verdana'
 				}
@@ -265,8 +266,6 @@ Ext.ConverterWindow = function(args)
                 }
             }]
         });
-	
-
 		
 		
 	var chartPanel = new Ext.Panel({

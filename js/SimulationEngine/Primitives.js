@@ -380,6 +380,8 @@ function Transition() {
 	Primitive.call(this);
 	this.alpha = null;
 	this.omega = null;
+	this.block = false;
+	this.oldBlock = false;
 	this.constructorFunction = Transition;
 }
 Transition.inherits(Primitive);
@@ -389,8 +391,14 @@ Transition.method("setEnds", function(alpha, omega) {
 	this.alpha = alpha;
 	this.omega = omega;
 });
+Transition.method("preserveState", function() {
+	this.oldBlock = this.block;
+});
+Transition.method("restoreState", function() {
+	this.block = this.oldBlock;
+});
 Transition.method("calculateValue", function() {
-	if(this.alpha && this.alpha.getActive()){
+	//if(this.alpha && this.alpha.getActive()){
 		var x = evaluateTree(this.equation, varBank).toNum();
 		
 		if(x instanceof Vector){
@@ -407,17 +415,25 @@ Transition.method("calculateValue", function() {
 			}
 			return x;
 		}
-	}else{
-		return  new Material(0);
-	}
+		//}else{
+		//return  new Material(0);
+		//}
 });
 Transition.method("transition", function() {
-	if(this.alpha && this.alpha.getActive() && ( eq(timeStart, time) || (! eq(this.alpha.arrivalTime, time)))){
+
+	if((! this.block) && ((! this.alpha) || (this.alpha && this.alpha.getActive())) && ( (! this.alpha) || eq(timeStart, time) || ( ! eq(this.alpha.arrivalTime, time)))){
 		if(this.dna.trigger == "Timeout"){
 			var v = this.value().toNum();
 			
-			if(greaterThanEq(minus(time, this.alpha.arrivalTime), v)  ){
-				this.doTransition();
+			if(this.alpha){
+				if(greaterThanEq(minus(time, this.alpha.arrivalTime), v)  ){
+					this.doTransition();
+				}
+			}else{
+				if(greaterThanEq(minus(time, timeStart), v)  ){
+					this.block = true;
+					this.doTransition();
+				}
 			}
 			
 		}else if(this.dna.trigger == "Condition"){
@@ -445,8 +461,11 @@ Transition.method("transition", function() {
 	}
 });
 Transition.method("doTransition", function() {
-	this.alpha.active = false;
-	this.alpha.arrivalTime = null;
+	//console.log(this.alpha)
+	if(this.alpha){
+		this.alpha.active = false;
+		this.alpha.arrivalTime = null;
+	}
 	if(this.omega){
 		this.omega.active = true;
 		this.omega.arrivalTime = time.fullClone();
@@ -897,7 +916,7 @@ Converter.method("getInputValue", function(){
   }
 );
 Converter.method("calculateValue", function() {
-	return new Material(this.getOutputValue(), this.dna.units?this.dna.units.clone():undefined);
+	return new Material(this.getOutputValue().value, this.dna.units?this.dna.units.clone():undefined);
 });
 Converter.method("getOutputValue", function() {
 	//console.log("---")
@@ -944,8 +963,8 @@ Converter.method("getOutputValue", function() {
 			}
 		}
 	}
-		return this.dna.outputs[this.dna.outputs.length-1];
-	});
+	return this.dna.outputs[this.dna.outputs.length-1];
+});
 
 
 function Variable() {
@@ -1054,9 +1073,10 @@ Flow.method("predict", function() {
 		this.testUnits(this.primaryRate, true);
 		//console.log("+++")
 		
-		
+		//console.log("--")
+		//console.log(this.primaryRate)
 		this.primaryRate = mult(this.primaryRate, timeStep);
-		
+		//console.log(this.primaryRate)
 		//console.log("push: "+this.id)
 		this.RKPrimary.push(this.primaryRate);
 	}

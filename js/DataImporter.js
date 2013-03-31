@@ -112,7 +112,7 @@ function importData(targetStore){
 				}
 				
 				targetStore.removeAll();
-				
+				var items = [];
 				for(var i=(Ext.getCmp("impIncludeHeader").getValue()==0?1:0); i<data.length; i++){
 					
 					try{
@@ -121,12 +121,13 @@ function importData(targetStore){
 						if(isNaN(x) || isNaN(y)){
 							mxUtils.alert("("+data[i][inIndex]+", "+data[i][outIndex]+") is not a pair of numbers. Skipping row during import.");
 						}else{
-							targetStore.add({xVal: x, yVal: y});
+							items.push({xVal: x, yVal: y});
 						}
 					}catch(err){
 						mxUtils.alert("Skipping badly formed row ("+data[i][inIndex]+", "+data[i][outIndex]+") on import.");
 					}
 				}
+				targetStore.add(items);
 				
 				win.close();
             }

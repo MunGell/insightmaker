@@ -61,7 +61,7 @@ Ext.RichTextWindow = function(args) {
 		height: 350,
 		items: [new Ext.form.field.HtmlEditor({
 			enableColors: false,
-			enableSourceEdit: false,
+			enableSourceEdit: true,
 			enableFont: false,
 			enableLists: true,
 			enableFontSize: false,

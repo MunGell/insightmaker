@@ -56,9 +56,15 @@ function doOptimizer(){
 	
 	var mySetting = getSetting();
 	
+	var dat = mySetting.getAttribute("OptimizerGridStore")?JSON.parse(mySetting.getAttribute("OptimizerGridStore")):[];
+	for(var i=dat.length-1; i>=0; i--){
+		if(! findID(dat[i].id)){
+			dat.splice(i,1);
+		}
+	}
 	var gridStore = Ext.create('Ext.data.Store', {	
 	    fields:['id', 'minBound', 'maxBound', 'desiredAccuracy'],
-	    data: mySetting.getAttribute("OptimizerGridStore")?JSON.parse(mySetting.getAttribute("OptimizerGridStore")):[]
+	    data: dat
 	});
 
 	var grid = Ext.create('Ext.grid.Panel', {
@@ -731,8 +737,13 @@ function evaluateCurrentPoint(){
 		}
 	}
 	var res = runModel(true);
-	if(res.error != "none" ){
-		throw("MODEL ERROR: "+res.error);
+	if(res.error != "none"){
+		mxUtils.alert(res.error);
+		highlight(res.errorPrimitive);
+		if(optimizerProgress){
+			optimizerProgress.close();
+		}
+		throw("Opt Error");
 	}
 	
 	optimizerController.evaluations = optimizerController.evaluations + 1;

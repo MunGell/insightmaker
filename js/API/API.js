@@ -340,9 +340,15 @@ function showData(title, tabs, size) {
 					dataIndex: "a"+j,
 					text: tabs[i].header?tabs[i].header[j]:""
 				});
+				var columnType = "float";
+				for(var k = 0; k < tabs[i].data[j].length; k++){
+					if( (typeof tabs[i].data[j][i]) == "string" ){
+						columnType = "string";
+					}
+				}
 				storeFields.push({
 					name: "a"+j,
-					type: "string"
+					type: columnType
 				})
 				
 			}

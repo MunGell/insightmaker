@@ -58,10 +58,10 @@ function sendGraphtoServer(graph) {
 
 function validPrimitiveName(name, primitive) {
 	if(primitive.value.nodeName == "Stock" || primitive.value.nodeName == "Variable" || primitive.value.nodeName == "Converter" || primitive.value.nodeName == "Flow" || primitive.value.nodeName == "Display" || primitive.value.nodeName == "Agents" || primitive.value.nodeName == "Transition" || primitive.value.nodeName == "State"){
-    	if(name.length > 0 && (!(/[^A-Za-z0-9\-_ \$\&\?\.\,\#\%]/.test(name))) ){
+    	if(name.length > 0 && (!(/[\[\]\(\)\{\}\<\>\'\"]/.test(name))) ){
     		return true;
     	}else{
-			mxUtils.alert("Primitive names must only contain numbers, letters, spaces and the following special characters: '&', '$', '#', '.', ',', '%', and '?'.");
+			mxUtils.alert("Primitive names cannot contain brackets, parenthesis, or quotes.");
     		return false;
     	}
 	}else{

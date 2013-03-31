@@ -708,6 +708,11 @@ function openDisplayConfigure(win) {
 			pname: win.displayInformation.displayedHeaders[i]
 		});
 	}
+	
+	storeData.sort(function(a,b){
+		return a.pname.localeCompare(b.pname);
+	});
+	
 	displayConfigStore.loadData(storeData);
 	displayConfigStore2.loadData(storeData);
 	var d = win.tabs.getActiveTab()

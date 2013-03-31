@@ -417,6 +417,14 @@ defineFunction("ResetTimer", {params: [{needPrimitive: true, name: "[Action]"}]}
 	return new Material(0);
 });
 
+defineFunction("Transition", {params: [{needPrimitive: true, name: "[Transition]"}]}, function(x) {
+	if(! (x[0] instanceof Transition)){
+		throw "Transition requires an Transition primitive.";
+	}
+	x[0].doTransition()
+	return new Material(0);
+});
+
 defineFunction("Value", {params: [{name: "[Population]"}, {needPrimitive: true, name: "[Primitive]"}]}, function(x) {//need population should be false
 	var id = x[1].id;
 	

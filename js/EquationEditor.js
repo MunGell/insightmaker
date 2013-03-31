@@ -23,7 +23,7 @@ Ext.form.customFields = {
 	'units': Ext.extend(Ext.form.TriggerField, {
 		enableKeyEvents: false,
 		selectOnFocus: true,
-		stripCharsRe: /[^A-Za-z 1\/\(\)\*]/g
+		stripCharsRe: /[^A-Za-z 0-9\.\/\(\)\*\^]/g
 	}),
 	'richText': Ext.extend(Ext.form.TriggerField, {
 		enableKeyEvents: false,

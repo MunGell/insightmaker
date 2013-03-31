@@ -265,6 +265,7 @@ function main() {
 		cell.setAttribute('ShowSlider', false);
 		cell.setAttribute('SliderMax', 100);
 		cell.setAttribute('SliderMin', 0);
+		cell.setAttribute('SliderStep', '');
 	}
 
 	primitiveBank.stock = doc.createElement('Stock');
@@ -368,7 +369,7 @@ function main() {
 
 	primitiveBank.setting = doc.createElement('Setting');
 	primitiveBank.setting.setAttribute('Note', '');
-	primitiveBank.setting.setAttribute('Version', '27');
+	primitiveBank.setting.setAttribute('Version', '28');
 	primitiveBank.setting.setAttribute('Throttle', '1');
 	primitiveBank.setting.setAttribute('TimeLength', '100');
 	primitiveBank.setting.setAttribute('TimeStart', '0');
@@ -932,6 +933,18 @@ function main() {
 			
 			mySetting.setAttribute("Version", 27);
 		}
+		
+		if (mySetting.getAttribute("Version") < 28) {
+			
+			var items = primitives();
+			for (var i = 0; i < items.length; i++) {
+				if("ShowSlider" in items[i]){
+					items[i].setAttribute("SliderStep", "");
+				}
+			}
+			
+			mySetting.setAttribute("Version", 28);
+		}
 
 	}
 	loadBackgroundColor();
@@ -985,7 +998,7 @@ function main() {
 			toolbarItems.getComponent('style').getComponent('align').setDisabled(!selectedNonGhost);
 			toolbarItems.getComponent('style').getComponent('movemenu').setDisabled(!selected);
 			toolbarItems.getComponent('style').getComponent('picturemenu').setDisabled(!selected);
-			toolbarItems.getComponent('connect').getComponent('reverse').setDisabled(!(selected && (cellsContainNodename(graph.getSelectionCells(), "Link") || cellsContainNodename(graph.getSelectionCells(), "Flow"))));
+			toolbarItems.getComponent('connect').getComponent('reverse').setDisabled(!(selected && (cellsContainNodename(graph.getSelectionCells(), "Link") || cellsContainNodename(graph.getSelectionCells(), "Flow") || cellsContainNodename(graph.getSelectionCells(), "Transition"))));
 
 			setStyles();
 		};
@@ -1449,6 +1462,25 @@ function main() {
 						'value': parseFloat(cell.getAttribute("SliderMin")),
 						'group': 'User Interface'
 					});
+					
+					properties.push({
+						'name': 'SliderMin',
+						'text': 'Slider Min',
+						'value': parseFloat(cell.getAttribute("SliderMin")),
+						'group': 'User Interface'
+					});
+					
+					properties.push({
+						'name': 'SliderStep',
+						'text': 'Slider Step',
+						'value': cell.getAttribute("SliderStep"),
+						'group': 'User Interface',
+						'editor': {
+					        xtype: 'numberfield',
+					        minValue: 0,
+							allowDecimals: true
+					    }
+					});
 				}
 
 				if (cell.value.nodeName != "Transition") {
@@ -1552,7 +1584,8 @@ function main() {
 						if (isNaN(getValue(slids[i]))) {
 							setValue(slids[i], (parseFloat(slids[i].getAttribute("SliderMin")) + parseFloat(slids[i].getAttribute("SliderMax"))) / 2);
 						}
-						var perc = Math.floor(-(Math.log(Math.max(.1, slids[i].getAttribute("SliderMax") - slids[i].getAttribute("SliderMin"))) / Math.log(10) - 4));
+						var step = parseFloat(slids[i].getAttribute("SliderStep"))?parseFloat(slids[i].getAttribute("SliderStep")):undefined;
+						var perc = step?Math.ceil(-Math.log(step) /Math.log(10)):Math.floor(-(Math.log(Math.max(0.1, slids[i].getAttribute("SliderMax") - slids[i].getAttribute("SliderMin"))) / Math.log(10) - 4));
 
 						var slid = Ext.create("Ext.slider.Single", {
 							flex: 1,
@@ -1560,7 +1593,8 @@ function main() {
 							sliderCell: slids[i],
 							value: parseFloat(getValue(slids[i])),
 							maxValue: parseFloat(slids[i].getAttribute("SliderMax")),
-							decimalPrecision: perc
+							decimalPrecision: perc,
+							increment: step
 						});
 						sliders.push(slid);
 

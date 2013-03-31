@@ -186,7 +186,7 @@ Quantities.prototype.equal = function(rhs) {
 // ********** Code for top level **************
 
 function convertUnits(source, target, forceLoose) {
-  if (source == null || target == null || unitsEqual(source, target, forceLoose)) {
+  if (unitsEqual(source, target, forceLoose)) {
     return 1;
   }
   var sQ = new Quantities(source);
@@ -198,10 +198,15 @@ function convertUnits(source, target, forceLoose) {
   return fn["/"](sQ.toBase, tQ.toBase);
 }
 function unitsEqual(lhs, rhs, forceLoose) {
-	
-  if (lhs == null || rhs == null || isUndefined(lhs) || isUndefined(rhs) || ((strictUnits && forceLoose!==true)?(rhs.unitless() && lhs.unitless()):(rhs.unitless() || lhs.unitless()))) {// if (lhs == null || rhs == null || (rhs.unitless() && lhs.unitless())) {
-    return true;
-  }
+	if(strictUnits && forceLoose !== true){
+		if(unitless(rhs) && unitless(lhs)){
+			return true;
+		}else if(unitless(rhs) != unitless(lhs)){
+			return false;
+		}
+	}else if(unitless(rhs) || unitless(lhs)){
+		return true
+	}
 
   if (rhs.names.length != lhs.names.length) {
     return false;

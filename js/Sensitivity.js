@@ -186,7 +186,16 @@ function doSensitivity(){
 }
 
 function runSensitivity(){
-	sensitivityController.results.push( runSimulation(true) );
+	var res = runSimulation(true);
+	if(res.error != "none"){
+		mxUtils.alert(res.error);
+		highlight(res.errorPrimitive);
+		if(sensitivityProgress){
+			sensitivityProgress.close();
+		}
+		return;
+	}
+	sensitivityController.results.push( res );
 	sensitivityProgress.updateProgress(sensitivityController.results.length/sensitivityController.nRuns, " ");
 	if(sensitivityController.results.length < sensitivityController.nRuns){
 		setTimeout("runSensitivity()", 15);

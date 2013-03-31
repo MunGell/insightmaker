@@ -134,6 +134,10 @@ var simulate = function(model, silent, callback){
 				s.preserveActive();
 			});
 			
+			simulate.transitions.forEach(function(t) {
+				t.preserveState();
+			});
+			
 			var moveSteps = 1;
 			if (RKOrder == 4 && RKPosition == 3) {
 				moveSteps = 2;
@@ -180,6 +184,10 @@ var simulate = function(model, silent, callback){
 			
 			simulate.states.forEach(function(s) {
 				s.restoreActive();
+			});
+			
+			simulate.transitions.forEach(function(t) {
+				t.restoreState();
 			});
 
 			if (RKOrder == 2 || (RKOrder == 4 && RKPosition != 3)) {

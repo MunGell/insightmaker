@@ -39,7 +39,7 @@ function runSimulation(silent) {
 		if (err.msg) {
 			return {
 				error: err.msg,
-				errorPrimitive: err.primitive
+				errorPrimitive: findID(err.primitive.id)
 			};
 		} else {
 			return {
@@ -64,7 +64,7 @@ function innerRunSimulation(silent) {
 		
 	//Set Up simulation time settings
 		
-	timeUnits = setting.getAttribute("TimeUnits");
+	timeUnits = setting.getAttribute("TimeUnits").toLowerCase();
 	var u = new UnitStore([timeUnits],[1]);
 	model["timeStep"] = new Material(sn("#i" + setting.getAttribute("TimeStep")), u.clone());
 	model["timeLength"] = new Material(sn("#i" + setting.getAttribute("TimeLength")), u.clone());
@@ -751,20 +751,16 @@ function linkPrimitive(primitive, dna){
 		var myNeighborhood = getPrimitiveNeighborhood(primitive, dna);
 			
 		if(type == "Flow" || type == "Transition"){
-			var alpha = null,
-				omega = null;
-
-			for (var neighbor in myNeighborhood) {
-				if (dna.targetId == myNeighborhood[neighbor].id) {
-					omega = myNeighborhood[neighbor];
-				}
-				if (dna.sourceId == myNeighborhood[neighbor].id) {
-					alpha = myNeighborhood[neighbor];
-				}
-				if(((! dna.targetId) || alpha) && ((! dna.sourceId) || omega)){
-					break;
-				}
+			var alpha = null, omega = null;
+			
+			if(myNeighborhood["alpha"]){
+				alpha = myNeighborhood["alpha"];
 			}
+			
+			if(myNeighborhood["omega"]){
+				omega = myNeighborhood["omega"];
+			}
+			
 			primitive.setEnds(alpha, omega);
 		}
 	
@@ -1001,14 +997,32 @@ function getPrimitiveNeighborhood(primitive, dna){
 			var found = false;
 			if(primitive.parent){
 				if(primitive.parent.childrenId[item.id]){
-					hood[primitive.parent.childrenId[item.id].dna.name.toLowerCase()] = primitive.parent.childrenId[item.id];
+					var hoodName = primitive.parent.childrenId[item.id].dna.name.toLowerCase();
+					//while(hood[hoodName]){
+						//hoodName += ".extra";
+						//}
+					hood[hoodName] = primitive.parent.childrenId[item.id];
 					found = true;
 				}
 			}
 			if(! found){
 				if (submodels["base"]["agents"][0].childrenId[item.id]) {
-					hood[submodels["base"]["agents"][0].childrenId[item.id].dna.name.toLowerCase()] = submodels["base"]["agents"][0].childrenId[item.id];
+					var hoodName = submodels["base"]["agents"][0].childrenId[item.id].dna.name.toLowerCase();
+					//while(hood[hoodName]){
+					//	hoodName += ".extra";
+					//}
+					hood[hoodName] = submodels["base"]["agents"][0].childrenId[item.id];
 					found = true;
+				}
+			}
+			
+			if(dna.type=="Flow" || dna.type=="Transition"){
+				if(hood[hoodName]){
+					if(dna.targetId == hood[hoodName].id){
+						hood["omega"] = hood[hoodName];
+					}else if(dna.sourceId == hood[hoodName].id){
+						hood["alpha"] = hood[hoodName];
+					}
 				}
 			}
 		}

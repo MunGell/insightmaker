@@ -580,6 +580,32 @@ defineFunction("SetRandSeed", {params:[{name:"Seed Number", noUnits:true, noVect
 	return "Random Seed Set";
 });
 
+defineFunction("Alert", {params:[{name:"Message", allowString: true, allowBoolean: true}]}, function(x) {
+	alert(x[0]);
+	return 1;
+});
+
+defineFunction("Console", {params:[{name:"Message", allowString: true, allowBoolean: true}]}, function(x) {
+	console.log(x[0]);
+	return 1;
+});
+
+defineFunction("Prompt", {params:[{name:"Message", allowString: true, allowBoolean: true}, {name:"Default", defaultVal: "", allowString: true, allowBoolean: true}]}, function(x) {
+	var y = x[1];
+	if((y instanceof Material) && unitless(y.units)){
+		y = y.value;
+	}
+	var x = prompt(x[0], y);
+	if(parseFloat(x).toString()==x){
+		return new Material(parseFloat(x));
+	}else{
+		return x;
+	}
+});
+
+defineFunction("Confirm", {params:[{name:"Message", allowString: true, allowBoolean: true}]}, function(x) {
+	return confirm(x[0]);
+});
 
 function defineFunction(name, definition, fn){
 	var configs = definition.params;
@@ -634,6 +660,9 @@ function defineFunction(name, definition, fn){
 			}
 			if (config.needAgent && (!  (x[i] instanceof Agent) )) {
 				x[i] = agent(x[i], fnName, config.name);
+			}
+			if ((! config.allowString) && (typeof x[i] == "string")) {
+				throw "MSG: " + fnName + " does not accept string values.";
 			}
 			if (config.needAgents && (!  (x[i] instanceof Agents) )) {
 				x[i] = agents(x[i], fnName, config.name);
