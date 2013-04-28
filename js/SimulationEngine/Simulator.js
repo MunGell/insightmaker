@@ -145,7 +145,7 @@ var simulate = function(model, silent, callback){
 
 
 			for (var moveCounter = 1; moveCounter <= moveSteps; moveCounter++) {
-
+				//console.log("step")
 				simulate.flows.forEach(function(f) {
 					f.apply();
 				});
@@ -169,10 +169,13 @@ var simulate = function(model, silent, callback){
 
 			}
 
+			RKPosition++;
 			simulate.flows.forEach(function(f) {
 				//console.log(f.id);
+				f.primaryRate = null;
 				f.predict();
 			});
+			RKPosition--;
 
 			simulate.valued.forEach(function(v) {
 				v.value();
@@ -190,18 +193,20 @@ var simulate = function(model, silent, callback){
 				t.restoreState();
 			});
 
-			if (RKOrder == 2 || (RKOrder == 4 && RKPosition != 3)) {
-				simulate.valued.forEach(function(v) {
-					v.clearPastValues(2);
-				});
-			} else if (RKOrder == 4 && RKPosition == 3) {
-				simulate.valued.forEach(function(v) {
-					v.clearPastValues(3);
-				});
+			if (RKOrder == 4) {
+				if( RKPosition == 3){
+					simulate.valued.forEach(function(v) {
+						v.clearPastValues(3);
+					});
+				}else if( RKPosition == 1 || RKPosition==2){
+					simulate.valued.forEach(function(v) {
+						v.clearPastValues(2);
+					});
+				}
 			}
 			
 			time = plus(timeStart, mult(new Material(simulate.timeCounter), userTimeStep));
-			 timeIndex = Math.round((time.value - timeStart.value) / timeStep.value);
+			timeIndex = Math.round((time.value - timeStart.value) / timeStep.value);
 		}
 		
 			//console.log("---STEP----");

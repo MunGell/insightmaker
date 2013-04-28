@@ -139,6 +139,24 @@ function testAgents(){
 	setValue(s, "false || true");
 	setValue(s2, "false || 0");
 	
+	var t = createConnector("My Transition", "Transition", null, s2);
+	var t2 = createConnector("My Transition", "Transition", s2, null);
+	
+	setTriggerType(t, "Timeout");
+	setTriggerValue(t, "{2 years}");
+	setTriggerType(t2, "Timeout");
+	setTriggerValue(t2, "{3 years}");
+	
+	var res = runModel(true);
+	assertEqual("Transition T Dangle 1", res.value(s)[0], 1);
+	assertEqual("Transition T Dangle 2", res.value(s2)[0], 0);
+	assertEqual("Transition T Dangle 3", res.value(s)[3], 1);
+	assertEqual("Transition T Dangle 4", res.value(s2)[3], 1);
+	assertEqual("Transition T Dangle 5", res.value(s2)[8], 0);
+	
+	removePrimitive(t)
+	removePrimitive(t2);
+	
 	var t = createConnector("My Transition", "Transition", s, s2);
 	var t2 = createConnector("My Transition", "Transition", s2, s);
 	
@@ -284,7 +302,7 @@ function testAgents(){
 	var v3 = createPrimitive("My Variable 3", "Variable", [1200,150], [150,100]);
 	var l4 = createConnector("My Link", "Link", pop, v3);
 	var l5 = createConnector("My Link", "Link", v3, v2);
-	setValue(v3, "FindState([Population], [State 2])")
+	setValue(v3, "FindState([Population], [State 2])");
 	setValue(v2, "Count([My Variable 3])")
 
 	res = runModel(true);
@@ -292,9 +310,21 @@ function testAgents(){
 	assertEqual("Pop 6.2", res.value(v2)[0], 0);
 	assertEqual("Pop 6.3", res.value(v)[8], 0);
 	assertEqual("Pop 6.4", res.value(v2)[8], 10);
+	assertEqual("Pop 6.5", res.error, "none");
 	
-	setValue(v, "Count(FindNotState([Population], [State 1]))")
-	setValue(v2, "Count(FindNotState([Population], [State 2]))")
+	
+	setValue(v, "Count(FindNotState([Population], [State 1]))");
+	setValue(v2, "Count(FindNotState([Population], [State 2]))");
+	
+	res = runModel(true);
+	assertEqual("Pop 6.6", res.error, "none");
+	setValue(v3, "FindState([Population], [State 2])+1");
+	res = runModel(true);
+	assertUnequal("Pop 6.7", res.error, "none");
+	setValue(v3, "[Population]+1");
+	res = runModel(true);
+	assertUnequal("Pop 6.8", res.error, "none");
+	removePrimitive(v3);
 	
 	setTriggerType(t2, "Timeout");
 	setTriggerValue(t2, "5");
@@ -767,6 +797,7 @@ function testUnitsAndConstraints(){
 	setConstraints(x, [10, false, 5, false]);
 	assertEqual("Constraints Error", runModel(true).error, "none");
 	
+	
 }
 
 
@@ -936,13 +967,62 @@ function testSimulation(){
 		assertEqual("Time End", res.Time[10], 10);
 		assertEqual("Stock Start", res.value(s)[0], 100);
 		assertEqual("Flow Start", Math.round(res.value(f)[0]*1000), 10*1000);
-		if(algorithms[i]=="RK4"){
-			assertEqual("Stock End", Math.round(res.value(s)[10]*100), Math.round(36.47*100));
-		}else{
-			assertEqual("Stock End", Math.round(res.value(s)[10]*100), Math.round(34.87*100));
-		}
 		clearModel();
 		
+		//Mathematica Parity Tests
+		setTimeLength(100);
+		clearModel();
+		
+		var mathimaticaScale = 100000;
+		
+		var y = createPrimitive("Y", "Stock", [10,10], [140, 50]);
+		var by = createConnector("My Flow", "Flow",  null, y);
+		setValue(y, "100");
+		setValue(by, "0.04*[Y]");
+		res = runModel(true);
+		if(algorithms[i]=="RK1"){
+			assertEqual("Mathematica ExpGrow", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(5050.49481843*mathimaticaScale) );
+		}else if(algorithms[i]=="RK4"){
+			assertEqual("Mathematica ExpGrow", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(5459.81455268*mathimaticaScale) );
+		}
+		
+
+		setValue(by, "0.02*[Y]*(1-[Y]/100)*Sin(Years/3)^2");
+		setValue(y, 2);
+		res = runModel(true);
+		if(algorithms[i]=="RK1"){
+			assertEqual("Mathematica LogGrow", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(5.2233233649*mathimaticaScale) );
+		}else if(algorithms[i]=="RK4"){
+			assertEqual("Mathematica LogGrow", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(5.30387612074*mathimaticaScale) );
+		}
+		
+		var x = createPrimitive("X", "Stock", [10,10], [140, 50]);
+		var bx = createConnector("My Flow", "Flow", null, x);
+		var dx = createConnector("My Flow", "Flow", x, null);
+		var dy = createConnector("My Flow", "Flow", y, null);
+		createConnector("Link", "Link", x, by);
+		createConnector("Link", "Link", y, dx);
+		
+		setValue(by, "[Y]*0.001*[X]");
+		setValue(dy, "[Y]*0.1");
+		setValue(bx, "[X]*0.1");
+		setValue(dx, "[X]*0.0001*[Y]");
+		setValue(x, 200);
+		setValue(y, 100);
+		
+		res = runModel(true);
+		if(algorithms[i]=="RK1"){
+			assertEqual("Mathematica LV", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(15.2517207902*mathimaticaScale) );
+		}else if(algorithms[i]=="RK4"){
+			assertEqual("Mathematica LV", Math.round(res.value(y)[100]*mathimaticaScale), Math.round(4118.37647504*mathimaticaScale) );
+		}
+		
+		
+
+		setTimeLength(10);
+		clearModel();
+		//End Mathematica Parity Tests
+	
 	
 		
 		var p = createPrimitive("p","Variable", [0,0], [100,100]);
@@ -1024,6 +1104,24 @@ function testSimulation(){
 		
 		clearModel()
 		
+		var s = createPrimitive("My Stock", "Stock", [100, 100], [140, 50]);
+		var f = createConnector("My Flow", "Flow", null, s);
+		
+		setUnits(f, "euros/year");
+		setUnits(s, "euros");
+	
+		setValue(f, "10");
+		setValue(s, "1");
+		res = runModel(true);
+		assertEqual("Unit Flows 1", res.value(s)[10], 10*10+1);
+	
+		setValue(f, "{10 Euros/years}");
+		setValue(s, "{1 Euros}");
+		res = runModel(true);
+		assertEqual("Unit Flows 2", res.value(s)[10], 10*10+1);
+		
+		clearModel()
+		
 		// Test fixing of values
 		p = createPrimitive("My Variable", "Variable", [100, 100], [140,50]);
 		
@@ -1094,6 +1192,22 @@ function testSimulation(){
 		assertEqual("FSF 4", Math.round(res.lastValue(outF)*1000), 2*1000);
 		assertEqual("FSF 5", res.value(outF)[3], 0);
 		assertEqual("FSF 6", res.lastValue(f), 2);
+		
+		clearModel()
+		
+		s = createPrimitive("My Stock", "Stock", [100, 100], [140,50]);
+		s2 = createPrimitive("My Stock", "Stock", [100, 100], [140,50]);
+		f = createConnector("My Flow", "Flow", s, s2);
+		setValue(f, "1");
+		setValue(s, "0");
+		setValue(s2, "0");
+
+		res = runModel(true);
+		assertEqual("Same Name 1", res.value(s)[5], -5);
+		assertEqual("Same Name 2", res.value(s2)[5], 5);
+		assertEqual("Same Name 3", res.value(s)[10], -10);
+		assertEqual("Same Name 4", res.value(s2)[10], 10);
+		
 		
 		clearModel()
 		
@@ -1233,6 +1347,21 @@ function testSimulation(){
 		res = runModel(true);
 		assertEqual("Interpolation 2",res.value(c)[10],3)
 		
+
+		
+		setValue(p,"[my converter]+[my converter]");
+
+		res = runModel(true);
+		assertEqual("Converter Addition", res.value(p)[10], 6);
+		assertEqual("Converter Addition", res.value(p)[20], 8);
+		assertEqual("Converter Addition", res.value(p)[21], 8);
+		
+		setUnits(p, "Years");
+		setUnits(c, "Years");
+		res = runModel(true);
+		assertEqual("Converter Addition", res.value(p)[10], 6);
+		assertEqual("Converter Addition", res.value(p)[20], 8);
+		assertEqual("Converter Addition", res.value(p)[21], 8);
 
 
 		//Test stock initial values

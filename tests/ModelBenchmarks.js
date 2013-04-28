@@ -40,7 +40,10 @@ function timeModel(name, code, base, reps){
 			benchmarkPrint("RK4 Test: ");
 		}
 		var start = Date.now();
-		runModel(true);
+		var res = runModel(true);
+		if(res.error != "none"){
+			benchmarkPrint("***ERROR: "+res.error);
+		}
 		var diff = (Date.now()-start)/1000;
 		if(i<reps){
 			times.push(diff);

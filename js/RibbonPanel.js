@@ -609,9 +609,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				id: 'connect',
 				items: [{
 					id: 'link',
-					text: 'Use Links',
+					text: 'Link',
 					iconCls: 'link-small-icon',
-					tooltip: 'Use Links to connect nodes',
+					tooltip: 'Use Links to connect primitives',
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
@@ -619,9 +619,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}, {
 					id: 'flow',
-					text: 'Use Flows',
+					text: 'Flow',
 					iconCls: 'flow-small-icon',
-					tooltip: 'Use Flows to connect nodes',
+					tooltip: 'Use Flows to connect primitives',
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: drupal_node_ID == -1,
@@ -742,7 +742,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 5,
 				height: 95,
-				title: 'Style',
+				title: 'Styles',
 				id: 'style',
 				items: [
 

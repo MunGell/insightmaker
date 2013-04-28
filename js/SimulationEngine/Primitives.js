@@ -69,10 +69,11 @@ Primitive.method("getPastValues",  function( length ){
 	}
 	if(RKOrder==4){
 		var it = true;
-		for(var i=res.length-1; i>=0; i--){
+		for(var i=0; i<res.length; i++){
 			it=!it
 			if(it){
 				res.splice(i, 1);
+				i--;
 			}
 		}
 	}
@@ -201,6 +202,10 @@ Primitive.method("value", function() {
 	if (this.pastValues.length - 1 < timeIndex) {
 		try{
 			var x = this.calculateValue().toNum();
+			if((x instanceof Material) && isNaN(x.value)){
+				//console.log(x)
+				throw("MSG: The result of this calculation is not a number (are you dividing by 0?).");
+			}
 		}catch(err){
 			if(! err.substr){
 				throw err; //it's already an object, let's kick it up the chain
@@ -1008,6 +1013,7 @@ function Flow() {
 	this.alpha = null;
 	this.omega = null;
 	this.primaryRate = null;
+	this.primaryRateScale = null;
 	this.RKPrimary = [];
 	this.constructorFunction = Flow;
 }
@@ -1020,7 +1026,7 @@ Flow.method("setEnds", function(alpha, omega) {
 });
 Flow.method("calculateValue", function() {
 	this.predict();
-	var sr = this.scaledPrimaryRate();
+	var sr = this.primaryRateScaled.fullClone();
 	if ((!this.dna.onlyPositive) || sr.value >= 0) {
 		return sr;
 	} else {
@@ -1029,6 +1035,7 @@ Flow.method("calculateValue", function() {
 });
 Flow.method("clean", function() {
 	this.primaryRate = null;
+	this.primaryRateScaled = null;
 	//console.log("clean: "+this.id)
 	this.RKPrimary = [];
 });
@@ -1079,31 +1086,32 @@ Flow.method("predict", function() {
 		//console.log(this.primaryRate)
 		//console.log("push: "+this.id)
 		this.RKPrimary.push(this.primaryRate);
+		
+		this.primaryRateScaled = this.scaledPrimaryRate();
 	}
 });
 Flow.method("scaledPrimaryRate", function() {
 	var sr = this.primaryRate==null?null:this.primaryRate.fullClone();
 	
-
-	if (RKOrder > 1) {
-		if (RKOrder == 2 && RKPosition == 2) {
-			sr = div(plus(this.RKPrimary[0], this.RKPrimary[1]), new Material(2));
-		} else if (RKOrder == 4) {
-			if (RKPosition == 1) {
-				sr = this.RKPrimary[0];
-			} else if (RKPosition == 2) {
-				sr = this.RKPrimary[1];
-			} else if (RKPosition == 3) {
-				sr = this.RKPrimary[2];
-			} else if (RKPosition == 4) {
-				//console.log(this);
-				//console.log(this.RKPrimary);
-					
-				sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[3])), new Material(6));
-			}
+	
+	//console.log("--")
+	//console.log(RKPosition);
+	if (RKOrder == 4) {
+		if (RKPosition == 1) {
+			sr = this.RKPrimary[0];
+		} else if (RKPosition == 2) {
+			sr = this.RKPrimary[1];
+		} else if (RKPosition == 3) {
+			sr = this.RKPrimary[2];
+		} else if (RKPosition == 4) {
+			//console.log(this);
+			//console.log(this.RKPrimary);
+			
+			sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[4])), new Material(6));
 		}
 	}
 	
+	//console.log(sr.value*2);
 
 	sr = div(sr, timeStep);
 	
@@ -1112,15 +1120,17 @@ Flow.method("scaledPrimaryRate", function() {
 });
 Flow.method("apply", function() {
 	try{
-		var rate = this.scaledPrimaryRate();
+		var rate = this.primaryRateScaled.fullClone();
 	
 		//console.log(rate);
 	
 		
 		rate = mult(rate, timeStep);
 		
+		
+		
 
-		//console.log(rate);
+		//console.log("Applying: "+rate.value);
 	
 		var in_r = rate;
 		var out_r = rate;

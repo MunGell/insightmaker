@@ -153,7 +153,6 @@ defineFunction("PastStdDev", {params:[{name: "[Primitive]",  noVector: true, nee
 });
 
 defineFunction("PastCorrelation", {params:[{name: "[Primitive]",  noVector: true, needPrimitive:true}, {name: "Past Range", needPrimitive: true, noVector: true}]}, function(x) {
-
 	var items1;
 	var items2;
 	if (x.length == 2) {
@@ -163,6 +162,7 @@ defineFunction("PastCorrelation", {params:[{name: "[Primitive]",  noVector: true
 		items1 = x[0].getPastValues(x[3].toNum());
 		items2 = x[1].getPastValues(x[3].toNum());
 	}
+
 	if (items1.length > 1) {
 		return functionBank["correlation"]([new Vector(items1), new Vector(items2)]);
 	} else {

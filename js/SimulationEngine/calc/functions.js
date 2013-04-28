@@ -548,10 +548,18 @@ defineFunction("Correlation", {params:  [{name: "Vector 1", needVector: true}, {
 		throw "MSG: The vectors for Correlation() must be of the same size.";
 	}
 	
+	
 	var v1_mean = functionBank["mean"]([v1]);
 	var v2_mean = functionBank["mean"]([v2]);
+
+	var v1_stddev = functionBank["stddev"]([v1]);
+	var v2_stddev = functionBank["stddev"]([v2]);
 	
-	return div(functionBank["sum"]([mult(minus(v1.clone(), v1_mean), minus(v2.clone(), v2_mean))]), mult(minus(functionBank["count"]([v1]), new Material(1)), mult(functionBank["stddev"]([v1]), functionBank["stddev"]([v2]))))
+	if(v1_stddev.value == 0 || v2_stddev.value == 0){
+		return new Material(0);
+	}
+	
+	return div(functionBank["sum"]([mult(minus(v1.clone(), v1_mean), minus(v2.clone(), v2_mean))]), mult(minus(functionBank["count"]([v1]), new Material(1)), mult(v1_stddev, v2_stddev)))
 });
 functionBank["count"] = function(x) {
 	x = functionBank["join"](x).items;

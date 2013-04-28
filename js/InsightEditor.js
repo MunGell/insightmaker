@@ -1453,21 +1453,25 @@ function main() {
 						'name': 'SliderMax',
 						'text': 'Slider Max',
 						'value': parseFloat(cell.getAttribute("SliderMax")),
-						'group': 'User Interface'
+						'group': 'User Interface',
+						'editor': {
+					        xtype: 'numberfield',
+							allowDecimals: true,
+							decimalPrecision: 9
+						}
 					});
 
-					properties.push({
-						'name': 'SliderMin',
-						'text': 'Slider Min',
-						'value': parseFloat(cell.getAttribute("SliderMin")),
-						'group': 'User Interface'
-					});
 					
 					properties.push({
 						'name': 'SliderMin',
 						'text': 'Slider Min',
 						'value': parseFloat(cell.getAttribute("SliderMin")),
-						'group': 'User Interface'
+						'group': 'User Interface',
+						'editor': {
+					        xtype: 'numberfield',
+							allowDecimals: true,
+							decimalPrecision: 9
+					    }
 					});
 					
 					properties.push({
@@ -1478,7 +1482,8 @@ function main() {
 						'editor': {
 					        xtype: 'numberfield',
 					        minValue: 0,
-							allowDecimals: true
+							allowDecimals: true,
+							decimalPrecision: 9
 					    }
 					});
 				}
@@ -1577,6 +1582,10 @@ function main() {
 						}
 					});
 					bottomItems.push(sliderHolder);
+					bottomItems.push(Ext.create("Ext.Component", {
+							html: "<br/>",
+							padding: 3
+						}));
 					var slids = sliderPrimitives();
 					sliders = [];
 
