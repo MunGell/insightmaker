@@ -61,7 +61,7 @@ function validPrimitiveName(name, primitive) {
     	if(name.length > 0 && (!(/[\[\]\(\)\{\}\<\>\'\"]/.test(name))) ){
     		return true;
     	}else{
-			mxUtils.alert("Primitive names cannot contain brackets, parenthesis, or quotes.");
+			mxUtils.alert(getText("Primitive names cannot contain brackets, parenthesis, or quotes."));
     		return false;
     	}
 	}else{
@@ -519,15 +519,6 @@ function getSetting() {
     }
     alert("Settings primitive could not be found.")
     return null;
-}
-
-function getText(obj) {
-    if (document.all) {
-        // IE;
-        return obj.innerText;
-    } else {
-        return obj.textContent;
-    }
 }
 
 function handelCursors() {

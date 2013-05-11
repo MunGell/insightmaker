@@ -47,7 +47,7 @@ Ext.RichTextWindow = function(args) {
 
 
 	obj.win = new Ext.Window({
-		title: 'Note Editor',
+		title: getText('Note Editor'),
 		layout: {
 			type: "fit"
 		},
@@ -69,13 +69,13 @@ Ext.RichTextWindow = function(args) {
 			name: 'richTextItem',
 			id: 'richTextItem',
 			allowBlank: true,
-			emptyText: "Enter a Note...",
+			emptyText: getText("Enter a Note..."),
 			value: obj.args.html
 		})],
 		buttons: [{
 			scale: "large",
 			iconCls: "cancel-icon",
-			text: 'Cancel',
+			text: getText('Cancel'),
 			handler: function() {
 				obj.win.close();
 				if (obj.args.parent != "") {
@@ -85,7 +85,7 @@ Ext.RichTextWindow = function(args) {
 		}, {
 			scale: "large",
 			iconCls: "apply-icon",
-			text: 'Apply',
+			text: getText('Apply'),
 			handler: function() {
 				if (obj.args.parent != "") {
 					obj.args.parent.setValue(Ext.getCmp("richTextItem").getValue());

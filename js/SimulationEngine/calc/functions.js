@@ -26,42 +26,42 @@ defineFunction("RandBoolean", {params: [{name:"Probability", defaultVal: 0.5, no
 });
 defineFunction("Rand", {params: [{name:"Lower Bound", defaultVal: 0, noUnits:true, noVector:true}, {name:"Upper Bound", defaultVal: 1, noUnits:true, noVector:true}]}, function(x){
 	if (x.length != 0) {
-		return new Material(Rand(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+		return new Material(Rand(x[0].toNum().value, x[1].toNum().value));
 	} else {
-		return new Material(Rand(), new UnitStore());
+		return new Material(Rand());
 	}
 });
 defineFunction("RandNormal", {params: [{name:"Mean", defaultVal: 0, noUnits:true, noVector:true}, {name:"Standard Deviation", defaultVal: 1, noUnits:true, noVector:true}]}, function(x){
 	if (x.length != 0) {
-		return new Material(RandNormal(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+		return new Material(RandNormal(x[0].toNum().value, x[1].toNum().value));
 	} else {
-		return new Material(RandNormal(), new UnitStore());
+		return new Material(RandNormal());
 	}
 });
 defineFunction("RandExp", {params: [{name:"Rate", defaultVal: 1, noUnits:true, noVector:true}]}, function(x){
 	if (x.length != 0) {
-		return new Material(RandExp(x[0].toNum().value), new UnitStore());
+		return new Material(RandExp(x[0].toNum().value));
 	} else {
-		return new Material(RandExp(), new UnitStore());
+		return new Material(RandExp());
 	}
 });
 defineFunction("RandLognormal", {params: [{name:"Mean", noUnits:true, noVector:true}, {name:"Standard Deviation", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandLognormal(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+	return new Material(RandLognormal(x[0].toNum().value, x[1].toNum().value));
 });
 defineFunction("RandBinomial", {params: [{name:"Count", noUnits:true, noVector:true}, {name:"Probability", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandBinomial(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+	return new Material(RandBinomial(x[0].toNum().value, x[1].toNum().value));
 });
 defineFunction("RandNegativeBinomial", {params: [{name:"Successes", noUnits:true, noVector:true}, {name:"Probability", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandNegativeBinomial(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+	return new Material(RandNegativeBinomial(x[0].toNum().value, x[1].toNum().value));
 });
 defineFunction("RandGamma", {params:[{name:"Alpha", noUnits:true, noVector:true}, {name:"Beta", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandGamma(x[0].toNum().value, x[1].toNum().value), new UnitStore());
+	return new Material(RandGamma(x[0].toNum().value, x[1].toNum().value));
 });
 defineFunction("RandPoisson", {params:[{name:"Rate", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandPoisson(x[0].toNum().value), new UnitStore());
+	return new Material(RandPoisson(x[0].toNum().value));
 });
 defineFunction("RandTriangular", {params:[{name:"Minimum", noUnits:true, noVector:true}, {name:"Maximum", noUnits:true, noVector:true}, {name:"Peak", noUnits:true, noVector:true}]}, function(x){
-	return new Material(RandTriangular(x[0].toNum().value, x[1].toNum().value, x[2].toNum().value), new UnitStore());
+	return new Material(RandTriangular(x[0].toNum().value, x[1].toNum().value, x[2].toNum().value));
 });
 
 defineFunction("Real", {params:[{name: "Number", noVector: true}]}, function(x){
@@ -83,24 +83,53 @@ defineFunction("Magnitude", {params:[{name: "Number"}]}, function(x){
 	return r;
 });
 defineFunction("Angle", {params:[{name: "Number", noVector: true}]}, function(x){
-	var r = x[0].toNum();
-	r.value = fn.angle(r.value);
-	return r;
+	return new Material(fn.angle(x[0].toNum().value), new UnitStore(["Radians"], [1]));
 });
 defineFunction("Abs", {params:[{name: "Number", noVector: true}]}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.abs(r.value);
 	return r;
 });
-defineFunction("sin", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
-	return new Material(fn.sin(x[0].toNum().value));
+defineFunction("sin", {params:[{name: "Number", noVector: true}]}, function(x){
+	var z = x[0].toNum();
+	
+	if(! unitless(z.units)){
+		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	}
+	if(unitless(z.units)){
+		return new Material(fn.sin(z.value));
+	}else{
+		throw "MSG: Non-angular units cannot be used in Sin().";
+	}
 });
-defineFunction("cos", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
-	return new Material(fn.cos(x[0].toNum().value));
+defineFunction("cos", {params:[{name: "Number", noVector: true}]}, function(x){
+	var z = x[0].toNum();
+	
+	if(! unitless(z.units)){
+		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	}
+	if(unitless(z.units)){
+		return new Material(fn.cos(z.value));
+	}else{
+		throw "MSG: Non-angular units cannot be used in Cos().";
+	}
+	
 });
-defineFunction("tan", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
-	return new Material(fn.tan(x[0].toNum().value));
+defineFunction("tan", {params:[{name: "Number", noVector: true}]}, function(x){
+	var z = x[0].toNum();
+	
+	if(! unitless(z.units)){
+		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	}
+	if(unitless(z.units)){
+		return new Material(fn.tan(z.value));
+	}else{
+		throw "MSG: Non-angular units cannot be used in Tan().";
+	}
+	
 });
+
+
 defineFunction("asin", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
 	return new Material(fn.asin(x[0].toNum().value));
 });
@@ -110,6 +139,17 @@ defineFunction("acos", {params:[{name: "Number", noVector: true, noUnits: true}]
 defineFunction("atan", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
 	return new Material(fn.atan(x[0].toNum().value));
 });
+
+defineFunction("arcsin", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+	return new Material(fn.asin(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+});
+defineFunction("arccos", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+	return new Material(fn.acos(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+});
+defineFunction("arctan", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+	return new Material(fn.atan(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+});
+
 defineFunction("Sqrt", {params:[{name: "Number", noVector: true}]}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.sqrt(r.value);

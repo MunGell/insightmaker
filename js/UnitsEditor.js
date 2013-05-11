@@ -79,7 +79,7 @@ Ext.UnitsWindow = function(args) {
 
 		tree.store.removeAll();
 		tree.setRootNode({
-			text: 'Units',
+			text: getText('Units'),
 			draggable: false,
 			id: 'Units',
 			leaf: false,
@@ -105,7 +105,7 @@ Ext.UnitsWindow = function(args) {
 		});
 		
 		lastNode = roots[roots.length - 1].appendChild({
-			text: "Units Used in Model",
+			text: getText("Units Used in Model"),
 			draggable: false,
 			id: "Custom",
 			leaf: false,
@@ -126,7 +126,7 @@ Ext.UnitsWindow = function(args) {
 		
 
 		lastNode = roots[roots.length - 1].appendChild({
-			text: "Custom Units",
+			text: getText("Custom Units"),
 			draggable: false,
 			id: "Custom",
 			leaf: false,
@@ -185,7 +185,7 @@ Ext.UnitsWindow = function(args) {
 	obj.setupUnits(obj.args.tree);
 
 	obj.win = new Ext.Window({
-		title: 'Units Selection',
+		title: getText('Units Selection'),
 		layout: {
 			type: "vbox",
 			align: "stretch"
@@ -205,9 +205,9 @@ Ext.UnitsWindow = function(args) {
 		buttons: [{
 			id: 'units_but',
 			scale: "large",
-			text: 'Custom Units',
+			text: getText('Custom Units'),
 			iconCls: 'units-icon',
-			tooltip: 'Define custom Insight units',
+			tooltip: getText('Define custom units'),
 			handler: function() {
 				var setting = getSetting();
 
@@ -248,7 +248,7 @@ Ext.UnitsWindow = function(args) {
 
 
 				var columnsList = [{
-					header: 'Name',
+					header: getText('Name'),
 					dataIndex: 'name',
 					flex: 2,
 					sortable: true,
@@ -256,11 +256,11 @@ Ext.UnitsWindow = function(args) {
 						xtype: 'textfield',
 						allowBlank: false,
 						regex: /^[a-zA-Z][a-z A-Z]*$/,
-						regexText: "The unit name may only contain letters and spaces."
+						regexText: getText("The unit name may only contain letters and spaces.")
 					}
 				}, {
 					xtype: 'numbercolumn',
-					header: 'Scale',
+					header: getText('Scale'),
 					dataIndex: 'scale',
 					width: 100,
 					sortable: false,
@@ -270,7 +270,7 @@ Ext.UnitsWindow = function(args) {
 						decimalPrecision: 10
 					}
 				}, {
-					header: 'Synonym',
+					header: getText('Synonym'),
 					dataIndex: 'synonym',
 					flex: 3,
 					sortable: false,
@@ -278,7 +278,7 @@ Ext.UnitsWindow = function(args) {
 						xtype: 'textfield',
 						allowBlank: true,
 						regex: /^([a-zA-Z][a-z A-Z]*(\^-?[\d\.]+)?[\*\/]?)*$/,
-						regexText: "The unit synonym should be of the form: Meters*Seconds^2/Kilograms."
+						regexText: getText("The unit synonym should be of the form: Meters*Seconds^2/Kilograms.")
 					}
 				}];
 
@@ -288,7 +288,7 @@ Ext.UnitsWindow = function(args) {
 					features: [],
 					tbar: [{
 						iconCls: 'units-remove-icon',itemId: "removeBut",
-						text: 'Remove Units',
+						text: getText('Remove Units'),
 						disabled: true,
 						handler: function() {
 							editor.completeEdit();
@@ -299,10 +299,10 @@ Ext.UnitsWindow = function(args) {
 						}
 					},"->",{
 						iconCls: 'units-add-icon',
-						text: 'Add Units',
+						text: getText('Add Units'),
 						handler: function() {
 							var e = {
-								name: 'New Unit',
+								name: getText('New Unit'),
 								synonym: '',
 								scale: 1
 							};
@@ -355,7 +355,7 @@ Ext.UnitsWindow = function(args) {
 					layout: 'fit',
 					modal: true,
 					width: 430,
-					title: "Configure Custom Units",
+					title: getText("Configure Custom Units"),
 					height: 330,
 					resizable: true,
 					closeAction: 'close',
@@ -366,12 +366,12 @@ Ext.UnitsWindow = function(args) {
 					buttons: [{
 						scale: "large",
 						iconCls: "cancel-icon",
-						text: 'Cancel',
+						text: getText('Cancel'),
 						handler: function(){unitsWin.close()}
 					},{
 						scale: "large",
 						iconCls: "apply-icon",
-						text: 'Apply',
+						text: getText('Apply'),
 						handler: saveUnits
 					}]
 
@@ -384,7 +384,7 @@ Ext.UnitsWindow = function(args) {
 		{
 			scale: "large",
 			iconCls: "cancel-icon",
-			text: 'Cancel',
+			text: getText('Cancel'),
 			handler: function() {
 				obj.win.close();
 				if (obj.args.parent != "") {
@@ -395,7 +395,7 @@ Ext.UnitsWindow = function(args) {
 			disabled: !is_editor,
 			scale: "large",
 			iconCls: "apply-icon",
-			text: 'Apply',
+			text: getText('Apply'),
 			handler: function() {
 				if (obj.args.parent != "") {
 					obj.args.parent.setValue(obj.args.newUnits);

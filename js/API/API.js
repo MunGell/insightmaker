@@ -555,22 +555,44 @@ Runs a simulation and optionally returns the results.
 
 Parameters:
 
-silent - If false, behaves the same way as if the user clicked the run simulation button. If true, no visible response is shown to running the simulation and the results of the simulation are returned as an object. Defaults to false.
+config - A configuration object. For compatibility, if set to the Boolean value, equivalent to calling runModel with a configuration object with the silent property set to the boolean value.
+config.silent - If false or undefined, behaves the same way as if the user clicked the run simulation button. If true, no visible response is shown to running the simulation and the results of the simulation are returned as an object.
+config.onSuccess(results) - Callback called when the simulation completes successfully.
+config.onError(results) - Callback called when an error occurs during the simulation.
 
 Returns:
 
-If silent is true, returns the simulation results as an object. This object contains the following properties.
+If silent is true, returns the simulation results as a results object. If callbacks are defined, the callbacks are called with a results object. This object contains the following properties.
 
-Time - The times for each period of the simulation as an array.
+times - The times for each period of the simulation as an array.
 value(primitive) - A function that takes a primitive reference and returns an array of the values that primitive took on over the course of the simulation.
 lastValue(primitive) - A function that takes a primitive reference and returns the last value of the primitive during the simulation.
+window - The results window object (if config.silent is false).
 error - "none" if no simulation error occurred, otherwise an error message.
 errorPrimitive - The primitive that caused the error.
 
+Examples:
+
+> # Runs a simulation, and displays the average value of the Stock named "Rabbits"
+> runModel({
+>   onSuccess: function(results){
+>      var sum = 0;
+>      for(var i = 0; i < results.times.length; i++){
+>          sum += results.value(findName("Rabbits"))[i];
+>      }
+>      showMessage("The average value is: " + sum/results.times.length);
+>   }
+> })
+
 */
 
-function runModel(silent) {
-	return runSimulation(silent);
+function runModel(config) {
+	if(isUndefined(config)){
+		config = {};
+	}else if(typeof config == 'boolean'){
+		config = {silent: config};
+	}
+	return runSimulation(config);
 }
 
 /*

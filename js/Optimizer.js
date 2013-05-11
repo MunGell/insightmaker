@@ -70,24 +70,24 @@ function doOptimizer(){
 	var grid = Ext.create('Ext.grid.Panel', {
 	    store: gridStore,
 	    columns: [
-	        {header: 'Primitive Name',  sortable: false, menuDisabled: true, dataIndex: 'id',flex:1,
+	        {header: getText('Primitive Name'),  sortable: false, menuDisabled: true, dataIndex: 'id',flex:1,
 				renderer: function(value) {
 	            	return getName(findID(value));
 	        	}
 			},
-	        {header: 'Minimum Bound', sortable: false, menuDisabled: true, dataIndex: 'minBound',width:90,
+	        {header: getText('Minimum Bound'), sortable: false, menuDisabled: true, dataIndex: 'minBound',width:90,
 	            editor: {
 	                xtype: 'numberfield',
 	                allowBlank: false
 	            }
 	        },
-	        {header: 'Maximum Bound', sortable: false, menuDisabled: true, dataIndex: 'maxBound',width:90,
+	        {header: getText('Maximum Bound'), sortable: false, menuDisabled: true, dataIndex: 'maxBound',width:90,
 	            editor: {
 	                xtype: 'numberfield',
 	                allowBlank: false
 	            }
 	        },
-	        {header: 'Accuracy', sortable: false, menuDisabled: true, dataIndex: 'desiredAccuracy',width:65,
+	        {header: getText('Accuracy'), sortable: false, menuDisabled: true, dataIndex: 'desiredAccuracy',width:65,
 	            editor: {
 	                xtype: 'numberfield',
 	                allowBlank: false,
@@ -115,7 +115,7 @@ function doOptimizer(){
 		frame: true,
 			items: [
 			Ext.create('Ext.form.field.ComboBox', {
-				fieldLabel: 'Goal Primitive',
+				fieldLabel: getText('Goal Primitive'),
 				name: 'optGoalPrimitive',
 				id: 'optGoalPrimitive',
 				displayField: 'pname',
@@ -124,38 +124,38 @@ function doOptimizer(){
 				store: targetConfigStore,
 				forceSelection:true,
 				allowBlank:false,
-				emptyText: 'Select primitive to target',
+				emptyText: getText('Select primitive to target'),
 				value: mySetting.getAttribute("OptimizerGoalPrimitive")?mySetting.getAttribute("OptimizerGoalPrimitive"):undefined
 			}),
 			Ext.create('Ext.form.field.ComboBox', {
-				fieldLabel: 'Goal',
+				fieldLabel: getText('Goal'),
 				name: 'optGoal',
 				id: 'optGoal',
 				queryMode: 'local',
-				store: ["Minimize", "Maximize"],
+				store: [["Minimize", getText("Minimize")], ["Maximize", getText("Maximize")]],
 				forceSelection:true,
 				allowBlank:false,
 				value: mySetting.getAttribute("OptimizerGoal")?mySetting.getAttribute("OptimizerGoal"):"Minimize"
 			}),
 			Ext.create('Ext.form.field.ComboBox', {
-				fieldLabel: 'Goal Type',
+				fieldLabel: getText('Goal Type'),
 				name: 'optGoalType',
 				id: 'optGoalType',
 				queryMode: 'local',
-				store: ["Integral of Value", "Final Value"],
+				store: [["Integral of Value", getText("Integral of Value")], ["Final Value", getText("Final Value")]],
 				forceSelection:true,
 				allowBlank:false,
 				value: mySetting.getAttribute("OptimizerGoalType")?mySetting.getAttribute("OptimizerGoalType"):"Integral of Value"
 			}),
 			Ext.create('Ext.ux.form.field.BoxSelect', {
-				fieldLabel: 'Primitives to Change',
+				fieldLabel: getText('Primitives to Change'),
 				name: 'optChangePrimitives',
 				id: 'optChangePrimitives',
 				displayField: 'pname',
 				valueField: 'pid',
 				queryMode: 'local',
 				store: changedConfigStore,
-				emptyText: 'Select primitives to adjust',
+				emptyText: getText('Select primitives to adjust'),
 				listeners: {
 					change: function(list, newData, oldData){
 						var newItems = newData.split?newData.split(", "):[];
@@ -189,7 +189,7 @@ function doOptimizer(){
 			items: [
 			
 			new Ext.form.NumberField({
-		        fieldLabel: 'Random Starts',
+		        fieldLabel: getText('Random Starts'),
 		        name: 'nRandomStarts',
 		        id: 'nRandomStarts',
 		        allowBlank: false,
@@ -198,7 +198,7 @@ function doOptimizer(){
 				value: mySetting.getAttribute("OptimizerRandomStarts")?mySetting.getAttribute("OptimizerRandomStarts"):0
 		    }),
 			new Ext.form.NumberField({
-		        fieldLabel: 'Maximum Number of Iterations',
+		        fieldLabel: getText('Maximum Number of Iterations'),
 		        name: 'nIterations',
 		        id: 'nIterations',
 		        allowBlank: false,
@@ -207,7 +207,7 @@ function doOptimizer(){
 				value: mySetting.getAttribute("OptimizerMaxIterations")?mySetting.getAttribute("OptimizerMaxIterations"):100
 		    }),
 			new Ext.form.NumberField({
-		        fieldLabel: 'Step Reduction Factor',
+		        fieldLabel: getText('Step Reduction Factor'),
 		        name: 'nStepReduction',
 		        id: 'nStepReduction',
 		        allowBlank: false,
@@ -221,7 +221,7 @@ function doOptimizer(){
 	});
 								
     var win = new Ext.Window({
-        title: 'Optimization',
+        title: getText('Optimization'),
         layout: 'fit',
         closeAction: 'destroy',
         border: false,
@@ -241,15 +241,15 @@ function doOptimizer(){
 			plain: true,
 			flex: 1,
 			items: [
-			{title: "General", items: [generalForm, grid]},
-			{title: "Advanced", items: advancedForm}
+			{title: getText("General"), items: [generalForm, grid]},
+			{title: getText("Advanced"), items: advancedForm}
 			]})
 		],
         buttons: [
         {
             scale: "large",
             iconCls: "cancel-icon",
-            text: 'Cancel',
+            text: getText('Cancel'),
             handler: function()
             {
                 win.close();
@@ -258,7 +258,7 @@ function doOptimizer(){
         {
             scale: "large",
             iconCls: "apply-icon",
-            text: 'Run Optimization',
+            text: getText('Run Optimization'),
             handler: function()
             {
 				var randomStarts = Ext.getCmp("nRandomStarts").getValue();
@@ -272,11 +272,11 @@ function doOptimizer(){
 				var changePrimitives = Ext.getCmp("optChangePrimitives").getValue();
 				
 				if(changePrimitives.length<1){
-					mxUtils.alert("You must select one or more primitives to change.");
+					mxUtils.alert(getText("You must select one or more primitives to change."));
 					return;
 				}
 				if(! goalPrimitive){
-					mxUtils.alert("You must select a goal primitive to optimize.");
+					mxUtils.alert(getText("You must select a goal primitive to optimize."));
 					return;
 				}
 				var mySetting = getSetting();
@@ -314,7 +314,7 @@ function doOptimizer(){
 				
 				graph.getModel().endUpdate();
 				
-			    optimizerProgress = Ext.MessageBox.show({msg:"Optimizing Model...",icon:'run-icon',width:300, closable:false, modal:true, progress:true, progressText:' '});
+			    optimizerProgress = Ext.MessageBox.show({msg: getText("Optimizing Model..."),icon:'run-icon',width:300, closable:false, modal:true, progress:true, progressText:' '});
 				
 				optimizerController = {runs: -1, randomStarts:randomStarts, optIterations: optIterations, stepReduction: stepReduction, optGoal: goal, goalType: goalType, goalPrimitive: goalPrimitive, changePrimitives: changePrimitives, gridData: gridData};
 				
@@ -491,17 +491,17 @@ function finishOptimizer(){
 		setValue(optimizerController.targets[i], optimizerController.solutionSpace[i+1][supremeBestPoint])
 	}
 	
-	var text = "<div style='padding: 1em; text-align: center;'><p>Your model has been set to the optimum solution.</p><br/>"+optString(supremeBestPoint);
+	var text = "<div style='padding: 1em; text-align: center;'><p>"+getText("Your model has been set to the optimum solution.")+"</p><br/>"+optString(supremeBestPoint);
 	
-	text=text+"<br/><p>Please note that the optimization algorithm is unable to fully account for local minimums or maximums. If your solution space contains such features, the algorithm may have returned erroneous results.</p>"
+	text=text+"<br/><p>"+getText("Please note that the optimization algorithm is unable to fully account for local minimums or maximums. If your solution space contains such features, the algorithm may have returned erroneous results.")+"</p>"
 	if(optimizerController.randomStarts>0 ){
-		text=text+"<hr><p>You specified a total of "+optimizerController.randomStarts+" random iterations. The optimums of the initial iteration and each random one are as follows:<br/>"
+		text=text+"<hr><p>"+getText("You specified a total of %s random iterations. The optimums of the initial iteration and each random one are as follows",optimizerController.randomStarts)+":<br/>"
 		for(var i=0; i<optimizerController.bestPoints.length; i++){
 			text=text+"\n\n"+optString(optimizerController.bestPoints[i])
 		}
 	}
 	
-	text=text+"<hr/><p>Optimization Duration: "+(Date.now()-optimizerController.startTime)/1000+" seconds</p></div>"
+	text=text+"<hr/><p>"+getText("Optimization Duration: %s seconds", (Date.now()-optimizerController.startTime)/1000)+"</p></div>"
 	
 	var tabs = [{name: "Summary", type: "html", data: text}];
 	
@@ -520,7 +520,7 @@ function finishOptimizer(){
 		}
 		
 		tabs.push({
-			name: "Explored Solution Space",
+			name: getText("Explored Solution Space"),
 			  type: "chart",
 			  xLabel: getName(optimizerController.targets[0]),
 			  yLabel: getName(optimizerController.goal)+" "+optimizerController.goalType,
@@ -551,9 +551,9 @@ function finishOptimizer(){
 	its= Ext.Array.unique(its);
 	
 	tabs.push({
-		name: "Iterations",
+		name: getText("Iterations"),
 		  type: "chart",
-		  xLabel: "Iteration",
+		  xLabel: getText("Iteration"),
 		  yLabel: getName(optimizerController.goal)+" "+optimizerController.goalType+" Optimum",
 		  legend: "none",
 		  horizontalGrid: true,
@@ -576,23 +576,23 @@ function finishOptimizer(){
 			data[j].push(optimizerController.solutionSpace[j][i])
 		}
 		if(optimizerController.startPoints.indexOf(i) != -1 ){
-			data[data.length-1].push("Iteration Start");
+			data[data.length-1].push(getText("Iteration Start"));
 		}else if(optimizerController.bestPoints.indexOf(i) != -1 ){
-			data[data.length-1].push("Iteration Optimum");
+			data[data.length-1].push(getText("Iteration Optimum"));
 		}else{
 			data[data.length-1].push("");
 		}
 	}
 	
 	tabs.push({
-		name: "Results Table",
+		name: getText("Results Table"),
 		  type: "table",
 		  data: data,
 		   header: headers
 	});
 	
 	
-	showData("Optimization Results", tabs);
+	showData(getText("Optimization Results"), tabs);
 	
 	optimizerProgress.close();
 }
@@ -736,7 +736,7 @@ function evaluateCurrentPoint(){
 			return k;
 		}
 	}
-	var res = runModel(true);
+	var res = runModel({silent: true});
 	if(res.error != "none"){
 		mxUtils.alert(res.error);
 		highlight(res.errorPrimitive);

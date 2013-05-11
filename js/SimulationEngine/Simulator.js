@@ -22,10 +22,10 @@ var timeIndex;
 var doFullSpeed = false;
 
 //model: {primitives, timeStart, timeLength, timeStep, RKOrder}
-var simulate = function(model, silent, callback){
+var simulate = function(model, config, callback){
 	var firstTime = false;
 	
-	if(isDefined(silent)){
+	if(isDefined(config)){
 		firstTime = true;
 		
 		distanceCache = {};
@@ -34,6 +34,7 @@ var simulate = function(model, silent, callback){
 		
 		simulate.agentsChanged = false;
 		
+		simulate.config = config;
 		simulate.callback = callback;
 		
 		simulate.timeLengthNumber = div(model.timeLength, model.timeStep).value.toPrecision(21);
@@ -67,7 +68,7 @@ var simulate = function(model, silent, callback){
 		fillDataSeries(simulate);
 		
 	}else{
-		silent = false;
+		config = simulate.config;
 	}
 	
 	
@@ -266,7 +267,7 @@ var simulate = function(model, silent, callback){
 		 timeIndex = Math.round((time.value - timeStart.value) / timeStep.value);
 
 		 var timeTaken = new Date().getTime()-start;
-		if((! silent) && (! doFullSpeed) && ( ( (!firstTime) && timeTaken>600) || (simulate.timeCounter/simulate.timeLengthNumber<.12 && timeTaken>200) || timeTaken > 1000 ) ){
+		if((! config.silent) && (! doFullSpeed) && ( ( (!firstTime) && timeTaken>600) || (simulate.timeCounter/simulate.timeLengthNumber<.12 && timeTaken>200) || timeTaken > 1000 ) ){
 			simulatorProgress.updateProgress(simulate.timeCounter/simulate.timeLengthNumber, "Current Time: "+round(Math.min(timeEnd.value,time.value).toString(),12)+" "+time.units.names[0]);
 			setTimeout(simulate,50);
 			return;
@@ -275,13 +276,7 @@ var simulate = function(model, silent, callback){
 	
 	}catch(err){
 		if(err.msg != "STOP"){
-			if(silent){
-				throw err;
-			}else{
-				simulatorProgress.close();
-				handleErrorObject(err);
-				return;
-			}
+			throw err;
 		}
 	}
 	
@@ -347,11 +342,11 @@ var simulate = function(model, silent, callback){
 		}
 	}
 	
-	if(silent){
+	if(config.silent){
 		return simulate.results;
 	}else{
 		simulatorProgress.close();
-		simulate.callback(simulate.results, simulate.displayInformation);
+		simulate.callback(simulate.results, simulate.displayInformation, simulate.config);
 	}
 }
 

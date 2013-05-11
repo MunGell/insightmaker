@@ -289,7 +289,7 @@ function openDisplayConfigure(win) {
 			modal: true,
 			autoScroll: true,
 			width: 410,
-			title: "Chart/Table Configuration",
+			title: getText("Chart/Table Configuration"),
 			height: 580,
 			resizable: false,
 			closeAction: 'hide',
@@ -307,7 +307,7 @@ function openDisplayConfigure(win) {
 				},
 				items: [{
 					xtype: 'fieldset',
-					title: 'General Settings',
+					title: getText('General Settings'),
 					defaultType: 'textfield',
 					defaults: {
 						anchor: '100%'
@@ -317,16 +317,14 @@ function openDisplayConfigure(win) {
 						fieldLabel: 'Title',
 						id: 'chartTitle',
 						name: 'chartTitle',
-						allowBlank: false,
-						regex: /^[a-zA-Z][a-zA-Z0-9\-_ \$\&\?\.\,\#\%]*$/,
-						regexText: "Only letters, numbers, dashes and spaces allowed in titles."
+						allowBlank: false
 					},
 					Ext.create('Ext.form.ComboBox', {
 						fieldLabel: 'Type',
 						name: 'chartType',
 						id: 'chartType',
 						allowBlank: false,
-						store: ["Time Series", "Scatterplot", "Tabular", "Map"],
+						store: [["Time Series", getText("Time Series")], ["Scatterplot", getText("Scatterplot")], ["Tabular", getText("Tabular")], ["Map", getText("Map")]],
 						queryMode: 'local',
 						forceSelection: true,
 						listeners: {
@@ -368,20 +366,20 @@ function openDisplayConfigure(win) {
 							}
 						}
 					}), Ext.create('Ext.ux.form.field.BoxSelect', {
-						fieldLabel: 'Data',
+						fieldLabel: getText('Data'),
 						name: 'chartPrimitives',
 						id: 'chartPrimitives',
 						displayField: 'pname',
 						valueField: 'pid',
 						queryMode: 'local',
 						store: displayConfigStore,
-						emptyText: 'Select which data to display'
+						emptyText: getText('Select which data to display')
 					}), {
 						xtype: 'checkboxfield',
-						fieldLabel: 'Add New',
+						fieldLabel: getText('Add New'),
 						name: 'autoAdd',
 						id: 'autoAdd',
-						boxLabel: "Add newly created primitives to the data"
+						boxLabel: getText("Add newly created primitives to the data")
 					}
 
 					]
@@ -389,7 +387,7 @@ function openDisplayConfigure(win) {
 
 				{
 					xtype: 'fieldset',
-					title: 'Chart Settings',
+					title: getText('Chart Settings'),
 					defaultType: 'textfield',
 					id: "chartSettings",
 					defaults: {
@@ -398,7 +396,7 @@ function openDisplayConfigure(win) {
 					layout: 'anchor',
 					items: [{
 						xtype: 'fieldcontainer',
-						fieldLabel: 'X-Axis',
+						fieldLabel: getText('X-Axis'),
 						layout: 'hbox',
 						defaultType: 'textfield',
 
@@ -408,13 +406,13 @@ function openDisplayConfigure(win) {
 
 						items: [{
 							flex: 1,
-							fieldLabel: 'Label',
+							fieldLabel: getText('Label'),
 							id: 'xAxisLabel',
 							name: 'xAxisLabel'
 						}, {
 							hidden: true,
 							xtype: "numberfield",
-							fieldLabel: 'Min',
+							fieldLabel: getText('Min'),
 							width: 50,
 							id: 'xAxisMin',
 							name: 'xAxisMin',
@@ -422,7 +420,7 @@ function openDisplayConfigure(win) {
 						}, {
 							hidden: true,
 							xtype: "numberfield",
-							fieldLabel: 'Max',
+							fieldLabel: getText('Max'),
 							width: 50,
 							id: 'xAxisMax',
 							name: 'xAxisMax',
@@ -430,7 +428,7 @@ function openDisplayConfigure(win) {
 						}]
 					}, {
 						xtype: 'fieldcontainer',
-						fieldLabel: 'Y-Axis',
+						fieldLabel: getText('Y-Axis'),
 						layout: 'hbox',
 						defaultType: 'textfield',
 
@@ -440,13 +438,13 @@ function openDisplayConfigure(win) {
 
 						items: [{
 							flex: 1,
-							fieldLabel: 'Label',
+							fieldLabel: getText('Label'),
 							id: 'yAxisLabel',
 							name: 'yAxisLabel'
 						}, {
 							hidden: true,
 							xtype: "numberfield",
-							fieldLabel: 'Min',
+							fieldLabel: getText('Min'),
 							width: 50,
 							id: 'yAxisMin',
 							name: 'yAxisMin',
@@ -454,7 +452,7 @@ function openDisplayConfigure(win) {
 						}, {
 							hidden: true,
 							xtype: "numberfield",
-							fieldLabel: 'Max',
+							fieldLabel: getText('Max'),
 							width: 50,
 							id: 'yAxisMax',
 							name: 'yAxisMax',
@@ -462,15 +460,15 @@ function openDisplayConfigure(win) {
 						}]
 					},{xtype:"combo",
 					id: "legendPosition",
-					fieldLabel: 'Legend Position',
+					fieldLabel: getText('Legend Position'),
 					allowBlank: false,
 					store: [
-						"Automatic",
-						"Top",
-						"Right",
-						"Bottom",
-						"Left",
-						"None"
+						["Automatic", getText("Automatic")],
+						["Top", getText("Top")],
+						["Right", getText("Right")],
+						["Bottom", getText("Bottom")],
+						["Left", getText("Left")],
+						["None", getText("None")]
 					],
 					queryMode: 'local',
 					forceSelection: true
@@ -482,28 +480,28 @@ function openDisplayConfigure(win) {
 						items: [{
 							columnWidth: .33,
 							xtype: 'checkboxfield',
-							boxLabel: 'Show Markers',
+							boxLabel: getText('Show Markers'),
 							name: 'showMarkers',
 							inputValue: '1',
 							id: 'showMarkers'
 						}, {
 							columnWidth: .33,
 							xtype: 'checkboxfield',
-							boxLabel: 'Show Lines',
+							boxLabel: getText('Show Lines'),
 							name: 'showLines',
 							inputValue: '1',
 							id: 'showLines'
 						}, {
 							columnWidth: .33,
 							xtype: 'checkboxfield',
-							boxLabel: 'Use Areas',
+							boxLabel: getText('Use Areas'),
 							name: 'showArea',
 							inputValue: '1',
 							id: 'showArea'
 						}]
 					}, {
 						xtype: 'fieldset',
-						title: 'Secondary Y-Axis',
+						title: getText('Secondary Y-Axis'),
 						defaultType: 'textfield',
 						id: "chartSettings2",
 						defaults: {
@@ -512,7 +510,7 @@ function openDisplayConfigure(win) {
 						layout: 'anchor',
 						items: [{
 							xtype: 'fieldcontainer',
-							fieldLabel: 'Axis',
+							fieldLabel: getText('Axis'),
 							layout: 'hbox',
 							defaultType: 'textfield',
 
@@ -522,13 +520,13 @@ function openDisplayConfigure(win) {
 
 							items: [{
 								flex: 1,
-								fieldLabel: 'Label',
+								fieldLabel: getText('Label'),
 								id: 'yAxisLabel2',
 								name: 'yAxisLabel2'
 							}, {
 								hidden: true,
 								xtype: "numberfield",
-								fieldLabel: 'Min',
+								fieldLabel: getText('Min'),
 								width: 50,
 								id: 'yAxisMin2',
 								name: 'yAxisMin2',
@@ -536,7 +534,7 @@ function openDisplayConfigure(win) {
 							}, {
 								hidden: true,
 								xtype: "numberfield",
-								fieldLabel: 'Max',
+								fieldLabel: getText('Max'),
 								width: 50,
 								id: 'yAxisMax2',
 								name: 'yAxisMax2',
@@ -544,14 +542,14 @@ function openDisplayConfigure(win) {
 							}]
 						},
 						Ext.create('Ext.ux.form.field.BoxSelect', {
-							fieldLabel: 'Data',
+							fieldLabel: getText('Data'),
 							name: 'chartPrimitives2',
 							id: 'chartPrimitives2',
 							displayField: 'pname',
 							valueField: 'pid',
 							queryMode: 'local',
 							store: displayConfigStore2,
-							emptyText: 'Select which data to display'
+							emptyText: getText('Select which data to display')
 						})]
 					}]
 				}]
@@ -560,14 +558,14 @@ function openDisplayConfigure(win) {
 			buttons: [{
 				scale: "large",
 				iconCls: "cancel-icon",
-				text: 'Cancel',
+				text: getText('Cancel'),
 				handler: function() {
 					displayConfigWin.hide();
 				}
 			}, {
 				iconCls: "apply-icon",
 				scale: "large",
-				text: 'Apply',
+				text: getText('Apply'),
 				handler: function() {
 					var d = displayConfigWin.myDisplay;
 					var w = displayConfigWin.myWin;
@@ -631,9 +629,9 @@ function openDisplayConfigure(win) {
 						if (type == "Scatterplot") {
 							if (items.length > 2) {
 								items.length = 2;
-								mxUtils.alert("The primitive list for the scatterplot has been truncated to two items. One for the x-Axis and one for the y-Axis.");
+								mxUtils.alert(getText("The primitive list for the scatterplot has been truncated to two items. One for the x-Axis and one for the y-Axis."));
 							} else if (items.length == 1) {
-								mxUtils.alert("You need two items to create a scatterplot. One for the x-Axis and one for the y-Axis.");
+								mxUtils.alert(getText("You need two primitives to create a scatterplot. One for the x-Axis and one for the y-Axis."));
 							}
 						} else if (type == "Map") {
 							//console.log(items);
@@ -652,7 +650,7 @@ function openDisplayConfigure(win) {
 
 							}
 							if (removed) {
-								mxUtils.alert("Map displays can only show agent population primitives.");
+								mxUtils.alert(getText("Map charts can only show agent population primitives."));
 							}
 						}
 						graph.getModel()
@@ -691,7 +689,7 @@ function openDisplayConfigure(win) {
 						graph.getModel()
 							.endUpdate();
 					} else {
-						mxUtils.alert("Correct display configuration before applying.");
+						mxUtils.alert(getText("Correct the display configuration before applying."));
 					}
 				}
 			}
@@ -797,7 +795,7 @@ function renderDisplay(display, displayInformation) {
 	if (primitives.length == 0 || (type == "Scatterplot" && primitives.length < 2)) {
 		return {
 			xtype: "box",
-			html: "<br/><br/><br/><b><big><center><span style='color:darkgray'>No data to display<br/><br/>Press 'Configure' to select data</span></center></big></b>"
+			html: "<br/><br/><br/><b><big><center><span style='color:darkgray'>"+getText("No data to display")+"<br/><br/>Press 'Configure' to select data</span></center></big></b>"
 		};
 	}
 
@@ -805,7 +803,7 @@ function renderDisplay(display, displayInformation) {
 	var histograms = [];
 	if (type == "Tabular") {
 		var cols = [{
-			header: "Time",
+			header: getText("Time"),
 			sortable: true,
 			flex: 1,
 			dataIndex: "TimeValue",
@@ -1615,14 +1613,14 @@ function createResultsWindow(displayInformation) {
 
 					} else {
 
-						mxUtils.alert("No chart or table to delete");
+						mxUtils.alert(getText("No chart or table to delete."));
 					}
 				}
 			}, {
 				scale: "large",
 				iconCls: "leftarrow-icon",
 				text: '',
-				tooltip: "Move display to the left.",
+				tooltip: getText("Move display to the left."),
 				handler: function() {
 
 					var win = this.findParentByType("window");
@@ -1642,14 +1640,14 @@ function createResultsWindow(displayInformation) {
 						tabs.setActiveTab(child);
 
 					} else {
-						mxUtils.alert("No chart or table to reorder.");
+						mxUtils.alert(getText("No chart or table to reorder."));
 					}
 				}
 			}, {
 				scale: "large",
 				iconCls: "rightarrow-icon",
 				text: '',
-				tooltip: "Move display to the right.",
+				tooltip: getText("Move display to the right."),
 				handler: function() {
 
 					var win = this.findParentByType("window");
@@ -1668,13 +1666,13 @@ function createResultsWindow(displayInformation) {
 						tabs.add(child);
 						tabs.setActiveTab(child);
 					} else {
-						mxUtils.alert("No chart or table to reorder.");
+						mxUtils.alert(getText("No chart or table to reorder."));
 					}
 				}
 			}, '->', {
 				scale: "large",
 				iconCls: "scratchpad-large-icon",
-				text: 'Scratchpad',
+				text: getText('Scratchpad'),
 				handler: function() {
 
 					var win = this.findParentByType("window");
@@ -1703,19 +1701,19 @@ function createResultsWindow(displayInformation) {
 							return;
 						}
 					}
-					mxUtils.alert("Scratchpads can only be shown for charts.");
+					mxUtils.alert(getText("Scratchpads can only be shown for charts."));
 
 				}
 			}, {
 				scale: "large",
 				iconCls: "configure-icon",
-				text: 'Configure',
+				text: getText('Configure'),
 				handler: function() {
 					var win = this.findParentByType("window");
 					if (win.displays.length > 0) {
 						openDisplayConfigure(win);
 					} else {
-						mxUtils.alert("Add a chart or table to configure it");
+						mxUtils.alert(getText("Add a chart or table to configure it."));
 					}
 				}
 			}
@@ -1736,6 +1734,8 @@ function createResultsWindow(displayInformation) {
 	});
 	resultsWindows.push(win);
 	win.show();
+	
+	return win;
 }
 
 function buildMapStore(item, time) {

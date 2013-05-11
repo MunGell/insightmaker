@@ -23,7 +23,7 @@ function showFindAndReplace(){
 				items: [
 				{
 					xtype: 'textareafield',
-				    fieldLabel: 'Search Text',
+				    fieldLabel: getText('Search Text'),
 				    name: 'frSearchData',
 				    id: 'frSearchData',
 				    allowBlank: false,
@@ -35,27 +35,27 @@ function showFindAndReplace(){
         		}
 				}, {
 					xtype: 'textareafield',
-				    fieldLabel: 'Replace Text',
+				    fieldLabel: getText('Replace Text'),
 				    name: 'frReplaceData',
 				    id: 'frReplaceData',
 				    allowBlank: true,
 					selectOnFocus: true, height:60
 				},{
             xtype: 'checkboxgroup',
-            fieldLabel: 'Search In',
+            fieldLabel: getText('Search in'),
             items: [{
-	                boxLabel: 'Names',
+	                boxLabel: getText('Names'),
 	                inputValue: '1',
 	                name: 'frSearchNames',
 	                id: 'frSearchNames',
 					value:'1',checked:true
 	            },
-				{boxLabel: 'Notes',
+				{boxLabel: getText('Notes'),
 	                inputValue: '1',
 	                name: 'frSearchNotes',
 	                id: 'frSearchNotes'
 	            },
-				{boxLabel: 'Values',
+				{boxLabel: getText('Equations'),
 	                inputValue: '1',
 	                name: 'frSearchValues',
 	                id: 'frSearchValues'
@@ -63,7 +63,7 @@ function showFindAndReplace(){
       	  		}
 	            ,{
 					xtype: "checkboxfield",
-	                fieldLabel: 'Case Sensitive',
+	                fieldLabel: getText('Case Sensitive'),
 	                inputValue: '1',
 	                name: 'frCaseSensitive',
 	                id: 'frCaseSensitive'
@@ -72,7 +72,7 @@ function showFindAndReplace(){
 		});
 								
 	    findAndReplaceWin = new Ext.Window({
-	        title: 'Find and Replace',
+	        title: getText('Find and Replace'),
 	        layout: 'fit',
 	        closeAction: 'hide',
 	        border: false,
@@ -90,7 +90,7 @@ function showFindAndReplace(){
 	        {
 	            scale: "large",
 	            iconCls: "cancel-icon",
-	            text: 'Cancel',
+	            text: getText('Cancel'),
 	            handler: function()
 	            {
 	                findAndReplaceWin.hide();
@@ -99,7 +99,7 @@ function showFindAndReplace(){
 	        {
 	            scale: "large",
 	            iconCls: "replace-icon",
-	            text: 'Replace All',
+	            text: getText('Replace All'),
 	            handler: function()
 	            {
 					var items = primitives();
@@ -116,7 +116,7 @@ function showFindAndReplace(){
 					}
 					
 					if((! searchNames) && (! searchValues) && (! searchNotes)){
-						mxUtils.alert("You must replace within at least one category.");
+						mxUtils.alert(getText("You must search within at least one category."));
 						return;
 					}
 					graph.getModel().beginUpdate();
@@ -140,7 +140,7 @@ function showFindAndReplace(){
 	        },{
 	            scale: "large",
 	            iconCls: "find-icon",
-	            text: 'Find Next',
+	            text: getText('Find Next'),
 				disabled: true,
 				id: 'findNextBut',tooltip: cmd("G"),
 	            handler: function()
@@ -151,7 +151,7 @@ function showFindAndReplace(){
 	        {
 	            scale: "large",
 	            iconCls: "find-icon",
-	            text: 'Find',
+	            text: getText('Find'),
 	            handler: function()
 	            {
 					findFirst();

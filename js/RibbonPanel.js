@@ -24,7 +24,7 @@ var showMacros = function() {
 				modal: true,
 				autoScroll: true,
 				width: 440,
-				title: "Insight Macros",
+				title: getText("Insight Macros"),
 				height: 360,
 				resizable: false,
 				closeAction: 'close',
@@ -41,14 +41,14 @@ var showMacros = function() {
 					},
 					items: [{
 						xtype: "textareafield",
-						fieldLabel: 'Macros',
+						fieldLabel: getText('Macros'),
 						id: 'macroTxt',
 						name: 'macroTxt',
 						height: 210
 					}, {
 						xtype: "displayfield",
 						labelAlign: 'center',
-						fieldLabel: 'Example Macros',
+						fieldLabel: getText('Example Macros'),
 						value: "g <- {9.80665 meters/seconds^2}<br/>TemperatureFtoC(f) <- (f+32)*5/9"
 					}]
 				})],
@@ -56,14 +56,14 @@ var showMacros = function() {
 				buttons: [{
 					scale: "large",
 					iconCls: "cancel-icon",
-					text: 'Cancel',
+					text: getText('Cancel'),
 					handler: function() {
 						macrosWin.hide();
 					}
 				}, {
 					iconCls: "apply-icon",
 					scale: "large",
-					text: 'Apply',
+					text: getText('Apply'),
 					handler: function() {
 
 						graph.getModel().beginUpdate();
@@ -277,7 +277,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 		width: 120,
 		colspan: 3,
 		triggerAction: 'all',
-		emptyText: 'Select a font...',
+		emptyText: getText('Select a font...'),
 		selectOnFocus: true,
 		listeners: {
 			select: function(p, entry) {
@@ -460,7 +460,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 		zoomMenu.items.push(
 /*'-',
         {
-            text: 'Vertical Hierarchical Layout',
+            text: getText('Vertical Hierarchical Layout'),
             scope: this,
             handler: function(item)
             {
@@ -469,7 +469,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
             }
         },
         {
-            text: 'Horizontal Hierarchical Layout',
+            text: getText('Horizontal Hierarchical Layout'),
             scope: this,
             handler: function(item)
             {
@@ -479,13 +479,13 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
             }
         },*/
 		'-', {
-			text: 'Organic Layout',
+			text: getText('Organic Layout'),
 			scope: this,
 			handler: function(item) {
 				layoutModel("organic");
 			}
 		}, {
-			text: 'Circle Layout',
+			text: getText('Circle Layout'),
 			scope: this,
 			handler: function(item) {
 				layoutModel("circular");
@@ -513,7 +513,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 4,
 				height: 95,
-				title: 'Primitives',
+				title: getText('Primitives'),
 				id: 'valued',
 				items: [{
 					iconAlign: 'top',
@@ -521,9 +521,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					cls: 'x-btn-as-arrow',
 					rowspan: 3,
 					id: 'stock',
-					text: 'Stock',
+					text: getText('Stock'),
 					iconCls: 'stock-icon',
-					tooltip: 'Create a new Stock by clicking on the canvas',
+					tooltip: getText('Create a new Stock by clicking on the canvas'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
@@ -534,9 +534,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					cls: 'x-btn-as-arrow',
 					rowspan: 3,
 					id: 'variable',
-					text: 'Variable',
+					text: getText('Variable'),
 					iconCls: 'parameter-icon',
-					tooltip: 'Create a new Variable by clicking on the canvas',
+					tooltip: getText('Create a new Variable by clicking on the canvas'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
@@ -546,18 +546,18 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 
 				{
 					id: 'converter',
-					text: 'Converter',
+					text: getText('Converter'),
 					iconCls: 'converter-icon',
-					tooltip: 'Create a new Converter by clicking on the canvas',
+					tooltip: getText('Create a new Converter by clicking on the canvas'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
 					scope: this
 				}, {
 					id: 'text',
-					text: 'Text',
+					text: getText('Text'),
 					iconCls: 'font-icon',
-					tooltip: 'Create a new Text Area by clicking on the canvas',
+					tooltip: getText('Create a new Text Area by clicking on the canvas'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
@@ -566,32 +566,32 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 
 				{
 					id: 'ghostBut',
-					text: 'Ghost',
+					text: getText('Ghost'),
 					iconCls: 'ghost-icon',
-					tooltip: 'Create a linked clone of the selected primitive which can help you organize your model',
+					tooltip: getText('Create a linked clone of the selected primitive which can help you organize your model'),
 					scope: this,
 					handler: makeGhost
 				}, {
 					id: 'picture',
-					text: 'Picture',
+					text: getText('Picture'),
 					iconCls: 'picture-icon',
-					tooltip: 'Create a new Picture by clicking on the canvas',
+					tooltip: getText('Create a new Picture by clicking on the canvas'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
 					scope: this
 				}, {
 					id: 'folder',
-					text: 'Folder',
+					text: getText('Folder'),
 					iconCls: 'folder-icon',
-					tooltip: 'Creates a new Folder containing the selected primitives',
+					tooltip: getText('Creates a new Folder containing the selected primitives'),
 					scope: this,
 					handler: makeFolder
 				}, {
 					id: 'buttonBut',
-					text: 'Button',
+					text: getText('Button'),
 					iconCls: 'button-icon',
-					tooltip: 'Creates a new Button with interactivity',
+					tooltip: getText('Creates a new Button with interactivity'),
 					scope: this,
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
@@ -605,13 +605,13 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 1,
 				height: 95,
-				title: 'Connections',
+				title: getText('Connections'),
 				id: 'connect',
 				items: [{
 					id: 'link',
-					text: 'Link',
+					text: getText('Link'),
 					iconCls: 'link-small-icon',
-					tooltip: 'Use Links to connect primitives',
+					tooltip: getText('Use Links to connect primitives'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: false,
@@ -619,9 +619,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}, {
 					id: 'flow',
-					text: 'Flow',
+					text: getText('Flow'),
 					iconCls: 'flow-small-icon',
-					tooltip: 'Use Flows to connect primitives',
+					tooltip: getText('Use Flows to connect primitives'),
 					enableToggle: true,
 					toggleHandler: handlePrimToggle,
 					pressed: drupal_node_ID == -1,
@@ -629,9 +629,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}, {
 					id: 'reverse',
-					text: 'Reverse',
+					text: getText('Reverse'),
 					iconCls: 'reverse-icon',
-					tooltip: 'Reverse connection direction',
+					tooltip: getText('Reverse connection direction'),
 					handler: function() {
 						graph.getModel().beginUpdate();
 
@@ -671,33 +671,33 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 2,
 				height: 95,
-				title: 'Actions',
+				title: getText('Actions'),
 				id: 'actions',
 				items: [
 
 				{
 					id: 'undo',
-					text: 'Undo',
+					text: getText('Undo'),
 					iconCls: 'undo-icon',
-					tooltip: 'Undo change ' + cmd("Z"),
+					tooltip: getText('Undo change') + ' ' + cmd("Z"),
 					handler: function() {
 						undoHistory.undo();
 					},
 					scope: this
 				}, {
 					id: 'redo',
-					text: 'Redo',
+					text: getText('Redo'),
 					iconCls: 'redo-icon',
-					tooltip: 'Redo change ' + cmd("Y"),
+					tooltip: getText('Redo change') +' '+ cmd("Y"),
 					handler: function() {
 						undoHistory.redo();
 					},
 					scope: this
 				}, {
 					id: 'copy',
-					text: 'Copy',
+					text: getText('Copy'),
 					iconCls: 'copy-icon',
-					tooltip: 'Copy ' + cmd("C"),
+					tooltip: getText('Copy') + ' ' + cmd("C"),
 					handler: function() {
 						mxClipboard.copy(graph);
 						clipboardListener();
@@ -705,9 +705,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}, {
 					id: 'cut',
-					text: 'Cut',
+					text: getText('Cut'),
 					iconCls: 'cut-icon',
-					tooltip: 'Cut ' + cmd("X"),
+					tooltip: getText('Cut') + ' ' + cmd("X"),
 					handler: function() {
 						mxClipboard.cut(graph);
 
@@ -716,9 +716,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					},
 					scope: this
 				}, {
-					text: 'Paste',
+					text: getText('Paste'),
 					iconCls: 'paste-icon',
-					tooltip: 'Paste ' + cmd("V"),
+					tooltip: getText('Paste') + ' ' + cmd("V"),
 					id: 'paste',
 					handler: function() {
 						mxClipboard.paste(graph);
@@ -729,9 +729,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}, {
 					id: 'delete',
-					text: 'Delete',
+					text: getText('Delete'),
 					iconCls: 'delete-icon',
-					tooltip: 'Delete',
+					tooltip: getText('Delete primitive'),
 					handler: function() {
 						graph.removeCells(graph.getSelectionCells(), false);
 					},
@@ -742,7 +742,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 5,
 				height: 95,
-				title: 'Styles',
+				title: getText('Styles'),
 				id: 'style',
 				items: [
 
@@ -753,26 +753,26 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				{
 					id: 'fontcolor',
 					text: '',
-					tooltip: 'Font Color',
+					tooltip: getText('Font Color'),
 					iconCls: 'fontcolor-icon',
 					menu: fontColorMenu
 				}, {
 					id: 'linecolor',
 					text: '',
-					tooltip: 'Line Color',
+					tooltip: getText('Line Color'),
 					iconCls: 'linecolor-icon',
 					menu: lineColorMenu
 				}, {
 					id: 'fillcolor',
 					text: '',
 					colspan: 1,
-					tooltip: 'Fill Color',
+					tooltip: getText('Fill Color'),
 					iconCls: 'fillcolor-icon',
 					menu: fillColorMenu
 				}, {
 					id: 'movemenu',
 					text: '',
-					tooltip: 'Change Order',
+					tooltip: getText('Change Order'),
 					iconCls: 'back-icon',
 					handler: function() {},
 					menu: {
@@ -780,7 +780,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 						cls: 'move-menu',
 						items: [{
 							id: 'moveback',
-							text: 'Move to Back',
+							text: getText('Move to Back'),
 							iconCls: 'back-icon',
 							handler: function() {
 								graph.orderCells(true);
@@ -788,7 +788,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							scope: this
 						}, {
 							id: 'movefront',
-							text: 'Move to Front',
+							text: getText('Move to Front'),
 							iconCls: 'front-icon',
 							handler: function() {
 								graph.orderCells(false);
@@ -799,7 +799,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				}, {
 					id: 'picturemenu',
 					text: '',
-					tooltip: 'Adjust Picture',
+					tooltip: getText('Adjust Picture'),
 					iconCls: 'picture-icon',
 					handler: function() {},
 					menu: {
@@ -808,7 +808,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 						items: [
 						{
 							id: 'fliphitem',
-							text: 'Flip Horizontal',
+							text: getText('Flip Horizontal'),
 							iconCls: 'fliph-icon',
 							handler: function() {
 								var cells = excludeType(getSelected(), "Ghost");
@@ -829,7 +829,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							scope: this
 						}, {
 							id: 'flipvitem',
-							text: 'Flip Vertical',
+							text: getText('Flip Vertical'),
 							iconCls: 'flipv-icon',
 							handler: function() {
 								var cells = excludeType(getSelected(), "Ghost");
@@ -851,7 +851,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					id: 'bold',
 					text: '',
 					iconCls: 'bold-icon',
-					tooltip: 'Bold ' + cmd("B"),
+					tooltip: getText('Bold') + ' ' + cmd("B"),
 					handler: function() {
 						graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD, excludeType(graph.getSelectionCells(), "Ghost"));
 						setStyles();
@@ -860,7 +860,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				}, {
 					id: 'italic',
 					text: '',
-					tooltip: 'Italic ' + cmd("I"),
+					tooltip: getText('Italic') + ' ' + cmd("I"),
 					iconCls: 'italic-icon',
 					handler: function() {
 						graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_ITALIC, excludeType(graph.getSelectionCells(), "Ghost"));
@@ -871,7 +871,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					id: 'underline',
 					text: '',
 					enableToggle: true,
-					tooltip: 'Underline ' + cmd("U"),
+					tooltip: getText('Underline') + ' ' + cmd("U"),
 					iconCls: 'underline-icon',
 					handler: function() {
 						graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_UNDERLINE, excludeType(graph.getSelectionCells(), "Ghost"));
@@ -882,13 +882,13 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					id: 'align',
 					text: '',
 					iconCls: 'left-icon',
-					tooltip: 'Label Position',
+					tooltip: getText('Label Position'),
 					handler: function() {},
 					menu: {
 						id: 'reading-menu',
 						cls: 'reading-menu',
 						items: [{
-							text: 'Align Left',
+							text: getText('Align Left'),
 							checked: false,
 							group: 'rp-group',
 							scope: this,
@@ -897,7 +897,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 								graph.setCellStyles(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_LEFT, excludeType(graph.getSelectionCells(), "Ghost"));
 							}
 						}, {
-							text: 'Align Center',
+							text: getText('Align Center'),
 							checked: true,
 							group: 'rp-group',
 							scope: this,
@@ -906,7 +906,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 								graph.setCellStyles(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER, excludeType(graph.getSelectionCells(), "Ghost"));
 							}
 						}, {
-							text: 'Align Right',
+							text: getText('Align Right'),
 							checked: false,
 							group: 'rp-group',
 							scope: this,
@@ -916,7 +916,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							}
 						}, '-',
 						{
-							text: 'Position Middle',
+							text: getText('Position Middle'),
 							checked: true,
 							group: 'vrp-group',
 							scope: this,
@@ -936,7 +936,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							}
 						},
 						{
-							text: 'Position Top',
+							text: getText('Position Top'),
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
@@ -955,7 +955,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 								
 							}
 						},{
-							text: 'Position Right',
+							text: getText('Position Right'),
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
@@ -974,7 +974,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 								
 							}
 						}, {
-							text: 'Position Bottom',
+							text: getText('Position Bottom'),
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
@@ -993,7 +993,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 								
 							}
 						}, {
-							text: 'Position Left',
+							text: getText('Position Left'),
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
@@ -1030,9 +1030,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				items: [{
 					iconAlign: 'top',
 					id: 'scratchpadLarge',
-					text: 'Scratchpad',
+					text: getText('Scratchpad'),
 					iconCls: 'scratchpad-large-icon',
-					tooltip: 'Draw a sketch on your diagram ' + cmd("K"),
+					tooltip: getText('Draw a sketch on your diagram') + ' ' + cmd("K"),
 					enableToggle: true,
 					scale: 'large',
 					cls: 'button',
@@ -1044,9 +1044,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scale: 'large',
 					cls: 'button',
 					rowspan: 3,
-					text: 'Zoom',
+					text: getText('Zoom'),
 					iconCls: 'zoom-large-icon',
-					tooltip: 'Zoom Diagram',
+					tooltip: getText('Zoom Diagram'),
 					id: 'zoomlargebutgrouped',
 					handler: function(menu) {},
 					menu: zoomMenu
@@ -1065,47 +1065,47 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					cls: 'x-btn-as-arrow',
 					rowspan: 3,
 					id: 'config',
-					text: 'Time Settings',
+					text: getText('Time Settings'),
 					iconCls: 'clock-icon',
-					tooltip: 'Configure Insight Time Settings ' + cmd("L"),
+					tooltip: getText('Configure time start and stop') + ' ' + cmd("L"),
 					handler: timeSettingsFn,
 					scope: this
 				}, {
 					hidden: (!is_editor) || is_embed,
 					id: 'scratchpad',
-					text: 'Scratchpad',
+					text: getText('Scratchpad'),
 					iconCls: 'scratchpad-icon',
-					tooltip: 'Draw notes on your diagram ' + cmd("K"),
+					tooltip: getText('Draw notes on your diagram') + ' ' + cmd("K"),
 					enableToggle: true,
 					handler: scratchpadFn,
 					scope: this
 				}, {
 					hidden: (!is_editor) || is_embed,
 					id: 'macroBut',
-					text: 'Macros',
+					text: getText('Macros'),
 					iconCls: 'download-icon',
-					tooltip: 'Edit macro functions and constants for use anywhere in the Insight',
+					tooltip: getText('Edit macro functions and constants for use anywhere in your equations'),
 					handler: showMacros,
 					scope: this
 				},{
 					hidden: (!is_editor) || is_embed,
 					id: 'sensitivityBut',
-					text: 'Sensitivity',
+					text: getText('Sensitivity'),
 					iconCls: 'sensitivity-icon',
-					tooltip: 'Sensitivity testing',
+					tooltip: getText('Sensitivity testing'),
 					handler: doSensitivity,
 					scope: this
 				},{
 					id: 'embed_but',
-					text: 'Embed',
+					text: getText('Embed'),
 					hidden: (!is_editor) || is_embed,
 					iconCls: 'embed-icon',
-					tooltip: 'Embed this Insight in another web page',
+					tooltip: getText('Embed this Insight in another web page'),
 					handler: function() {
 						if (drupal_node_ID == -1) {
 							Ext.MessageBox.show({
-								title: 'Save this Insight',
-								msg: 'You must save this Insight before you can embed it in another webpage.',
+								title: getText('Save the Insight'),
+								msg: getText('You must save this Insight before you can embed it.'),
 								buttons: Ext.MessageBox.OK,
 								animEl: 'mb9',
 								icon: Ext.MessageBox.ERROR
@@ -1113,8 +1113,8 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 						} else {
 
 							Ext.MessageBox.show({
-								title: 'Embed',
-								msg: 'To embed this Insight in another webpage (such as a blog or a private site), copy and paste the following code into the source HTML code of your webpage:<br/><br/><center><tt>&lt;IFRAME SRC="http://InsightMaker.com/insight/' + drupal_node_ID + '/embed?topBar=1&sideBar=1&zoom=1" TITLE="Embedded Insight" width=600 height=420&gt;&lt;/IFRAME&gt;</tt></center><br/>',
+								title: getText('Embed'),
+								msg: getText('To embed this Insight in another webpage (such as a blog or a private site), copy and paste the following code into the source HTML code of your webpage: %s', '<br/><br/><center><tt>&lt;IFRAME SRC="http://InsightMaker.com/insight/' + drupal_node_ID + '/embed?topBar=1&sideBar=1&zoom=1" TITLE="Embedded Insight" width=600 height=420&gt;&lt;/IFRAME&gt;</tt></center><br/>'),
 								buttons: Ext.MessageBox.OK,
 								animEl: 'mb9',
 								icon: Ext.MessageBox.INFO
@@ -1125,17 +1125,17 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				},{
 					hidden: (!is_editor) || is_embed,
 					id: 'textBut',
-					text: 'Equations',
+					text: getText('Equations'),
 					iconCls: 'equations-icon',
-					tooltip: 'A listing of all equations in the Insight',
+					tooltip: getText('A listing of all equations in the Insight'),
 					handler: textEquations,
 					scope: this
 				},{
 					hidden: (!is_editor) || is_embed,
 					id: 'optimizeBut',
-					text: 'Optimize',
+					text: getText('Optimize'),
 					iconCls: 'optimize-icon',
-					tooltip: 'Optimize model parameters',
+					tooltip: getText('Optimize model parameters'),
 					handler: doOptimizer,
 					scope: this
 				}
@@ -1146,9 +1146,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				hidden: (!is_embed),
 				iconAlign: 'top',
 				id: 'scratchpadLargeEmbed',
-				text: 'Scratchpad',
+				text: getText('Scratchpad'),
 				iconCls: 'scratchpad-large-icon',
-				tooltip: 'Draw notes on your diagram ' + cmd("K"),
+				tooltip: getText('Draw notes on your diagram') + ' ' + cmd("K"),
 				enableToggle: true,
 				scale: 'large',
 				cls: 'button',
@@ -1161,9 +1161,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				scale: 'large',
 				cls: 'button',
 				rowspan: 3,
-				text: 'Zoom',
+				text: getText('Zoom'),
 				iconCls: 'zoom-large-icon',
-				tooltip: 'Zoom Diagram',
+				tooltip: getText('Zoom Diagram'),
 				id: 'zoomlargebutEmbed',
 				handler: function(menu) {},
 				menu: zoomMenu
@@ -1182,9 +1182,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scale: 'large',
 					cls: 'x-btn-as-arrow',
 					rowspan: 3,
-					text: 'Save Insight',
+					text: getText('Save Insight'),
 					iconCls: 'save-icon',
-					tooltip: 'Save Insight ' + cmd("S"),
+					tooltip: getText('Save Insight') + ' ' + cmd("S"),
 					id: 'savebut',
 					handler: function() {
 						saveModel();
@@ -1198,9 +1198,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				cls: 'button',
 				rowspan: 3,
 				id: 'run_embed',
-				text: 'Run Simulation',
+				text: getText('Run Simulation'),
 				iconCls: 'run-icon',
-				tooltip: 'Run ' + cmd("Enter"),
+				tooltip: getText('Run') + ' ' + cmd("Enter"),
 				handler: function() {
 					runModel()
 				},
@@ -1209,7 +1209,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				hidden: is_embed,
 				xtype: 'buttongroup',
 				columns: 1,
-				title: 'Simulate',
+				title: getText('Simulate'),
 				height: 95,
 				items: [{
 					iconAlign: 'top',
@@ -1219,7 +1219,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					id: 'run',
 					text: 'Run Simulation',
 					iconCls: 'run-icon',
-					tooltip: 'Run ' + cmd("Enter"),
+					tooltip: getText('Run') + ' ' + cmd("Enter"),
 					handler: function(me, evt) {
 						runModel();
 					},

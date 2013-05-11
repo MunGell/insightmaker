@@ -14,9 +14,9 @@ var strictUnits = null;
 var submodels = null;
 
 
-function runSimulation(silent) {
+function runSimulation(config) {
 	try {
-		return innerRunSimulation(silent);//have an inner funciton call to escape try-catch performance pathologies
+		return innerRunSimulation(config);//have an inner function call to escape try-catch performance pathologies
 	} catch (err) {
 		if (isLocal()) {
 			console.log(err);
@@ -25,34 +25,34 @@ function runSimulation(silent) {
 		if (isDefined(simulatorProgress) && simulatorProgress != null) {
 			simulatorProgress.close()
 		};
-
-		if (!silent) {
-			if (err.msg) {
-				handleErrorObject(err)
-			} else {
-				handleErrorObject({
-					msg: "Unknown model generation error."
-				});
-			}
-		}
-
+		
+		var errOut;
 		if (err.msg) {
-			return {
+			errOut = {
 				error: err.msg,
 				errorPrimitive: findID(err.primitive.id)
 			};
 		} else {
-			return {
+			errOut = {
 				error: "Unknown model error.",
 				errorPrimitive: null
 			};
+		}
+		
+		
+		if(config.onError){
+			config.onError(errOut)
+		}
+		if (! config.silent) {
+			handleErrorObject(err)
+		}else{
+			return errOut;
 		}
 	}
 }
 
 var timeUnits = null;
-function innerRunSimulation(silent) {
-	silent = isUndefined(silent) ? false : silent;
+function innerRunSimulation(config) {
 	
 	allPlaceholders = [];
 	var model = {};
@@ -291,24 +291,12 @@ function innerRunSimulation(silent) {
 
 	model["submodels"] = submodels;
 
-	if (silent) {
-		var res = simulate(model, true);
-		
-		res.error = "none";
-		res.errorPrimitive = null;
-		res.names = {};
-		var items = submodels["base"].agents[0].children;
-		for (var i = 0; i < items.length; i++) {
-			res.names[items[i].name] = items[i].id;
+	if (config.silent) {
+		var res = formatSimResults(simulate(model, config));
+		if(config.onSuccess){
+			config.onSuccess(res);
 		}
-		res.value = function(item) {
-			return this[item.id].results;
-		};
-		res.lastValue = function(item) {
-			return this[item.id].results[this[item.id].results.length - 1];
-		};
-		res.periods = res["Time"].length;
-
+		
 		return res;
 	} else {
 		simulatorProgress = Ext.MessageBox.show({
@@ -319,11 +307,31 @@ function innerRunSimulation(silent) {
 			modal: true,
 			progress: true
 		});
-				
-		simulate(model, false, finishSim);
+		
+		simulate(model, config, finishSim);
 	}
 
 	
+}
+
+function formatSimResults(res){
+	res.error = "none";
+	res.errorPrimitive = null;
+	res.names = {};
+	var items = submodels["base"].agents[0].children;
+	for (var i = 0; i < items.length; i++) {
+		res.names[items[i].name] = items[i].id;
+	}
+	res.value = function(item) {
+		return this[item.id].results;
+	};
+	res.lastValue = function(item) {
+		return this[item.id].results[this[item.id].results.length - 1];
+	};
+	res.periods = res.Time.length;
+	res.times = res.Time;
+	
+	return res;
 }
 
 function createUnitStore(u) {
@@ -450,7 +458,7 @@ function aggregateAgentSeries(res){
 	return ret;
 }
 
-function finishSim(res, displayInformation) {
+function finishSim(res, displayInformation, config) {
 	var ids = [];
 	var headers = [];
 	var agents = {};
@@ -552,11 +560,20 @@ function finishSim(res, displayInformation) {
 	displayInformation.store = store;
 
 	//console.log(storeData);
-	createResultsWindow(displayInformation);
+	var win = createResultsWindow(displayInformation);
 
+	if(config.onSuccess){
+		res = formatSimResults(res);
+		res.window = win;
+		config.onSuccess(res);
+	}
 }
 
 function handleErrorObject(err) {
+	if(simulatorProgress){
+		simulatorProgress.close();
+	}
+	
 	if (isLocal()) {
 		console.log(err);
 	}
@@ -569,7 +586,7 @@ function handleErrorObject(err) {
 			}
 		}
 		mxUtils.alert(err.msg);
-	} else {
+	} else if(err.error) {
 		mxUtils.alert(err);
 	}
 }

@@ -57,11 +57,11 @@ function doSensitivity(){
 				valueField: 'pid',
 				queryMode: 'local',
 				store: displayConfigStore,
-				emptyText: 'Select primitives to monitor',
+				emptyText: getText('Select primitives to monitor'),
 				value: mySetting.getAttribute("SensitivityPrimitives")?mySetting.getAttribute("SensitivityPrimitives").split(","):[]
 			}),
 			new Ext.form.NumberField({
-                fieldLabel: 'Number of Runs',
+                fieldLabel: getText('Number of Runs'),
                 name: 'nRuns',
                 id: 'nRuns',
                 allowBlank: false,
@@ -70,7 +70,7 @@ function doSensitivity(){
 				value: mySetting.getAttribute("SensitivityRuns")
             }),
 			{
-                fieldLabel: 'Confidence Regions (%)',
+                fieldLabel: getText('Confidence Regions')+' (%)',
                 name: 'confRegion',
                 id: 'confRegion',
                 allowBlank: false,
@@ -78,7 +78,7 @@ function doSensitivity(){
             },
             {
 				xtype: "checkboxfield",
-                fieldLabel: 'Plot Each Run (slower)',
+                fieldLabel: getText('Plot Each Run (slower)'),
                 inputValue: 'true',
                 name: 'plotEach',
                 id: 'plotEach',
@@ -93,7 +93,7 @@ function doSensitivity(){
 	});
 								
     var win = new Ext.Window({
-        title: 'Sensitivity Analysis',
+        title: getText('Sensitivity Analysis'),
         layout: 'fit',
         closeAction: 'destroy',
         border: false,
@@ -111,7 +111,7 @@ function doSensitivity(){
         {
             scale: "large",
             iconCls: "cancel-icon",
-            text: 'Cancel',
+            text: getText('Cancel'),
             handler: function()
             {
                 win.close();
@@ -120,26 +120,25 @@ function doSensitivity(){
         {
             scale: "large",
             iconCls: "apply-icon",
-            text: 'Run Analysis',
+            text: getText('Run Analysis'),
             handler: function()
-            {	
-				
+            {
 				var nRuns = Ext.getCmp("nRuns").getValue();
 				var items = Ext.getCmp("monPrimitives").getValue();
 				var bounds = Ext.Array.map(Ext.getCmp("confRegion").getValue().split(","), parseFloat);
 				var showRuns = isTrue(Ext.getCmp("plotEach").getValue());
 				
 				if(items.length<1){
-					mxUtils.alert("You must select one or more primitives to monitor.")
+					mxUtils.alert(getText("You must select one or more primitives to monitor."))
 					return
 				}
 				if(bounds.length<1){
-					mxUtils.alert("You must specify one or more bounds as percentages.")
+					mxUtils.alert(getText("You must specify one or more bounds as percentages."))
 					return
 				}
 				for(var b=0; b< bounds.length; b++){
 					if(bounds[b]<=0 || bounds[b]>100){
-						mxUtils.alert("Bounds are percentages that must be between 0 and 100.")
+						mxUtils.alert(getText("Bounds are percentage values that must be between 0 and 100."))
 						return
 					}
 				}
@@ -169,7 +168,7 @@ function doSensitivity(){
 				
 				graph.getModel().endUpdate();
 				
-			    sensitivityProgress = Ext.MessageBox.show({msg:"Running Sensitivity Analysis...",icon:'run-icon',width:300, closable:false, modal:true, progress:true, progressText:' '});
+			    sensitivityProgress = Ext.MessageBox.show({msg:getText("Running Sensitivity Analysis..."),icon:'run-icon',width:300, closable:false, modal:true, progress:true, progressText:' '});
 				
 				sensitivityController = {nRuns:nRuns, items: items, bounds: bounds, showRuns: showRuns, results: []};
 				
@@ -186,7 +185,7 @@ function doSensitivity(){
 }
 
 function runSensitivity(){
-	var res = runSimulation(true);
+	var res = runModel({silent: true});
 	if(res.error != "none"){
 		mxUtils.alert(res.error);
 		highlight(res.errorPrimitive);
@@ -242,25 +241,25 @@ function runSensitivity(){
 		var dat = {name: cell.getAttribute("name")+" Quantiles Table", type: "table"};
 		var headers = [];
 		var series = [];
-		headers.push("Time");
+		headers.push(getText("Time"));
 		series.push(results[0].Time);
-		headers.push("Median");
+		headers.push(getText("Median"));
 		series.push(aggregates.median);
-		var chartSeries = [{name:"Median", data: aggregates.median, type: "line", color: "black"}];
+		var chartSeries = [{name:getText("Median"), data: aggregates.median, type: "line", color: "black"}];
 		
 		var sensitivityColors = ["#ECC928", "#425FCA", "#8E630F", "#007012", "#CC2C33", "#773A86"];
 		var topbs = [],botbs=[];
 		for(var b = bounds.length-1; b >=0; b--){
-			headers.push(bounds[b]+"% Lower");
+			headers.push(bounds[b]+"% "+getText("Lower"));
 			series.push(aggregates[bounds[b]+"_lower"]);
-			headers.push(bounds[b]+"% Upper");
+			headers.push(bounds[b]+"% "+getText("Upper"));
 			series.push(aggregates[bounds[b]+"_upper"]);
 			
 			if(b>0){
 				botbs.push({name: "Lower "+bounds[b]+"%", data: aggregates[bounds[b-1]+"_lower"], type: "line", color: sensitivityColors[b % sensitivityColors.length], fill:true, hideMarkers:true, hideLegend: true});
 			}
 			
-			topbs.push({name: bounds[b]+"% Region"/*"Upper "+bounds[b]+"%"*/, data: aggregates[bounds[b]+"_upper"], type: "line", color: sensitivityColors[b % sensitivityColors.length], fill:true, hideMarkers:true});
+			topbs.push({name: bounds[b]+"% "+getText("Region"), data: aggregates[bounds[b]+"_upper"], type: "line", color: sensitivityColors[b % sensitivityColors.length], fill:true, hideMarkers:true});
 		}
 
 		
@@ -281,12 +280,12 @@ function runSensitivity(){
 		dat.header = headers;
 		dat.data = series;
 		
-		data.push({legend: "right", data:chartSeries, name: cell.getAttribute("name")+" Quantiles Chart", type: "chart", horizontalGrid: false, verticalGrid: false, xType:"Numeric", xData: results[0].Time, xLabel:"Time", yLabel: cell.getAttribute("name")});
+		data.push({legend: "right", data:chartSeries, name: cell.getAttribute("name")+" "+getText("Quantiles Chart"), type: "chart", horizontalGrid: false, verticalGrid: false, xType:"Numeric", xData: results[0].Time, xLabel:"Time", yLabel: cell.getAttribute("name")});
 		data.push(dat);	
 		
 		
 		if(sensitivityController.showRuns){
-			dat = {name: cell.getAttribute("name")+" Runs Table", type: "table"};
+			dat = {name: cell.getAttribute("name")+" "+getText("Runs Table"), type: "table"};
 			var headers = [];
 			var series = [];
 			var chartSeries = [];
@@ -298,7 +297,7 @@ function runSensitivity(){
 			dat.header = headers;
 			dat.data = series;
 			
-			data.push({legend: "none", data: chartSeries, name: cell.getAttribute("name")+" Runs Chart", type: "chart", horizontalGrid: true, verticalGrid: true, xType:"Numeric", xData: results[0].Time, xLabel:"Time", yLabel: cell.getAttribute("name")});
+			data.push({legend: "none", data: chartSeries, name: cell.getAttribute("name")+" "+getText("Runs Chart"), type: "chart", horizontalGrid: true, verticalGrid: true, xType:"Numeric", xData: results[0].Time, xLabel:"Time", yLabel: cell.getAttribute("name")});
 		
 			data.push(dat);
 		}
@@ -306,7 +305,7 @@ function runSensitivity(){
 	
 	sensitivityProgress.close();
 	
-	showData("Sensitivity Analysis Results", data);
+	showData(getText("Sensitivity Analysis Results"), data);
 }
 
 function getQuantile(arr, quantile){

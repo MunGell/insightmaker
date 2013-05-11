@@ -137,7 +137,7 @@ Ext.ConverterWindow = function(args)
         },
         tbar: [{
             iconCls: 'units-add-icon',
-            text: 'Add Point',
+            text: getText('Add Point'),
             handler: function() {
                 var e = {
                     xVal: 0,
@@ -154,7 +154,7 @@ Ext.ConverterWindow = function(args)
         {
             id: "converterRemoveBut",
             iconCls: 'units-remove-icon',
-            text: 'Remove Point',
+            text: getText('Remove Point'),
             disabled: true,
             handler: function() {
                 editor.completeEdit();
@@ -169,7 +169,7 @@ Ext.ConverterWindow = function(args)
         new Ext.grid.RowNumberer(),
         {
             id: 'xVal',
-            header: 'Input Value',
+            header: getText('Input Value'),
             dataIndex: 'xVal',
             flex: 1,
             sortable: false,
@@ -182,7 +182,7 @@ Ext.ConverterWindow = function(args)
             }
         },
         {
-            header: 'Output Value',
+            header: getText('Output Value'),
             dataIndex: 'yVal',
             flex: 1,
             sortable: false,
@@ -228,7 +228,7 @@ Ext.ConverterWindow = function(args)
                 type: 'Numeric',
                 position: 'left',
                 fields: ["yVal"],
-                title: "Output",
+                title: getText("Output"),
                 grid: true,
 				labelTitle: {
 					font: '14px Verdana'
@@ -238,7 +238,7 @@ Ext.ConverterWindow = function(args)
                 type: 'Numeric',
                 position: 'bottom',
                 fields: ["xVal"],
-                title: "Input (" + clean(sourceName) + ")",
+                title: getText("Input")+" (" + clean(sourceName) + ")",
                 grid: true,
 				maximum: getXRange()[1],/*minimum: getXRange()[0],*/
 				labelTitle: {
@@ -283,7 +283,7 @@ Ext.ConverterWindow = function(args)
 
 
     obj.win = new Ext.Window({
-        title: 'Converter Data Specification',
+        title: getText('Converter Data Specification'),
         layout: 'border',
         closeAction: 'destroy',
         border: false,
@@ -300,9 +300,9 @@ Ext.ConverterWindow = function(args)
         buttons: [{
 			disabled: ! is_editor,
 			scale: "large",
-			text: 'Units',
+			text: getText('Units'),
 			iconCls: 'units-icon',
-			tooltip: 'Edit primitive units',
+			tooltip: getText('Edit primitive units'),
 			handler: function() {
 				var unitsWindow = new Ext.UnitsWindow({
 					parent: "",
@@ -314,9 +314,9 @@ Ext.ConverterWindow = function(args)
 		},{
 			disabled: ! is_editor,
 			scale: "large",
-			text: 'Import Data',
+			text: getText('Import Data'),
 			iconCls: 'import-icon',
-			tooltip: 'Import data from a CSV or other text file',
+			tooltip: getText('Import data from a CSV or other text file'),
 			handler: function() {
 				importData(store);
 			}
@@ -325,7 +325,7 @@ Ext.ConverterWindow = function(args)
         {
             scale: "large",
             iconCls: "cancel-icon",
-            text: 'Cancel',
+            text: getText('Cancel'),
             handler: function()
             {
                 obj.win.close();
@@ -338,7 +338,7 @@ Ext.ConverterWindow = function(args)
 			disabled: ! is_editor,
             scale: "large",
             iconCls: "apply-icon",
-            text: 'Apply',
+            text: getText('Apply'),
             handler: function()
             {	
 				editor.completeEdit();

@@ -27,7 +27,7 @@ function importModel() {
 				items: [{
 					xtype: 'displayfield',height:40,
 					fieldLabel: '',
-					value: 'Enter an Insight Maker Insight specification. This specification should begin with "&lt;InsightMakerModel&gt;" and end with "&lt;/InsightMakerModel&gt;".'
+					value: getText('Enter an Insight Maker Insight specification. This specification should begin with "&lt;InsightMakerModel&gt;" and end with "&lt;/InsightMakerModel&gt;".')
 				}, {
 					flex:1,
 					xtype: 'textareafield',
@@ -90,12 +90,12 @@ function importModel() {
 		items: [{
 			xtype: 'displayfield',
 			fieldLabel: '',
-			value: 'Select the type of import. <b>WARNING:</b> your current model will be cleared on import.'
+			value: getText('Select the type of import. Warning: your current model will be cleared on import.')
 		}, tab]
 	};
 
 	var win = new Ext.Window({
-		title: 'Import Insight Equations',
+		title: getText('Import Insight Equations'),
 		layout: 'fit',
 		closeAction: 'destroy',
 		border: false,
@@ -109,19 +109,19 @@ function importModel() {
 		buttons: [{
 			scale: "large",
 			iconCls: "cancel-icon",
-			text: 'Cancel',
+			text: getText('Cancel'),
 			handler: function() {
 				win.close();
 			}
 		}, {
 			scale: "large",
 			iconCls: "apply-icon",
-			text: 'Import Insight Equations',
+			text: getText('Import Equations'),
 			handler: function() {
 				
 				if(tab.getActiveTab().title == "Insight Maker"){
 					if(Ext.getCmp("impIM").getValue().trim()==""){
-						alert("Error: No Insight Equations were entered.")
+						alert(getText("No Insight Equations were entered."))
 						return;
 					}
 					
@@ -131,7 +131,7 @@ function importModel() {
 						if(isLocal()){
 							console.log(err);
 						}
-						mxUtils.alert("Import could not be completed as an error was encountered.");
+						mxUtils.alert(getText("Import could not be completed as an error was encountered."));
 						return;
 					}
 					
@@ -146,7 +146,7 @@ function importModel() {
 						if(isLocal()){
 							console.log(err);
 						}
-						mxUtils.alert("Import could not be completed as an error was encountered.");
+						mxUtils.alert(getText("Import could not be completed as an error was encountered."));
 						return;
 					}
 					
@@ -160,7 +160,7 @@ function importModel() {
 						if(isLocal()){
 							console.log(err);
 						}
-						mxUtils.alert("Import could not be completed as an error was encountered.");
+						mxUtils.alert(getText("Import could not be completed as an error was encountered."));
 						return;
 					}
 					

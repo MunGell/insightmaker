@@ -17,11 +17,11 @@ var timeSettingsFn = function()
         'abbr', "name"],
         data: [{
             'abbr': 'RK1',
-            'name': 'Fast (Euler)'
+            'name': getText('Fast (Euler)')
         },
         {
             'abbr': 'RK4',
-            'name': 'Accurate (RK4)'
+            'name': getText('Accurate (RK4)')
         }]
     });
 
@@ -30,7 +30,7 @@ var timeSettingsFn = function()
             layout: 'fit',
             modal: true,
             width: 370,
-            title: "Simulation Time Settings",
+            title: getText("Simulation Time Settings"),
             height: 380,
             resizable: false,
             closeAction: 'hide',
@@ -50,7 +50,7 @@ var timeSettingsFn = function()
                 defaultType: 'textfield',
 
                 items: [new Ext.form.NumberField({
-                    fieldLabel: 'Simulation Start',
+                    fieldLabel: getText('Simulation Start'),
                     name: 'stimestart',
                     id: 'stimestart',
                     allowBlank: false,
@@ -58,7 +58,7 @@ var timeSettingsFn = function()
                     decimalPrecision: 12
                 }),
                 new Ext.form.NumberField({
-                    fieldLabel: 'Simulation Length',
+                    fieldLabel: getText('Simulation Length'),
                     name: 'stimelength',
                     id: 'stimelength',
                     allowBlank: false,
@@ -66,7 +66,7 @@ var timeSettingsFn = function()
                     decimalPrecision: 12
                 }),
                 new Ext.form.NumberField({
-                    fieldLabel: 'Simulation Time Step',
+                    fieldLabel: getText('Simulation Time Step'),
                     name: 'stimestep',
                     id: 'stimestep',
                     allowBlank: false,
@@ -77,48 +77,48 @@ var timeSettingsFn = function()
                 {
                     xtype: 'radiogroup',
                     id: "tunits",
-                    fieldLabel: 'Time Units',
+                    fieldLabel: getText('Time Units'),
                     columns: 1,
                     items: [
                     {
-                        boxLabel: 'Seconds',
+                        boxLabel: getText('Seconds'),
                         name: 'tunits',
                         inputValue: "Seconds"
                     },
                     {
-                        boxLabel: 'Minutes',
+                        boxLabel: getText('Minutes'),
                         name: 'tunits',
                         inputValue: "Minutes"
                     },
                     {
-                        boxLabel: 'Hours',
+                        boxLabel: getText('Hours'),
                         name: 'tunits',
                         inputValue: "Hours"
                     },
                     {
-                        boxLabel: 'Days',
+                        boxLabel: getText('Days'),
                         name: 'tunits',
                         inputValue: "Days"
                     },
                     {
-                        boxLabel: 'Weeks',
+                        boxLabel: getText('Weeks'),
                         name: 'tunits',
                         inputValue: "Weeks"
                     },
                     {
-                        boxLabel: 'Months',
+                        boxLabel: getText('Months'),
                         name: 'tunits',
                         inputValue: "Months"
                     },
                     {
-                        boxLabel: 'Years',
+                        boxLabel: getText('Years'),
                         name: 'tunits',
                         inputValue: "Years"
                     }
                     ]
                 },
                 new Ext.form.ComboBox({
-                    fieldLabel: "Analysis Algorithm",
+                    fieldLabel: getText("Analysis Algorithm"),
                     typeAhead: true,
                     triggerAction: 'all',
                     queryMode: 'local',
@@ -136,7 +136,7 @@ var timeSettingsFn = function()
 					xtype:"button",
                     scale: "large",
                     iconCls: "cancel-icon",
-                    text: 'Cancel',
+                    text: getText('Cancel'),
 					id: "timeCancleBut",
                     handler: function() {
                         configWin.hide();
@@ -148,7 +148,7 @@ var timeSettingsFn = function()
 					xtype:"button",
                     iconCls: "apply-icon",
                     scale: "large",
-                    text: 'Apply',
+                    text: getText('Apply'),
                     handler: function() {
 
 					    var setting = getSetting();

@@ -51,7 +51,7 @@ function callAPI(e) {
 }
 
 function isLocal() {
-	return (document.location.hostname == "localhost");
+	return (document.location.hostname == "localhost") || (document.location.hostname == "insightmaker.dev");
 }
 
 mxGraph.prototype.stopEditing=function(a){if(this.cellEditor!==null){this.cellEditor.stopEditing(a)}}
@@ -212,11 +212,11 @@ function main() {
 	var doc = mxUtils.createXmlDocument();
 
 	primitiveBank.text = doc.createElement('Text');
-	primitiveBank.text.setAttribute('name', 'Text Area');
+	primitiveBank.text.setAttribute('name', getText('Text Area'));
 	primitiveBank.text.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.folder = doc.createElement('Folder');
-	primitiveBank.folder.setAttribute('name', 'New Folder');
+	primitiveBank.folder.setAttribute('name', getText('New Folder'));
 	primitiveBank.folder.setAttribute('Note', '');
 	primitiveBank.folder.setAttribute('Type', 'None');
 	primitiveBank.folder.setAttribute('Image', 'None');
@@ -236,7 +236,7 @@ function main() {
 	primitiveBank.picture.setAttribute('LabelPosition', "Bottom");
 
 	primitiveBank.display = doc.createElement('Display');
-	primitiveBank.display.setAttribute('name', 'New Display');
+	primitiveBank.display.setAttribute('name', getText('Default Display'));
 	primitiveBank.display.setAttribute('Note', '');
 	primitiveBank.display.setAttribute('Type', 'Time Series');
 	primitiveBank.display.setAttribute('xAxis', 'Time (%u)');
@@ -269,7 +269,7 @@ function main() {
 	}
 
 	primitiveBank.stock = doc.createElement('Stock');
-	primitiveBank.stock.setAttribute('name', 'New Stock');
+	primitiveBank.stock.setAttribute('name', getText('New Stock'));
 	primitiveBank.stock.setAttribute('Note', '');
 	primitiveBank.stock.setAttribute('InitialValue', '0');
 	primitiveBank.stock.setAttribute('StockMode', 'Store');
@@ -283,7 +283,7 @@ function main() {
 	primitiveBank.stock.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.state = doc.createElement('State');
-	primitiveBank.state.setAttribute('name', 'New State');
+	primitiveBank.state.setAttribute('name', getText('New State'));
 	primitiveBank.state.setAttribute('Note', '');
 	primitiveBank.state.setAttribute('Active', 'false');
 	primitiveBank.state.setAttribute('Image', 'None');
@@ -292,21 +292,21 @@ function main() {
 	primitiveBank.state.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.transition = doc.createElement('Transition');
-	primitiveBank.transition.setAttribute('name', 'Transition');
+	primitiveBank.transition.setAttribute('name', getText('Transition'));
 	primitiveBank.transition.setAttribute('Note', '');
 	primitiveBank.transition.setAttribute('Trigger', 'Timeout');
 	primitiveBank.transition.setAttribute('Value', '0');
 	setValuedProperties(primitiveBank.transition);
 	
 	primitiveBank.action = doc.createElement('Action');
-	primitiveBank.action.setAttribute('name', 'New Action');
+	primitiveBank.action.setAttribute('name', getText('New Action'));
 	primitiveBank.action.setAttribute('Note', '');
 	primitiveBank.action.setAttribute('Trigger', 'Condition');
 	primitiveBank.action.setAttribute('Value', 'true');
 	primitiveBank.action.setAttribute('Action', 'Move([Self], <<rand, rand>>)');
 
 	primitiveBank.agents = doc.createElement('Agents');
-	primitiveBank.agents.setAttribute('name', 'New Agent Population');
+	primitiveBank.agents.setAttribute('name', getText('New Agent Population'));
 	primitiveBank.agents.setAttribute('Note', '');
 	primitiveBank.agents.setAttribute('Size', 100);
 	primitiveBank.agents.setAttribute('GeoWrap', false);
@@ -324,7 +324,7 @@ function main() {
 	primitiveBank.agents.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.variable = doc.createElement('Variable');
-	primitiveBank.variable.setAttribute('name', 'New Variable');
+	primitiveBank.variable.setAttribute('name', getText('New Variable'));
 	primitiveBank.variable.setAttribute('Note', '');
 	primitiveBank.variable.setAttribute('Equation', '0');
 	setValuedProperties(primitiveBank.variable);
@@ -334,7 +334,7 @@ function main() {
 	primitiveBank.variable.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.button = doc.createElement('Button');
-	primitiveBank.button.setAttribute('name', 'New Button');
+	primitiveBank.button.setAttribute('name', getText('New Button'));
 	primitiveBank.button.setAttribute('Note', '');
 	primitiveBank.button.setAttribute('Function', 'showMessage("Button action triggered!\\n\\nIf you want to edit this Action, click on the button while holding down the Shift key on your keyboard.")');
 	primitiveBank.button.setAttribute('Image', 'None');
@@ -343,7 +343,7 @@ function main() {
 	primitiveBank.button.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.converter = doc.createElement('Converter');
-	primitiveBank.converter.setAttribute('name', 'New Converter');
+	primitiveBank.converter.setAttribute('name', getText('New Converter'));
 	primitiveBank.converter.setAttribute('Note', '');
 	primitiveBank.converter.setAttribute('Source', 'Time');
 	primitiveBank.converter.setAttribute('Data', '0,0; 1,1; 2,4; 3,9');
@@ -355,7 +355,7 @@ function main() {
 	primitiveBank.converter.setAttribute('LabelPosition', "Middle");
 
 	primitiveBank.flow = doc.createElement('Flow');
-	primitiveBank.flow.setAttribute('name', 'Flow');
+	primitiveBank.flow.setAttribute('name', getText('Flow'));
 	primitiveBank.flow.setAttribute('Note', '');
 	primitiveBank.flow.setAttribute('FlowRate', '0');
 	primitiveBank.flow.setAttribute('OnlyPositive', true);
@@ -363,7 +363,7 @@ function main() {
 	setValuedProperties(primitiveBank.flow);
 
 	primitiveBank.link = doc.createElement('Link');
-	primitiveBank.link.setAttribute('name', 'Link');
+	primitiveBank.link.setAttribute('name', getText('Link'));
 	primitiveBank.link.setAttribute('Note', '');
 	primitiveBank.link.setAttribute('BiDirectional', false);
 
@@ -594,7 +594,7 @@ function main() {
 	var firstdisp = graph.insertVertex(parent, null, primitiveBank.display.cloneNode(true), 50, 20, 64, 64, "roundImage;image="+builder_path+"/images/DisplayFull.png;");
 	firstdisp.visible = false;
 	firstdisp.setAttribute("AutoAddPrimitives", true);
-	firstdisp.setAttribute("name", "Default Display");
+	firstdisp.setAttribute("name", getText("Default Display"));
 
 
 
@@ -602,16 +602,16 @@ function main() {
 		if ((edge != null && (edge.value.nodeName == "Flow" || edge.value.nodeName == "Transition")) || (this.model.getValue(edge) == null && ribbonPanelItems().getComponent('connect').getComponent('flow').pressed)) {
 			if (isDefined(source) && source !== null && source.isConnectable()) {
 				if (!(source.value.nodeName == "Stock" || (source.value.nodeName == "Ghost" && orig(source).value.nodeName == "Stock") || source.value.nodeName == "State" || (source.value.nodeName == "Ghost" && orig(source).value.nodeName == "State"))) {
-					return 'You cannnot make that connection.';
+					return getText('You cannot make that connection.');
 				}
 			}
 			if (isDefined(target) && target !== null && target.isConnectable()) {
 				if (!(target.value.nodeName == "Stock" || (target.value.nodeName == "Ghost" && orig(target).value.nodeName == "Stock") || target.value.nodeName == "State" || (target.value.nodeName == "Ghost" && orig(target).value.nodeName == "State"))) {
-					return 'You cannnot make that connection.';
+					return getText('You cannot make that connection.');
 				}
 				if (isDefined(source) && source !== null && source.isConnectable()) {
 					if (orig(source).value.nodeName != orig(target).value.nodeName) {
-						return "You cannot connect stocks to transitions.";
+						return getText("You cannot connect stocks to transitions.");
 					}
 				}
 			}
@@ -621,12 +621,12 @@ function main() {
 		if ((edge != null && edge.value.nodeName == "Link") || (this.model.getValue(edge) == null && ribbonPanelItems().getComponent('connect').getComponent('link').pressed)) {
 			if (isDefined(source) && source !== null) {
 				if (source.value.nodeName == "Link") {
-					return 'Links cannot be connected to links.';
+					return getText('Links cannot be connected to links.');
 				}
 			}
 			if (isDefined(target) && target !== null) {
 				if (target.value.nodeName == "Link") {
-					return 'Links cannot be connected to links.';
+					return getText('Links cannot be connected to links.');
 				}
 			}
 		}
@@ -1293,7 +1293,7 @@ function main() {
 	
 	
 	keyHandler.bindControlKey(80, function() { // P
-		var pageCount = mxUtils.prompt('Enter page count for printing:', '1');
+		var pageCount = mxUtils.prompt(getText('Enter page count for printing')+":", '1');
 
 		if (pageCount != null)
 		{
@@ -1381,7 +1381,6 @@ function main() {
 			forceSelection: false,
 			selectOnFocus: true,
 			listConfig: {
-				emptyText: "No primitives exist in your model",
 				getInnerTpl: function() {
 					return '<center><div class="x-combo-list-item" style=\"white-space:normal\";><img src="'+builder_path+'/images/SD/{text}.png" width=48 height=48/></div></center>';
 				}
@@ -1417,24 +1416,24 @@ function main() {
 
 			properties = [{
 				'name': 'Note',
-				'text': 'Note',
+				'text': getText('Note'),
 				'value': cell.getAttribute("Note"),
-				'group': '  General',
+				'group': '  '+getText('General'),
 				'editor': new Ext.form.customFields['richText']({})
 			}, {
 				'name': 'name',
-				'text': '(name)',
+				'text': getText('(name)'),
 				'value': cell.getAttribute("name"),
-				'group': '  General'
+				'group': '  '+getText('General')
 			}];
 
 
 			if (is_editor && cell.getAttribute("Image", -99) != -99) {
 				properties.push({
 					'name': 'Image',
-					'text': 'Image',
+					'text': getText('Image'),
 					'value': cell.getAttribute("Image"),
-					'group': 'User Interface',
+					'group': getText('User Interface'),
 					'editor': pictureEditor()
 				});
 
@@ -1444,16 +1443,16 @@ function main() {
 				if (is_editor && cell.value.nodeName != "Converter") {
 					properties.push({
 						'name': 'ShowSlider',
-						'text': 'Show Value Slider',
+						'text': getText('Show Value Slider'),
 						'value': isTrue(cell.getAttribute("ShowSlider")),
-						'group': 'User Interface'
+						'group': getText('User Interface')
 					});
 
 					properties.push({
 						'name': 'SliderMax',
-						'text': 'Slider Max',
+						'text': getText('Slider Max'),
 						'value': parseFloat(cell.getAttribute("SliderMax")),
-						'group': 'User Interface',
+						'group': getText('User Interface'),
 						'editor': {
 					        xtype: 'numberfield',
 							allowDecimals: true,
@@ -1464,9 +1463,9 @@ function main() {
 					
 					properties.push({
 						'name': 'SliderMin',
-						'text': 'Slider Min',
+						'text': getText('Slider Min'),
 						'value': parseFloat(cell.getAttribute("SliderMin")),
-						'group': 'User Interface',
+						'group': getText('User Interface'),
 						'editor': {
 					        xtype: 'numberfield',
 							allowDecimals: true,
@@ -1476,9 +1475,9 @@ function main() {
 					
 					properties.push({
 						'name': 'SliderStep',
-						'text': 'Slider Step',
+						'text': getText('Slider Step'),
 						'value': cell.getAttribute("SliderStep"),
-						'group': 'User Interface',
+						'group': getText('User Interface'),
 						'editor': {
 					        xtype: 'numberfield',
 					        minValue: 0,
@@ -1491,9 +1490,9 @@ function main() {
 				if (cell.value.nodeName != "Transition") {
 					properties.push({
 						'name': 'Units',
-						'text': 'Units',
+						'text': getText('Units'),
 						'value': cell.getAttribute("Units"),
-						'group': 'Validation',
+						'group': getText('Validation'),
 						'editor': new Ext.form.customFields['units']({})
 					});
 				}
@@ -1501,31 +1500,31 @@ function main() {
 				if (is_editor) {
 					properties.push({
 						'name': 'MaxConstraintUsed',
-						'text': 'Max Constraint',
+						'text': getText('Max Constraint'),
 						'value': isTrue(cell.getAttribute("MaxConstraintUsed")),
-						'group': 'Validation'
+						'group': getText('Validation')
 					});
 
 					properties.push({
 						'name': 'MaxConstraint',
-						'text': 'Max Constraint',
+						'text': getText('Max Constraint'),
 						'value': parseFloat(cell.getAttribute("MaxConstraint")),
-						'group': 'Validation'
+						'group': getText('Validation')
 					});
 
 
 					properties.push({
 						'name': 'MinConstraintUsed',
-						'text': 'Min Constraint',
+						'text': getText('Min Constraint'),
 						'value': isTrue(cell.getAttribute("MinConstraintUsed")),
-						'group': 'Validation'
+						'group': getText('Validation')
 					});
 
 					properties.push({
 						'name': 'MinConstraint',
-						'text': 'Min Constraint',
+						'text': getText('Min Constraint'),
 						'value': parseFloat(cell.getAttribute("MinConstraint")),
-						'group': 'Validation'
+						'group': getText('Validation')
 					});
 				}
 			}
@@ -1550,7 +1549,7 @@ function main() {
 				var topTags = "";
 				if (topDesc == "") {
 					if (is_editor) {
-						topDesc = "<span style='color: gray'>You haven't entered a description for this Insight yet. Please enter one to help others understand it.</span>";
+						topDesc = "<span style='color: gray'>"+getText("You haven't entered a description for this Insight yet. Please enter one to help others understand it.")+"</span>";
 					}
 				}
 				
@@ -1563,7 +1562,7 @@ function main() {
 
 				topDesc = "<big class='description'>" + topDesc + "</big>";
 				if (drupal_node_ID != -1 && cell == null) {
-					topDesc = topDesc + '<br/><br/> ' + (is_editor ? '<a href="#" style="text-decoration:none" onclick="updateProperties()">Edit description</a>' : '') + ' <div style="float:right; vertical-align:middle"> Share <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span></div>';
+					topDesc = topDesc + '<br/><br/> ' + (is_editor ? '<a href="#" style="text-decoration:none" onclick="updateProperties()">'+getText('Edit description')+'</a>' : '') + ' <div style="float:right; vertical-align:middle"> '+getText('Share')+' <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span></div>';
 				}
 				topDesc = topDesc + "<br/><br/>";
 				
@@ -1675,23 +1674,23 @@ function main() {
 			bottomDesc = descBase + '<p>A stock stores a material or a resource. Lakes and Bank Accounts are both examples of stocks. One stores water while the other stores money. The Initial Value defines how much material is initially in the Stock.</p>' + (is_editor ? ' <br/><h1>Examples of valid Initial Values:</h1><center><table class="undefined"><tr><td align=center>Static Value</td></tr><tr><td align=center><i>10</i></td></tr><tr><td>Mathematical Equation</td></tr><tr><td align=center><i>cos(2.78)+7*2</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>5+[My Variable]</i></td></tr></table></center>' : '');
 			properties.push({
 				'name': 'InitialValue',
-				'text': 'Initial Value =',
+				'text': getText('Initial Value')+' =',
 				'value': cell.getAttribute("InitialValue"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
 
 			properties.push({
 				'name': 'AllowNegatives',
-				'text': 'Allow Negatives',
+				'text': getText('Allow Negatives'),
 				'value': !isTrue(cell.getAttribute("NonNegative")),
-				'group': ' Configuration'
+				'group': ' '+getText('Configuration')
 			});
 
 			properties.push({
 				'name': 'StockMode',
-				'text': 'Stock Type',
+				'text': getText('Stock Type'),
 				'value': cell.getAttribute("StockMode"),
 				'group': 'Behavior',
 				'editor': new Ext.form.ComboBox({
@@ -1702,7 +1701,7 @@ function main() {
 			});
 			properties.push({
 				'name': 'Delay',
-				'text': 'Delay',
+				'text': getText('Delay'),
 				'value': cell.getAttribute("Delay").toString(),
 				'group': 'Behavior'
 			});
@@ -1711,9 +1710,9 @@ function main() {
 			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><h1>Examples of valid Values:</h1><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'Equation',
-				'text': 'Value/Equation =',
+				'text': getText('Value/Equation')+' =',
 				'value': cell.getAttribute("Equation"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
@@ -1721,18 +1720,18 @@ function main() {
 			bottomDesc = descBase + "Links connect the different parts of your model. If one primitive in your model refers to another in its equation, the two primitives must either be directly connected or connected through a link. Once connected with links, square-brackets may be used to reference values of other primitives. So if you have a stock called <i>Bank Balance</i>, you could refer to it in another primitive's equation with <i>[Bank Balance]</i>.";
 			properties.push({
 				'name': 'BiDirectional',
-				'text': 'Bi-Directional',
+				'text': getText('Bi-Directional'),
 				'value': isTrue(cell.getAttribute("BiDirectional")),
-				'group': ' Configuration'
+				'group': ' '+getText('Configuration')
 			});
 
 		} else if (cell.value.nodeName == "Folder") {
 			bottomDesc = descBase + "Folders group together similar items in a logical way. You can collapse and expand folders to hide or reveal model complexity.";
 			properties.push({
 				'name': 'Type',
-				'text': 'Extension',
+				'text': getText('Behavior'),
 				'value': cell.getAttribute("Type"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					store: ['None', 'Agent'],
@@ -1744,9 +1743,9 @@ function main() {
 			bottomDesc = descBase + "Buttons are used for interactivity. To select a button without triggering its action, hold down the Shift key when you click the button. Buttons are currently in Beta and their implementation may change in later versions of Insight Maker. More button documentation is <a href='http://insightmaker.com/sites/default/files/API/' target='_blank'>available here</a>.";
 			properties.push({
 				'name': 'Function',
-				'text': 'Action',
+				'text': getText('Action'),
 				'value': cell.getAttribute("Function"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.TextArea({
 					grow: true
 				})
@@ -1756,26 +1755,26 @@ function main() {
 			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><h1>Examples of valid Flow Rates:</h1><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'FlowRate',
-				'text': 'Flow Rate =',
+				'text': getText('Flow Rate')+' =',
 				'value': cell.getAttribute("FlowRate"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
 			properties.push({
 				'name': 'OnlyPositive',
-				'text': 'Only Positive Rates',
+				'text': getText('Only Positive Rates'),
 				'value': isTrue(cell.getAttribute("OnlyPositive")),
-				'group': ' Configuration'
+				'group': ' '+getText('Configuration')
 			});
 
 		} else if (cell.value.nodeName == "Transition") {
 			bottomDesc = descBase + "<p>Transitions move agents between states. The probability is probability per time.</p>";
 			properties.push({
 				'name': 'Trigger',
-				'text': 'Triggered by',
+				'text': getText('Triggered by'),
 				'value': cell.getAttribute("Trigger"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					store: ['Timeout', 'Probability', 'Condition'],
@@ -1785,9 +1784,9 @@ function main() {
 			});
 			properties.push({
 				'name': 'Value',
-				'text': 'Value =',
+				'text': getText('Value')+' =',
 				'value': cell.getAttribute("Value"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
@@ -1795,9 +1794,9 @@ function main() {
 			bottomDesc = descBase + "<p>Actions can be used to move agents or dynamically create connections between them.</p>";
 			properties.push({
 				'name': 'Trigger',
-				'text': 'Triggered by',
+				'text': getText('Triggered by'),
 				'value': cell.getAttribute("Trigger"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					store: ['Timeout', 'Probability', 'Condition'],
@@ -1807,17 +1806,17 @@ function main() {
 			});
 			properties.push({
 				'name': 'Value',
-				'text': 'Trigger Value =',
+				'text': getText('Trigger Value')+' =',
 				'value': cell.getAttribute("Value"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
 			properties.push({
 				'name': 'Action',
-				'text': 'Action =',
+				'text': getText('Action')+' =',
 				'value': cell.getAttribute("Action"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
@@ -1826,9 +1825,9 @@ function main() {
 
 			properties.push({
 				'name': 'Active',
-				'text': 'Start Active = ',
+				'text': getText('Start Active')+' = ',
 				'value': cell.getAttribute("Active"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
@@ -1854,9 +1853,9 @@ function main() {
 
 			properties.push({
 				'name': 'Agent',
-				'text': 'Agent Base',
+				'text': getText('Agent Base'),
 				'value': cell.getAttribute("Agent"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					queryMode: 'local',
@@ -1871,9 +1870,9 @@ function main() {
 
 			properties.push({
 				'name': 'Size',
-				'text': 'Population Size',
+				'text': getText('Population Size'),
 				'value': cell.getAttribute("Size"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': {
 			        xtype: 'numberfield',
 			        minValue: 0,
@@ -1883,42 +1882,42 @@ function main() {
 			
 			properties.push({
 				'name': 'GeoWidth',
-				'text': 'Width',
+				'text': getText('Width'),
 				'value': cell.getAttribute("GeoWidth"),
-				'group': ' Geometry',
+				'group': ' '+getText('Geometry'),
 				'editor': new Ext.form.customFields['code']({}),
 				renderer: equationRenderer
 			});
 			
 			properties.push({
 				'name': 'GeoHeight',
-				'text': 'Height',
+				'text': getText('Height'),
 				'value': cell.getAttribute("GeoHeight"),
-				'group': ' Geometry',
+				'group': ' '+getText('Geometry'),
 				'editor': new Ext.form.customFields['code']({}),
 				renderer: equationRenderer
 			});
 			
 			properties.push({
 				'name': 'GeoDimUnits',
-				'text': 'Dimension Units',
+				'text': getText('Dimension Units'),
 				'value': cell.getAttribute("GeoDimUnits"),
-				'group': ' Geometry',
+				'group': ' '+getText('Geometry'),
 				'editor': new Ext.form.customFields['units']({})
 			});
 			
 			properties.push({
 				'name': 'GeoWrap',
-				'text': 'Wrap Around',
+				'text': getText('Wrap Around'),
 				'value': isTrue(cell.getAttribute("GeoWrap")),
-				'group': ' Geometry'
+				'group': ' '+getText('Geometry')
 			});
 			
 			properties.push({
 				'name': 'Placement',
-				'text': 'Placement Method',
+				'text': getText('Placement Method'),
 				'value': cell.getAttribute("Placement"),
-				'group': ' Geometry',
+				'group': ' '+getText('Geometry'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					queryMode: 'local',
@@ -1931,18 +1930,18 @@ function main() {
 			
 			properties.push({
 				'name': 'PlacementFunction',
-				'text': 'Custom Function',
+				'text': getText('Custom Function'),
 				'value': cell.getAttribute("PlacementFunction"),
-				'group': ' Geometry',
+				'group': ' '+getText('Geometry'),
 				'editor': new Ext.form.customFields['code']({}),
 				renderer: equationRenderer
 			});
 			
 			properties.push({
 				'name': 'Network',
-				'text': 'Network Method',
+				'text': getText('Network Method'),
 				'value': cell.getAttribute("Network"),
-				'group': ' Network',
+				'group': ' '+getText('Network'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					queryMode: 'local',
@@ -1954,9 +1953,9 @@ function main() {
 			
 			properties.push({
 				'name': 'NetworkFunction',
-				'text': 'Custom Function',
+				'text': getText('Custom Function'),
 				'value': cell.getAttribute("NetworkFunction"),
-				'group': ' Network',
+				'group': ' '+getText('Network'),
 				'editor': new Ext.form.customFields['code']({}),
 				renderer: equationRenderer
 			});
@@ -1987,9 +1986,9 @@ function main() {
 
 			properties.push({
 				'name': 'Source',
-				'text': 'Input Source',
+				'text': getText('Input Source'),
 				'value': cell.getAttribute("Source"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					queryMode: 'local',
@@ -2003,16 +2002,16 @@ function main() {
 			});
 			properties.push({
 				'name': 'Data',
-				'text': 'Data',
+				'text': getText('Data'),
 				'value': cell.getAttribute("Data"),
 				'group': 'Input/Output Table',
 				'editor': new Ext.form.customFields['converter']({})
 			});
 			properties.push({
 				'name': 'Interpolation',
-				'text': 'Interpolation',
+				'text': getText('Interpolation'),
 				'value': cell.getAttribute("Interpolation"),
-				'group': ' Configuration',
+				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
 					store: ['None', 'Linear'],
@@ -2124,7 +2123,7 @@ function confirmClose() {
 		if ((!saved_enabled) || ribbonPanelItems().getComponent('savegroup').getComponent('savebut').disabled) {
 
 		} else {
-			return "You have made unsaved changes to this Insight. If you close now, they will be lost.";
+			return getText("You have made unsaved changes to this Insight. If you close now, they will be lost.");
 		}
 	} else {
 		surpressCloseWarning = false;
@@ -2203,7 +2202,7 @@ function showContextMenu(node, e) {
 	var selected = selectedItems.length > 0 && (! folder);
 	
 	var folderObject = {
-		text: "Create Folder",
+		text: getText("Create Folder"),
 		iconCls: 'folder-icon',
 		disabled: !selected,
 		handler: makeFolder
@@ -2225,13 +2224,13 @@ function showContextMenu(node, e) {
 
 	var menu = new Ext.menu.Menu({
 		items: [{
-			text: "Create Stock",
+			text: getText("Create Stock"),
 			iconCls: 'stock-icon-small',
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Stock", "Stock", [pt.x, pt.y], [100, 40]);
+				var cell = createPrimitive(getText("New Stock"), "Stock", [pt.x, pt.y], [100, 40]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2242,13 +2241,13 @@ function showContextMenu(node, e) {
 
 			}
 		}, {
-			text: "Create Variable",
+			text: getText("Create Variable"),
 			iconCls: 'parameter-icon-small',
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Variable", "Variable", [pt.x, pt.y], [120, 50]);
+				var cell = createPrimitive(getText("New Variable"), "Variable", [pt.x, pt.y], [120, 50]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2262,13 +2261,13 @@ function showContextMenu(node, e) {
 			}
 
 		}, {
-			text: "Create Converter",
+			text: getText("Create Converter"),
 			iconCls: 'converter-icon',
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Converter", "Converter", [pt.x, pt.y], [120, 50]);
+				var cell = createPrimitive(getText("New Converter"), "Converter", [pt.x, pt.y], [120, 50]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2283,12 +2282,12 @@ function showContextMenu(node, e) {
 			}
 		}, '-',
 		{
-			text: "Create State",
+			text: getText("Create State"),
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New State", "State", [pt.x, pt.y], [120, 40]);
+				var cell = createPrimitive(getText("New State"), "State", [pt.x, pt.y], [120, 40]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2302,12 +2301,12 @@ function showContextMenu(node, e) {
 
 		},
 		{
-			text: "Create Action",
+			text: getText("Create Action"),
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Action", "Action", [pt.x, pt.y], [120, 50]);
+				var cell = createPrimitive(getText("New Action"), "Action", [pt.x, pt.y], [120, 50]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2321,32 +2320,30 @@ function showContextMenu(node, e) {
 
 		},
 		{
-			text: "Create Agent Population",
+			text: getText("Create Agent Population"),
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("Agent Population", "Agents", [pt.x, pt.y], [170, 80]);
+				var cell = createPrimitive(getText("Agent Population"), "Agents", [pt.x, pt.y], [170, 80]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
 				}
 				setSelected(cell);
 				
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
 			}
 
 		}, '-',
 		{
-			text: "Create Text",
+			text: getText("Create Text"),
 			iconCls: 'font-icon',
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Text", "Text", [pt.x, pt.y], [200, 50]);
+				var cell = createPrimitive(getText("New Text"), "Text", [pt.x, pt.y], [200, 50]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2360,7 +2357,7 @@ function showContextMenu(node, e) {
 
 			}
 		}, {
-			text: "Create Picture",
+			text: getText("Create Picture"),
 			iconCls: 'picture-icon',
 			disabled: selected,
 			handler: function() {
@@ -2380,13 +2377,13 @@ function showContextMenu(node, e) {
 			}
 
 		}, {
-			text: "Create Button",
+			text: getText("Create Button"),
 			iconCls: 'button-icon',
 			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive("New Button", "Button", [pt.x, pt.y], [120, 40]);
+				var cell = createPrimitive(getText("New Button"), "Button", [pt.x, pt.y], [120, 40]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);
@@ -2400,7 +2397,7 @@ function showContextMenu(node, e) {
 
 		}, '-',
 		{
-			text: "Ghost Primitive",
+			text: getText("Ghost Primitive"),
 			iconCls: 'ghost-icon',
 			disabled: graph.getSelectionCount() != 1 || ((!isValued(graph.getSelectionCell()) && graph.getSelectionCell().value.nodeName != "Picture")) || graph.getSelectionCell().value.nodeName == "Flow" || graph.getSelectionCell().value.nodeName == "Ghost",
 			handler: makeGhost
@@ -2409,7 +2406,7 @@ function showContextMenu(node, e) {
 
 		, '-',
 		{
-			text: 'Delete',
+			text: getText('Delete'),
 			iconCls: 'delete-icon',
 			disabled: !selected,
 			handler: function() {

@@ -22,7 +22,7 @@ function importData(targetStore){
 			{
 	        	xtype: 'displayfield',
 	        	fieldLabel: '',
-	        	value: '<center>Copy and paste the contents from your CSV file or tab-delimited file into the data field below.</center>'
+	        	value: '<center>'+getText('Copy and paste the contents from your CSV file or tab-delimited file into the data field below.')+'</center>'
 	    	},
 			{
 				xtype: 'textareafield',
@@ -31,17 +31,17 @@ function importData(targetStore){
 			    id: 'impData',
 			    allowBlank: false,
 				selectOnFocus: true,
-				value: "Example Input, Example Output\n24, 62\n641, 12\n234, 56\n123, 19",height:195
+				value: getText("Example Input, Example Output")+"\n24, 62\n641, 12\n234, 56\n123, 19",height:195
 			}, 
             {
 				xtype: "checkboxfield",
-                fieldLabel: 'Include first row',
+                fieldLabel: getText('Include First Row'),
                 inputValue: '1',
                 name: 'impIncludeHeader',
                 id: 'impIncludeHeader'
             },
 			new Ext.form.NumberField({
-                fieldLabel: 'Input Column Index',
+                fieldLabel: getText('Input Column Index'),
                 name: 'impInputIndex',
                 id: 'impInputIndex',
                 allowBlank: false,
@@ -50,7 +50,7 @@ function importData(targetStore){
 				value: 1
             }),
 			new Ext.form.NumberField({
-                fieldLabel: 'Output Column Index',
+                fieldLabel: getText('Output Column Index'),
                 name: 'impOutputIndex',
                 id: 'impOutputIndex',
                 allowBlank: false,
@@ -62,7 +62,7 @@ function importData(targetStore){
 	});
 								
     var win = new Ext.Window({
-        title: 'Import Converter Data',
+        title: getText('Import Converter Data'),
         layout: 'fit',
         closeAction: 'destroy',
         border: false,
@@ -80,7 +80,7 @@ function importData(targetStore){
         {
             scale: "large",
             iconCls: "cancel-icon",
-            text: 'Cancel',
+            text: getText('Cancel'),
             handler: function()
             {
                 win.close();
@@ -89,17 +89,17 @@ function importData(targetStore){
         {
             scale: "large",
             iconCls: "apply-icon",
-            text: 'Import',
+            text: getText('Import'),
             handler: function()
             {	
 				try{
 					var data = parseCSV(Ext.getCmp("impData").getValue());
 				}catch(err){
-					mxUtils.alert("There was an error with your data file. It should be a valid CSV or tab-delimited text file.");
+					mxUtils.alert(getText("There was an error with your data file. It should be a valid CSV or tab-delimited text file."));
 					return;
 				}
 				if(data.length<=0){
-					mxUtils.alert("Could not import as no data entered.");
+					mxUtils.alert(getText("Could not import as no data entered."));
 					return;
 				}
 				
@@ -107,7 +107,7 @@ function importData(targetStore){
 				var outIndex = Ext.getCmp("impOutputIndex").getValue()-1;
 				
 				if(!(inIndex<data[0].length && outIndex<data[0].length)){
-					mxUtils.alert("Invalid column index for data file. Maximum number of columns is "+data[0].length+".")
+					mxUtils.alert(getText("Invalid column index for data file. Maximum number of columns is %s.", data[0].length))
 					return;
 				}
 				
@@ -119,12 +119,12 @@ function importData(targetStore){
 						var x = flexibleParseFloat(data[i][inIndex]);
 						var y = flexibleParseFloat(data[i][outIndex]);
 						if(isNaN(x) || isNaN(y)){
-							mxUtils.alert("("+data[i][inIndex]+", "+data[i][outIndex]+") is not a pair of numbers. Skipping row during import.");
+							mxUtils.alert(getText("(%s, %s) is not a pair of numbers. Skipping row during import.", data[i][inIndex], data[i][outIndex]));
 						}else{
 							items.push({xVal: x, yVal: y});
 						}
 					}catch(err){
-						mxUtils.alert("Skipping badly formed row ("+data[i][inIndex]+", "+data[i][outIndex]+") on import.");
+						mxUtils.alert(getText("Skipping badly formed row (%s, %s) on import.", data[i][inIndex], data[i][outIndex]));
 					}
 				}
 				targetStore.add(items);

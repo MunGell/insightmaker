@@ -34,11 +34,11 @@ function textEquations(){
 		if(item && item!=null){
 			return clean(item.getAttribute("name"));
 		}
-		return "<i>None</i>";
+		return "<i>"+getText("None")+"</i>";
 	}
 	function addNote(items, item){
 		if(item.getAttribute("Note")){
-			items.push(["Note", clean(item.getAttribute("Note"))])
+			items.push([getText("Note"), clean(item.getAttribute("Note"))])
 		}
 		return items;
 	}
@@ -54,58 +54,58 @@ function textEquations(){
 		return items;
 	}
 	var mySetting = getSetting();
-	add("Simulation Settings", list([["Time Start", clean(mySetting.getAttribute("TimeStart"))], ["Time Length", clean(mySetting.getAttribute("TimeLength"))], ["Time Step", clean(mySetting.getAttribute("TimeStep"))], ["Time Units", clean(mySetting.getAttribute("TimeUnits"))], ["Algorithm", clean(mySetting.getAttribute("SolutionAlgorithm"))]]))
+	add("Simulation Settings", list([[getText("Time Start"), clean(mySetting.getAttribute("TimeStart"))], [getText("Time Length"), clean(mySetting.getAttribute("TimeLength"))], [getText("Time Step"), clean(mySetting.getAttribute("TimeStep"))], [getText("Time Units"), clean(mySetting.getAttribute("TimeUnits"))], [getText("Algorithm"), clean(mySetting.getAttribute("SolutionAlgorithm"))]]))
 	
 	items = findAndSort("Variable");
 	if(items.length>0){
-		divide("Model Variables");
+		divide(getText("Model Variables"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Value", equationRenderer(getValue(items[i]))], ["Units", clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Value"), equationRenderer(getValue(items[i]))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	var items = findAndSort("Stock");
 	if(items.length>0){
-		divide("Model Stocks");
+		divide(getText("Model Stocks"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Initial Value", equationRenderer(getValue(items[i]))], ["Non-Negative", clean(items[i].getAttribute("NonNegative"))], ["Units", clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Initial Value"), equationRenderer(getValue(items[i]))], [getText("Non-Negative"), clean(items[i].getAttribute("NonNegative"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	items = findAndSort("Flow");
 	if(items.length>0){
-		divide("Model Flows");
+		divide(getText("Model Flows"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Rate", equationRenderer(getValue(items[i]))], ["Alpha", clean(name(items[i].source))], ["Omega", clean(name(items[i].target))], ["Positive Only", clean(items[i].getAttribute("OnlyPositive"))], ["Units", clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Rate"), equationRenderer(getValue(items[i]))], [getText("Alpha"), clean(name(items[i].source))], [getText("Omega"), clean(name(items[i].target))], [getText("Positive Only"), clean(items[i].getAttribute("OnlyPositive"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	items = findAndSort("Converter");
 	if(items.length>0){
-		divide("Model Converters");
+		divide(getText("Model Converters"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Data", clean(getValue(items[i]).replace(/\;/g,"; ")) ] , ["Source", clean(items[i].getAttribute("Source")=="Time"?"Time":name(findID(items[i].getAttribute("Source")))) ], ["Interpolation", clean(items[i].getAttribute("Interpolation"))], ["Units", clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Data"), clean(getValue(items[i]).replace(/\;/g,"; ")) ] , [getText("Source"), clean(items[i].getAttribute("Source")=="Time"?"Time":name(findID(items[i].getAttribute("Source")))) ], [getText("Interpolation"), clean(items[i].getAttribute("Interpolation"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	
 	items = findAndSort("State");
 	if(items.length>0){
-		divide("Model States");
+		divide(getText("Model States"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Initial Active", equationRenderer(getValue(items[i]))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Initial Active"), equationRenderer(getValue(items[i]))] ], items[i]) ))
 		}
 	}
 	
 	items = findAndSort("Transition");
 	if(items.length>0){
-		divide("Model Transitions");
+		divide(getText("Model Transitions"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Trigger", clean(items[i].getAttribute("Trigger"))], ["Value", equationRenderer(getValue(items[i]))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Trigger"), clean(items[i].getAttribute("Trigger"))], [getText("Value"), equationRenderer(getValue(items[i]))] ], items[i]) ))
 		}
 	}
 	
 	items = findAndSort("Action");
 	if(items.length>0){
-		divide("Model Actions");
+		divide(getText("Model Actions"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ ["Trigger", clean(items[i].getAttribute("Trigger"))], ["Trigger Value", equationRenderer(items[i].getAttribute("Value"))], ["Action", equationRenderer(getValue(items[i]))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Trigger"), clean(items[i].getAttribute("Trigger"))], [getText("Trigger Value"), equationRenderer(items[i].getAttribute("Value"))], [getText("Action"), equationRenderer(getValue(items[i]))] ], items[i]) ))
 		}
 	}
 	
@@ -119,10 +119,10 @@ function textEquations(){
 			plain: true,
 			flex: 1,
 			items: [
-			{title: "Insight Equations", xtype: "box", html: html, style: "background-color: white", autoScroll: true},
+			{title: getText("Insight Equations"), xtype: "box", html: html, style: "background-color: white", autoScroll: true},
 			{
 				padding: 4,
-				title: "Full Insight Specification",
+				title: getText("Full Insight Specification"),
 				xtype: "container",
 				layout: {
 					type: 'vbox',
@@ -131,7 +131,7 @@ function textEquations(){
 				items: [{
 					xtype: 'displayfield',height:40,
 					fieldLabel: '',
-					value: 'Complete Insight specification including equations and styling. You may use this to fully backup the Insight to your computer.'
+					value: getText('Complete Insight specification including equations and styling. You may use this to fully backup the Insight to your computer.')
 				}, {
 					flex:1,
 					readOnly:true,
@@ -143,7 +143,7 @@ function textEquations(){
 		});
 								
     var win = new Ext.Window({
-        title: 'Complete Model Equation List',
+        title: getText('Complete Model Equation List'),
         layout: 'fit',
         closeAction: 'destroy',
         border: false,
@@ -162,7 +162,7 @@ function textEquations(){
         {
             scale: "large",
             iconCls: "import-icon",
-            text: 'Import Equations',
+            text: getText('Import Equations'),
             handler: function()
             {	
 				importModel();
@@ -172,7 +172,7 @@ function textEquations(){
         {
             scale: "large",
             iconCls: "apply-icon",
-            text: 'Done',
+            text: getText('Done'),
             handler: function()
             {	
 				win.close();

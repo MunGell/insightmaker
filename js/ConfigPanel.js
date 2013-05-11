@@ -287,7 +287,7 @@ var ConfigPanel = function()
 		autoScroll: true,
 		listeners: {beforeexpand:function(p){setSelected([])}},
         collapsible: true,
-        title: "Configuration",
+        title: getText("Configuration"),
         border: true,
 		layout: {
 			type: "vbox",

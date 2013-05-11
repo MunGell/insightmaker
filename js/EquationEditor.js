@@ -137,12 +137,12 @@ Ext.EquationWindow = function(args) {
 	["Round", "Round(##Value$$)", "Rounds a number to the nearest integer.", ["Round(3.6)", "4"]],
 	["Round Up", "Ceiling(##Value$$)", "Rounds a number up to the nearest integer.", ["Ceiling(3.6)", "4"]],
 	["Round Down", "Floor(##Value$$)", "Rounds a number down to the nearest integer.", ["Floor(3.6)", "3"]],
-	["Cos", "Cos(##Value$$)", "Finds the cosine of a value in radians.", ["Cos(pi)", "-1"]],
-	["Acos", "Acos(##Value$$)", "Finds the arc-cosine of a value in radians.", ["Acos(1)", "0"]],
-	["Sin", "Sin(##Value$$)", "Finds the sine of a value in radians.", ["Sin(pi)", "0"]],
-	["Asin", "Asin(##Value$$)", "Finds the arc-sine of a value in radians.", ["Asin(0)", "0"]],
-	["Tan", "Tan(##Value$$)", "Finds the tangent of a value in radians."],
-	["Atan", "Atan(##Value$$)", "Finds the arc-tangent of a value in radians."],
+	["Cos", "Cos(##Angle$$)", "Finds the cosine of an angle.", ["Cos({180 Degrees})", "-1"]],
+	["ArcCos", "ArcCos(##Value$$)", "Finds the arc-cosine of a value. The result includes units.", ["ArcCos(0)", "{90 Degrees}"]],
+	["Sin", "Sin(##Angle$$)", "Finds the sine of an angle.", ["Sin({180 Degrees})", "0"]],
+	["ArcSin", "ArcSin(##Value$$)", "Finds the arc-sine of a value.  The result includes units.", ["ArcSin(1)", "{90 Degrees}"]],
+	["Tan", "Tan(##Angle$$)", "Finds the tangent of an angle.", ["Tan({Pi/4 Radians})", "1"]],
+	["ArcTan", "ArcTan(##Value$$)", "Finds the arc-tangent of a value. The result includes units.", ["ArcTan(1)", "{45 Degrees}"]],
 	["Log", "Log(##Value$$)", "Returns the base-10 logarithm of a number.", ["Log(1000)", "3"]],
 	["Ln", "Ln(##Value$$)", "Returns the natural logarithm of a number.", ["Ln(e^2)", "2"]],
 	["Exp", "Exp(##Value$$)", "Returns e taken to a power.", ["Exp(1)", "e"]],
@@ -314,7 +314,7 @@ Ext.EquationWindow = function(args) {
 
 	//var form = new Ext.FormPanel({layout:"border",frame:true,border:true, items: [syntax, refList, help]});
 	obj.win = new Ext.Window({
-		title: 'Equation Editor: '+clean(cell.getAttribute("name")),
+		title: getText('Equation Editor')+': '+clean(cell.getAttribute("name")),
 		layout: 'border',
 		closeAction: 'destroy',
 		border: false,
@@ -328,9 +328,9 @@ Ext.EquationWindow = function(args) {
 		buttons: [{
 			disabled: ! is_editor,
 			scale: "large",
-			text: 'Units',
+			text: getText('Units'),
 			iconCls: 'units-icon',
-			tooltip: 'Edit primitive units',
+			tooltip: getText('Edit primitive units'),
 			handler: function() {
 				var unitsWindow = new Ext.UnitsWindow({
 					parent: "",
@@ -343,7 +343,7 @@ Ext.EquationWindow = function(args) {
 		{
 			scale: "large",
 			iconCls: "cancel-icon",
-			text: 'Cancel',
+			text: getText('Cancel'),
 			handler: function() {
 				obj.win.close();
 				if (obj.args.parent != "") {
@@ -354,7 +354,7 @@ Ext.EquationWindow = function(args) {
 			disabled: !is_editor,
 			iconCls: "apply-icon",
 			scale: "large",
-			text: 'Apply',
+			text: getText('Apply'),
 			handler: function() {
 				var newCode = codeEditor.getValue();
 				newCode = newCode.replace(/\n|\r/g, "\\n");
