@@ -50,7 +50,7 @@ function doSensitivity(){
 			items: [
 			
 			Ext.create('Ext.ux.form.field.BoxSelect', {
-				fieldLabel: 'Monitored Primitives',
+				fieldLabel: getText('Monitored Primitives'),
 				name: 'monPrimitives',
 				id: 'monPrimitives',
 				displayField: 'pname',
@@ -87,7 +87,7 @@ function doSensitivity(){
 			{
 	        	xtype: 'displayfield',
 	        	fieldLabel: '',
-	        	value: "<div style='padding-top:1.2em; padding-left: 0.8em;padding-right: 0.8em'><img style='float:left; margin-right: 7px' src='"+builder_path+"/images/gui/help.png' width=32px height=32px />Sensitivity analysis runs your simulation multiple times with random inputs to see how the results vary (in a sense, how 'sensitive' the results are to the inputs).<br/><br/> In order to use sensitivity analysis you need to have sources of randomness in your model. For instance, you can use the <i>Rand()</i> function or other Insight Maker random generation functions to choose random variables or random starting values. Please note, that if you want to have a random variable value, you can use <i>Fix(Rand())</i> to set the variable to a random value at the start of the simualtion and keep it at the same value for the rest of that simulation.</div>"
+	        	value: "<div style='padding-top:1.2em; padding-left: 0.8em;padding-right: 0.8em'><img style='float:left; margin-right: 7px' src='"+builder_path+"/images/gui/help.png' width=32px height=32px />"+"Sensitivity analysis runs your simulation multiple times with random inputs to see how the results vary (in a sense, how 'sensitive' the results are to the inputs).<br/><br/> In order to use sensitivity analysis you need to have sources of randomness in your model. For instance, you can use the <i>Rand()</i> function or other Insight Maker random generation functions to choose random variables or random starting values. Please note, that if you want to have a random variable value, you can use <i>Fix(Rand())</i> to set the variable to a random value at the start of the simulation and keep it at the same value for the rest of that simulation.</div>"
 			}
 		]
 	});
@@ -174,6 +174,8 @@ function doSensitivity(){
 				
 				setTimeout("runSensitivity()", 15);
 				
+				threads++;
+				
 				win.close();
             }
         }]
@@ -191,13 +193,18 @@ function runSensitivity(){
 		highlight(res.errorPrimitive);
 		if(sensitivityProgress){
 			sensitivityProgress.close();
+			threads--;
 		}
 		return;
 	}
 	sensitivityController.results.push( res );
 	sensitivityProgress.updateProgress(sensitivityController.results.length/sensitivityController.nRuns, " ");
 	if(sensitivityController.results.length < sensitivityController.nRuns){
-		setTimeout("runSensitivity()", 15);
+		if(sensitivityController.noYield){
+			runSensitivity()
+		}else{
+			setTimeout("runSensitivity()", 15);
+		}
 		return;
 	}
 	
@@ -306,6 +313,9 @@ function runSensitivity(){
 	sensitivityProgress.close();
 	
 	showData(getText("Sensitivity Analysis Results"), data);
+
+	threads--;
+	
 }
 
 function getQuantile(arr, quantile){

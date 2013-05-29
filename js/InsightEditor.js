@@ -13,6 +13,8 @@ Ext.onReady(function() {
 	main();
 });
 
+var threads = 0;
+
 //make html edit links target blank
 Ext.override(Ext.form.HtmlEditor, {
 	createLink: function() {
@@ -239,7 +241,7 @@ function main() {
 	primitiveBank.display.setAttribute('name', getText('Default Display'));
 	primitiveBank.display.setAttribute('Note', '');
 	primitiveBank.display.setAttribute('Type', 'Time Series');
-	primitiveBank.display.setAttribute('xAxis', 'Time (%u)');
+	primitiveBank.display.setAttribute('xAxis', getText("Time")+' (%u)');
 	primitiveBank.display.setAttribute('yAxis', '');
 	primitiveBank.display.setAttribute('yAxis2', '');
 	primitiveBank.display.setAttribute('showMarkers', false);
@@ -391,9 +393,69 @@ function main() {
 		border: false
 	});
 	
+	
 	mainPanel = Ext.create('Ext.Panel', {
 		region: 'center',
-		border: false,layout:"fit",
+		border: false,
+		layout:"fit",
+		dockedItems: [{
+		    xtype: 'toolbar',
+		    dock: 'bottom',
+			hidden: false,
+			id: 'unfoldToolbar',
+		    items: [
+			{
+				iconCls: 'units-add-icon',
+	            text: getText('Unfold Model'),
+				scope: this,
+				id: 'unfoldUnfoldBut',
+	            handler: function(){
+					revealUnfoldButtons(true);
+					beginUnfolding();
+	            }
+			},
+			{
+				scale: "large",
+				iconAlign: 'top',
+				iconCls: 'reload-icon',
+	            text: getText('Start Over'),
+				scope: this,
+				id: 'reloadUnfoldBut',
+	            handler: function(){
+					restartUnfolding();
+	            }
+			},{
+				scale: "large",
+				iconAlign: 'top',
+				iconCls: 'cancel-icon',
+	            text: getText('Exit Unfolding'),
+				scope: this,
+				id: 'exitUnfoldBut',
+	            handler: function(){
+					revealUnfoldButtons(false);
+					finishUnfolding();
+	            }
+			},
+			{
+				html: "",
+				id: 'messageUnfoldBut',
+				flex: 1,
+				xtype: "box",
+				style: {"font-size": "larger"},
+				margin: '4 10 4 10'
+			},
+			{
+				scale: "large",
+				iconAlign: 'top',
+				iconCls: 'next-icon',
+	            text: getText('Step Forward'),
+				scope: this,
+				id: 'nextUnfoldBut',
+	            handler: function(){
+					doUnfoldStep()
+	            }
+			}
+		]}],
 		items: [mxPanel]
 	});
 	
@@ -953,7 +1015,7 @@ function main() {
 		var mgr = new mxAutoSaveManager(graph);
 		mgr.autoSaveThreshold = 0;
 		mgr.save = function() {
-			if (graph_title != "") {
+			if (graph_title != "" && unfoldingManager.unfolding == false) {
 				saveModel();
 			}
 		};
@@ -1362,7 +1424,7 @@ function main() {
 		};
 
 	function pictureEditor() {
-		var picNames = ["None", "Growth", "Balance", 'Positive Feedback Clockwise', 'Positive Feedback Counterclockwise', 'Negative Feedback Clockwise', 'Negative Feedback Counterclockwise', 'Unknown Feedback Clockwise', 'Unknown Feedback Counterclockwise', 'Plus', 'Minus', 'Forwards', 'Backwards', 'Up', 'Down', 'Diagonal', "Play", "Pause", "Stop", "Info", 'Question', 'Warning', 'Checkmark', 'Prohibited', 'Idea', "Home", 'Book', 'Clock', 'Computer', 'Dice', 'Gear', 'Hammer', 'Smiley', 'Heart', 'Key', 'Lock', 'Loudspeaker', 'Footprints', 'Mail', 'Network', 'Notes', 'Pushpin', 'Paperclip', 'People', 'Person', 'Wallet', 'Money', 'Flag', 'Trash'];
+		var picNames = ["None", "Growth", "Balance", 'Positive Feedback Clockwise', 'Positive Feedback Counterclockwise', 'Negative Feedback Clockwise', 'Negative Feedback Counterclockwise', 'Unknown Feedback Clockwise', 'Unknown Feedback Counterclockwise', 'Plus', 'Minus', 'Forwards', 'Backwards', 'Up', 'Down', 'Diagonal', "Reload", "Play", "Pause", "Stop", "Info", 'Question', 'Warning', 'Checkmark', 'Prohibited', 'Idea', "Home", 'Book', 'Clock', 'Computer', 'Dice', 'Gear', 'Hammer', 'Smiley', 'Heart', 'Key', 'Lock', 'Loudspeaker', 'Footprints', 'Mail', 'Network', 'Notes', 'Pushpin', 'Paperclip', 'People', 'Person', 'Wallet', 'Money', 'Flag', 'Trash'];
 
 		return new Ext.form.ComboBox({
 			triggerAction: "all",
@@ -1411,7 +1473,7 @@ function main() {
 		}
 
 		if (cell != null && graph.getSelectionCells().length == 1 && (cellType != "Ghost")) {
-			configPanel.setTitle(cellType);
+			configPanel.setTitle(getText(cellType));
 
 
 			properties = [{
@@ -1692,10 +1754,10 @@ function main() {
 				'name': 'StockMode',
 				'text': getText('Stock Type'),
 				'value': cell.getAttribute("StockMode"),
-				'group': 'Behavior',
+				'group': getText('Behavior'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
-					store: ['Store', 'Conveyor'],
+					store: [['Store', getText("Store")], ['Conveyor', getText("Conveyor")]],
 					selectOnFocus: true
 				})
 			});
@@ -1703,7 +1765,7 @@ function main() {
 				'name': 'Delay',
 				'text': getText('Delay'),
 				'value': cell.getAttribute("Delay").toString(),
-				'group': 'Behavior'
+				'group': getText('Behavior')
 			});
 
 		} else if (cellType == "Variable") {
@@ -1734,7 +1796,7 @@ function main() {
 				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
-					store: ['None', 'Agent'],
+					store: [['None', getText('None')], ['Agent', getText('Agent')]],
 					editable: false,
 					selectOnFocus: true
 				})
@@ -1923,7 +1985,7 @@ function main() {
 					queryMode: 'local',
 					selectOnFocus: true,
 					editable: false,
-					store: ["Random", "Grid", "Ellipse", "Network", "Custom Function"]
+					store: [["Random", getText("Random")], ["Grid", getText("Grid")], ["Ellipse", getText("Ellipse")], ["Network", getText("Network")], ["Custom Function", getText("Custom Function")]]
 				}),
 				'renderer': primitiveRenderer
 			});
@@ -1947,7 +2009,7 @@ function main() {
 					queryMode: 'local',
 					selectOnFocus: true,
 					editable: false,
-					store: ["None", "Custom Function"]
+					store: [["None", getText("None")], ["Custom Function", getText("Custom Function")]]
 				})
 			});
 			
@@ -2004,7 +2066,7 @@ function main() {
 				'name': 'Data',
 				'text': getText('Data'),
 				'value': cell.getAttribute("Data"),
-				'group': 'Input/Output Table',
+				'group': getText('Input/Output Table'),
 				'editor': new Ext.form.customFields['converter']({})
 			});
 			properties.push({
@@ -2014,7 +2076,7 @@ function main() {
 				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.ComboBox({
 					triggerAction: "all",
-					store: ['None', 'Linear'],
+					store: [['None', getText("None")], ['Linear', getText("Linear")]],
 					editable: false,
 					selectOnFocus: true
 				})
@@ -2105,6 +2167,8 @@ function main() {
 	}
 
 	handelCursors();
+	
+	handleUnfoldToolbar();
 
 	if ((!is_editor) && (is_embed) && (is_zoom == 1)) {
 		graph.getView().setScale(0.25);

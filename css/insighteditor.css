@@ -302,6 +302,9 @@ html, body {
 .sensitivity-icon {
     background-image:url(../images/sensitivity.png) !important;
 }
+.optimize-icon {
+    background-image:url(../images/optimizer.png) !important;
+}
 .equations-icon {
     background-image:url(../images/equations.png) !important;
 }
@@ -401,6 +404,20 @@ html, body {
 .rightarrow-icon {
     background-image:url(../images/rightarrow.png) !important;
 }
+
+.reload-icon {
+    background-image:url(../images/reload.png) !important;
+}
+.next-icon {
+    background-image:url(../images/next.png) !important;
+}
+.advanced-icon {
+    background-image:url(../images/advanced.png) !important;
+}
+.unfold-icon {
+    background-image:url(../images/unfold.png) !important;
+}
+
 
 
 

@@ -346,6 +346,7 @@ var simulate = function(model, config, callback){
 		return simulate.results;
 	}else{
 		simulatorProgress.close();
+		threads--;
 		simulate.callback(simulate.results, simulate.displayInformation, simulate.config);
 	}
 }

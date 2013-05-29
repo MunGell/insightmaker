@@ -46,7 +46,7 @@ Primitive.method("toNum", function(){
 	return this.value();
 });
 Primitive.method("calculateValue", function() {
-	throw "MSG: ["+this.dna.name+"] does not have a value and can not be used as a value in an equation.";
+	throw "MSG: "+getText("[%s] does not have a value and can not be used as a value in an equation.", this.dna.name);
 });
 Primitive.method("createIds", function(){
 	this.fullId = ":"+this.id+"-"+this.agentId+"-"+this.index;
@@ -195,16 +195,16 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 	}
 });
 Primitive.method("setValue", function() {
-	throw "MSG: You cannot set the value for that primitive.";
+	throw "MSG: "+getText("You cannot set the value for that primitive.");
 });
 Primitive.method("value", function() {
 	
 	if (this.pastValues.length - 1 < timeIndex) {
 		try{
 			var x = this.calculateValue().toNum();
-			if((x instanceof Material) && isNaN(x.value)){
+			if((x instanceof Material) && ! isFinite(x.value)){
 				//console.log(x)
-				throw("MSG: The result of this calculation is not a number (are you dividing by 0?).");
+				throw("MSG: "+getText("The result of this calculation is not a number (are you dividing by 0?)."));
 			}
 		}catch(err){
 			if(! err.substr){
@@ -286,7 +286,7 @@ function Placeholder(dna, primitive){
 }
 Placeholder.inherits(Primitive);
 Placeholder.method("calculateValue",function(){
-	error("["+clean(this.dna.name)+"] is a placeholder and cannot be used as a direct value in equations.", this.primitive, true);
+	error(getText("[%s] is a placeholder and cannot be used as a direct value in equations.", clean(this.dna.name)), this.primitive, true);
 });
 
 function State() {
@@ -360,7 +360,7 @@ State.method("setInitialActive", function() {
 	}
 	
 	if(init instanceof Vector){
-		error("Cannot set the initial active state to a vector.", this, true);
+		error(getText("Cannot set the initial active state to a vector."), this, true);
 	}
 
 	this.active = trueValue(init);
@@ -456,7 +456,7 @@ Transition.method("transition", function() {
 					this.doTransition();
 				}
 			}else{
-				error("The probability for the trigger had units of "+this.value().units.toString()+". Probabilities must be unitless.", this, true);
+				error(getText("The probability for the trigger had units of %s. Probabilities must be unitless.", this.value().units.toString()), this, true);
 			}
 		}else{
 			error("Unknown trigger: "+this.dna.trigger, this, true);
@@ -533,7 +533,7 @@ Action.method("test", function() {
 				this.act();
 			}
 		}else{
-			error("The probability for the trigger had units of "+this.value().units.toString()+". Probabilities must be unitless.", this, true);
+			error(getText("The probability for the trigger had units of %s. Probabilities must be unitless.", this.value().units.toString()), this, true);
 		}
 	}else{
 		error("Unknown trigger: "+this.dna.trigger, this, true);
@@ -588,7 +588,7 @@ Agents.method("states", function() {
 	return this.stateIds.slice(0);
 });
 Agents.method("toNum", function(){
-	throw("MSG: ["+clean(this.dna.name)+"] is a population of agents and cannot be used as a direct value in equations.");
+	throw("MSG: "+getText("[%s] is a population of agents and cannot be used as a direct value in equations.", clean(this.dna.name)));
 });
 Agents.method("add", function(base){
 	this.size = 1 + parseInt(this.size, 10);
@@ -819,7 +819,7 @@ Stock.method("setInitialValue", function() {
 	}
 	
 	if(init instanceof Vector){
-		error("Cannot set the initial value of a stock to a vector.", this, true);
+		error(getText("Cannot set the initial value of a stock to a vector."), this, true);
 	}
 	if(typeof init == "boolean"){
 		if(init){
@@ -912,7 +912,7 @@ Converter.method("getInputValue", function(){
         inp = this.source.value().toNum();
 		if(! inp){
 
-			error("Undefined input value.", this, false);
+			error(getText("Undefined input value."), this, false);
 			
 		}
 		//console.log(inp);
@@ -1046,6 +1046,11 @@ Flow.method("predict", function() {
 			var x = evaluateTree(this.equation, varBank).toNum();
 			//console.log(this.equation);
 			//console.log(x);
+			if(! isFinite(x.value)){
+				//console.log(x)
+				throw("MSG: "+getText("The result of this calculation is not finite. Flows must have finite values. Are you dividing by 0?"));
+			}
+			
 		}catch(err){
 			if(! err.substr){
 				throw err; //it's already an object, let's kick it up the chain
@@ -1060,7 +1065,7 @@ Flow.method("predict", function() {
 			}
 		}
 		if(x instanceof Vector){
-			error("Cannot set the value of a flow to a vector.", this, true);
+			error(getText("Cannot set the value of a flow to a vector."), this, true);
 		}else if(typeof x== "boolean"){
 			if(x){
 				x = new Material(1);
@@ -1078,6 +1083,8 @@ Flow.method("predict", function() {
 		//console.log("---")
 //		console.log(this.primaryRate)
 		this.testUnits(this.primaryRate, true);
+		
+		
 		//console.log("+++")
 		
 		//console.log("--")
@@ -1153,7 +1160,7 @@ Flow.method("apply", function() {
 			}
 			if (this.omega !== null && this.omega.dna.nonNegative) {
 				if (plus(this.omega.value().toNum(), out_r).value < 0) {
-					error("Inconsistent non-negative constraints for flow.", this, false);
+					error(getText("Inconsistent non-negative constraints for flow."), this, false);
 				}
 			}
 

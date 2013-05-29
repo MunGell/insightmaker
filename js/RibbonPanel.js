@@ -189,7 +189,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 	});
 	fillColorMenu.add("-");
 	fillColorMenu.add({
-		text: 'Transparent',
+		text: getText('Transparent'),
 		handler: function() {
 
 			graph.getModel().beginUpdate();
@@ -234,7 +234,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 	});
 	lineColorMenu.add("-");
 	lineColorMenu.add({
-		text: 'Transparent',
+		text: getText('Transparent'),
 		handler: function() {
 			graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxConstants.NONE, excludeType(graph.getSelectionCells(), "Ghost"));
 		}
@@ -426,14 +426,14 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			}
 		}, '-',
 		{
-			text: 'Zoom In',
+			text: getText('Zoom In'),
 			iconCls: 'zoomin-icon',
 			scope: this,
 			handler: function(item) {
 				graph.zoomIn();
 			}
 		}, {
-			text: 'Zoom Out',
+			text: getText('Zoom Out'),
 			iconCls: 'zoomout-icon',
 			scope: this,
 			handler: function(item) {
@@ -441,14 +441,14 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			}
 		}, '-',
 		{
-			text: 'Actual Size',
+			text: getText('Actual Size'),
 			iconCls: 'zoomactual-icon',
 			scope: this,
 			handler: function(item) {
 				graph.zoomActual();
 			}
 		}, {
-			text: 'Fit Window',
+			text: getText('Fit Window'),
 			iconCls: 'fit-icon',
 			scope: this,
 			handler: function(item) {
@@ -1057,7 +1057,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: config_columns,
 				height: 95,
-				title: 'Tools',
+				title: getText('Tools'),
 				id: "configgroup",
 				items: [{
 					iconAlign: 'top',
@@ -1078,22 +1078,6 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					tooltip: getText('Draw notes on your diagram') + ' ' + cmd("K"),
 					enableToggle: true,
 					handler: scratchpadFn,
-					scope: this
-				}, {
-					hidden: (!is_editor) || is_embed,
-					id: 'macroBut',
-					text: getText('Macros'),
-					iconCls: 'download-icon',
-					tooltip: getText('Edit macro functions and constants for use anywhere in your equations'),
-					handler: showMacros,
-					scope: this
-				},{
-					hidden: (!is_editor) || is_embed,
-					id: 'sensitivityBut',
-					text: getText('Sensitivity'),
-					iconCls: 'sensitivity-icon',
-					tooltip: getText('Sensitivity testing'),
-					handler: doSensitivity,
 					scope: this
 				},{
 					id: 'embed_but',
@@ -1122,7 +1106,8 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 						}
 					},
 					scope: this
-				},{
+				},
+				{
 					hidden: (!is_editor) || is_embed,
 					id: 'textBut',
 					text: getText('Equations'),
@@ -1130,14 +1115,44 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					tooltip: getText('A listing of all equations in the Insight'),
 					handler: textEquations,
 					scope: this
-				},{
+				},
+				{
 					hidden: (!is_editor) || is_embed,
-					id: 'optimizeBut',
-					text: getText('Optimize'),
-					iconCls: 'optimize-icon',
-					tooltip: getText('Optimize model parameters'),
-					handler: doOptimizer,
+					text: getText('Unfolding'),
+					iconCls: 'unfold-icon',
+					tooltip: getText('Display the model step-by-step to share a story'),
+					handler: showUnfoldingWin,
 					scope: this
+				},{
+   					text: getText('Advanced'),
+   					iconCls: 'advanced-icon',
+					hidden: (!is_editor) || is_embed,
+   					handler: function() {},
+   					menu: {
+					
+						items: [{
+							id: 'macroBut',
+							text: getText('Macros'),
+							iconCls: 'download-icon',
+							tooltip: getText('Edit macro functions and constants for use anywhere in your equations'),
+							handler: showMacros,
+							scope: this
+						},{
+							id: 'sensitivityBut',
+							text: getText('Sensitivity'),
+							iconCls: 'sensitivity-icon',
+							tooltip: getText('Sensitivity testing'),
+							handler: doSensitivity,
+							scope: this
+						},{
+							id: 'optimizeBut',
+							text: getText('Optimize'),
+							iconCls: 'optimize-icon',
+							tooltip: getText('Optimize model parameters'),
+							handler: doOptimizer,
+							scope: this
+						}]
+					}
 				}
 
 

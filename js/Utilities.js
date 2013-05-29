@@ -281,7 +281,7 @@ function isValued(cell) {
 function setSaveEnabled(e) {
     if (is_editor && (! is_embed)) {
         var b = ribbonPanelItems().getComponent('savegroup').getComponent('savebut');
-        if (e) {
+        if (e && unfoldingManager.unfolding == false) {
             b.setDisabled(false);
             b.setText('Save Insight');
         } else {

@@ -322,6 +322,8 @@ function doOptimizer(){
 				
 				setTimeout("runOptimizer()", 30);
 				
+				threads++;
+				
             }
         }]
 
@@ -595,6 +597,8 @@ function finishOptimizer(){
 	showData(getText("Optimization Results"), tabs);
 	
 	optimizerProgress.close();
+	
+	threads--;
 }
 
 var OptDimension = function(thisDimension){
@@ -742,6 +746,7 @@ function evaluateCurrentPoint(){
 		highlight(res.errorPrimitive);
 		if(optimizerProgress){
 			optimizerProgress.close();
+			threads--;
 		}
 		throw("Opt Error");
 	}

@@ -14,6 +14,10 @@ function textEquations(){
 	
 	var odd = true;
 	
+	function boolYesNo(bool){
+		return isTrue(bool)?getText("Yes"):getText("No")
+	}
+	
 	function list(items){
 		var inner = "";
 		for(var i = 0; i < items.length; i++){
@@ -67,21 +71,21 @@ function textEquations(){
 	if(items.length>0){
 		divide(getText("Model Stocks"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ [getText("Initial Value"), equationRenderer(getValue(items[i]))], [getText("Non-Negative"), clean(items[i].getAttribute("NonNegative"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Initial Value"), equationRenderer(getValue(items[i]))], [getText("Non-Negative"), boolYesNo(items[i].getAttribute("NonNegative"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	items = findAndSort("Flow");
 	if(items.length>0){
 		divide(getText("Model Flows"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ [getText("Rate"), equationRenderer(getValue(items[i]))], [getText("Alpha"), clean(name(items[i].source))], [getText("Omega"), clean(name(items[i].target))], [getText("Positive Only"), clean(items[i].getAttribute("OnlyPositive"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Rate"), equationRenderer(getValue(items[i]))], [getText("Alpha"), clean(name(items[i].source))], [getText("Omega"), clean(name(items[i].target))], [getText("Positive Only"), boolYesNo(items[i].getAttribute("OnlyPositive"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	items = findAndSort("Converter");
 	if(items.length>0){
 		divide(getText("Model Converters"));
 		for(var i=0; i<items.length; i++){
-			add(name(items[i]), list( addNote([ [getText("Data"), clean(getValue(items[i]).replace(/\;/g,"; ")) ] , [getText("Source"), clean(items[i].getAttribute("Source")=="Time"?"Time":name(findID(items[i].getAttribute("Source")))) ], [getText("Interpolation"), clean(items[i].getAttribute("Interpolation"))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
+			add(name(items[i]), list( addNote([ [getText("Data"), clean(getValue(items[i]).replace(/\;/g,"; ")) ] , [getText("Source"), clean(items[i].getAttribute("Source")=="Time"?"Time":name(findID(items[i].getAttribute("Source")))) ], [getText("Interpolation"), getText(clean(items[i].getAttribute("Interpolation")))], [getText("Units"), clean(items[i].getAttribute("Units"))] ], items[i]) ))
 		}
 	}
 	

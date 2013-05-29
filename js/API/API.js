@@ -541,6 +541,21 @@ function showData(title, tabs, size) {
 	return win;
 }
 
+/*
+Method: frontWindow
+
+Gets the front most window (if one exists).
+
+Returns:
+
+A window object.
+
+*/
+
+function frontWindow(){
+	return Ext.WindowMgr.getActive();
+}
+
 
 /*
 
@@ -2761,20 +2776,25 @@ function pressButton(button) {
 	graph.getModel().beginUpdate();
 	
 	map(button, function(primitive) {
-		try {
-			eval("\"use strict;\"\n\n"+primitive.getAttribute("Function"));
-		} catch (err) {
-			Ext.Msg.show({
-				title: 'Action Error',
-				msg: '<p>There was error with the Action for the button <i>' + primitive.getAttribute("name") + '</i>.</p><br/><p><tt>' + err + "</tt></p>",
-				buttons: Ext.Msg.OK,
-				icon: Ext.Msg.ERROR
-			});
-		}
+		runAction(primitive.getAttribute("Function"), '<p>There was error with the Action for the button <i>' + primitive.getAttribute("name") + '</i>.</p><br/>');
 	});
 	
 	graph.getModel().endUpdate();
 	
+}
+
+function runAction(code, errHeader){
+	try {
+		eval("\"use strict;\"\n\n"+code);
+	} catch (err) {
+		errHeader = errHeader || '';
+		Ext.Msg.show({
+			title: getText('Action Error'),
+			msg: errHeader+'<p><tt>' + err + "</tt></p>",
+			buttons: Ext.Msg.OK,
+			icon: Ext.Msg.ERROR
+		});
+	}
 }
 
 /*

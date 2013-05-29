@@ -48,37 +48,38 @@ function setTopLinks() {
 		arrow = "&darr;"
 	}
     if (drupal_node_ID == -1) {
-        links = '<div style="float:right;padding:0.2em;"><nobr><a href="'+base_path+'/help" target="_blank" >Help</a> | <a href="'+base_path+'/browse" target="_blank">Find More Insights</a> | <a href="javascript:toggleTopBar()"  id="toolbarToggle">'+arrow+'</a></nobr></div>';
+        links = '<div style="float:right;padding:0.2em;"><nobr><a href="'+base_path+'/help" target="_blank" >'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()"  id="toolbarToggle">'+arrow+'</a></nobr></div>';
     } else {
         if (is_editor) {
             links = '<div style="float:left;padding:0.2em;">';
-            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">Insight Discussion</a>';
-            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/access" target="_blank" id="editBut">Insight Properties</a>';
-            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/delete" id="deleteBut">Delete Insight</a>';
+            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a>';
+            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/access" target="_blank" id="editBut">'+getText("Insight Properties")+'</a>';
+            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/delete" id="deleteBut">'+getText("Delete Insight")+'</a>';
 			links = links + '</div></div>';
       
 		} else {
             links = links + '<div style="float:left;padding:0.2em;">';
-            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">Insight Discussion</a></div>';
+            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a></div>';
         }
         links = links + '<div style="float:right;padding:0.2em;"><nobr>';
         if (is_embed) {
-            links = links + '<a target="_blank" href="'+base_path+'/insight/' + drupal_node_ID + '">Full Screen Insight</a> | ';
+            links = links + '<a target="_blank" href="'+base_path+'/insight/' + drupal_node_ID + '">'+getText("Full Screen Insight")+'</a> | ';
         } else {
-            links = links + '<a target="_blank" href="'+base_path+'/insight/">Make a New Insight</a> | ';
-            links = links + '<a target="_blank" href="'+base_path+'/node/' + drupal_node_ID + '/clone">Duplicate Insight</a> | ';
+            links = links + '<a target="_blank" href="'+base_path+'/insight/">'+getText("Make new Insight")+'</a> | ';
+            links = links + '<a target="_blank" href="'+base_path+'/node/' + drupal_node_ID + '/clone">'+getText("Clone Insight")+'</a> | ';
         }
-        links = links + '<a href="'+base_path+'/help" target="_blank">Help</a> | <a href="'+base_path+'/browse" target="_blank">Find More Insights</a> | <a href="javascript:toggleTopBar()" id="toolbarToggle">'+arrow+'</a></nobr></div>';
+        links = links + '<a href="'+base_path+'/help" target="_blank">'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()" id="toolbarToggle">'+arrow+'</a></nobr></div>';
     }
 	
     replace_html(document.getElementById("toplinks-holder"), links);
 	
-
-     $('#commentBut').frameWarp({
-        url : base_path+'/discussion/' + drupal_node_ID
-     });
-     $('#editBut').frameWarp({
-        url : base_path+'/node/' + drupal_node_ID + "/access"
-     });
+	if($.fn.frameWarp){
+	     $('#commentBut').frameWarp({
+	        url : base_path+'/discussion/' + drupal_node_ID
+	     });
+	     $('#editBut').frameWarp({
+	        url : base_path+'/node/' + drupal_node_ID + "/access"
+	     });
+ 	}
 }
 

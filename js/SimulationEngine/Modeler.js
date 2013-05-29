@@ -24,6 +24,7 @@ function runSimulation(config) {
 
 		if (isDefined(simulatorProgress) && simulatorProgress != null) {
 			simulatorProgress.close()
+			threads--;
 		};
 		
 		var errOut;
@@ -299,6 +300,7 @@ function innerRunSimulation(config) {
 		
 		return res;
 	} else {
+		threads++;
 		simulatorProgress = Ext.MessageBox.show({
 			msg: "Processing Model...",
 			icon: 'run-icon',
@@ -572,6 +574,7 @@ function finishSim(res, displayInformation, config) {
 function handleErrorObject(err) {
 	if(simulatorProgress){
 		simulatorProgress.close();
+		threads--;
 	}
 	
 	if (isLocal()) {

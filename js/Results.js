@@ -314,13 +314,13 @@ function openDisplayConfigure(win) {
 					},
 					layout: 'anchor',
 					items: [{
-						fieldLabel: 'Title',
+						fieldLabel: getText('Title'),
 						id: 'chartTitle',
 						name: 'chartTitle',
 						allowBlank: false
 					},
 					Ext.create('Ext.form.ComboBox', {
-						fieldLabel: 'Type',
+						fieldLabel: getText('Type'),
 						name: 'chartType',
 						id: 'chartType',
 						allowBlank: false,
@@ -795,7 +795,7 @@ function renderDisplay(display, displayInformation) {
 	if (primitives.length == 0 || (type == "Scatterplot" && primitives.length < 2)) {
 		return {
 			xtype: "box",
-			html: "<br/><br/><br/><b><big><center><span style='color:darkgray'>"+getText("No data to display")+"<br/><br/>Press 'Configure' to select data</span></center></big></b>"
+			html: "<br/><br/><br/><b><big><center><span style='color:darkgray'>"+getText("No data to display")+"<br/><br/>"+getText("Press 'Configure' to select data")+"</span></center></big></b>"
 		};
 	}
 
@@ -1422,14 +1422,14 @@ function createResultsWindow(displayInformation) {
 		labelWidth: 0,
 		allowBlank: false,
 		store: [
-			[.2, "0.2 x Normal"],
-			[.5, "0.5 x Normal"],
-			[1, "Normal Speed"],
-			[1.5, "1.5 x Normal"],
-			[2, "2 x Normal"],
-			[5, "5 x Normal"],
-			[10, "10 x Normal"],
-			[-1, "Full Speed"]
+			[.2, getText("%s x Normal", "0.2")],
+			[.5, getText("%s x Normal", "0.5")],
+			[1, getText("Normal Speed")],
+			[1.5, getText("%s x Normal", "1.5")],
+			[2, getText("%s x Normal", "2")],
+			[5, getText("%s x Normal", "5")],
+			[10, getText("%s x Normal", "10")],
+			[-1, getText("Full Speed")]
 		],
 		queryMode: 'local',
 		value: parseFloat(getSetting()
@@ -1533,7 +1533,7 @@ function createResultsWindow(displayInformation) {
 
 
 	var win = new Ext.Window({
-		title: 'Simulation Results ' + analysisCount,
+		title: getText('Simulation Results %s', analysisCount),
 		analysisCount: analysisCount,
 		scratchPadStatus: {},
 		closable: true,
@@ -1570,7 +1570,7 @@ function createResultsWindow(displayInformation) {
 			items: [{
 				iconCls: "add-icon",
 				scale: "large",
-				text: 'Add Display',
+				text: getText('Add Display'),
 				handler: function() {
 					var parent = graph.getDefaultParent();
 					var win = this.findParentByType("window");
@@ -1595,7 +1595,7 @@ function createResultsWindow(displayInformation) {
 			}, {
 				scale: "large",
 				iconCls: "big-delete-icon",
-				text: 'Delete Display',
+				text: getText('Delete Display'),
 				handler: function() {
 
 					var win = this.findParentByType("window");

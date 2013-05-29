@@ -66,7 +66,7 @@ function getEditor(item) {
     } else if (typeof val == 'boolean') {
         return new Ext.form.ComboBox({
             triggerAction: "all",
-            store: [["false", "No"], ["true", "Yes"]],
+            store: [["false", getText("No")], ["true", getText("Yes")]],
             selectOnFocus: true, editable: false
         });
     } else {
