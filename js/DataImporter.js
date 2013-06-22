@@ -74,7 +74,7 @@ function importData(targetStore){
             columns: 1
         },
         width: 380,
-        height: 400,
+        height: 410,
         items: [p],
         buttons: [
         {

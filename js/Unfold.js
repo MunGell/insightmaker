@@ -87,7 +87,9 @@ function executeUnfoldAction(action){
 		
 	}else if(action.type=="visibility"){
 		var data = JSON.parse(action.data)
+		graph.getModel().beginUpdate();
 		setOpacity(findID(data.ids).filter(function(x){return x!==null}), data.opacity);
+		graph.getModel().endUpdate();
 	}else if(action.type=="action"){
 		runAction(action.data);
 	}else if(action.type=="folder"){
@@ -133,7 +135,7 @@ var handleUnfoldToolbar = function(fromWin){
 		}
 
 		revealUnfoldButtons(should_unfold);
-		if(should_unfold){
+		if(should_unfold && unfoldEnabled){
 			beginUnfolding();
 		}
 	}
@@ -208,6 +210,22 @@ function showUnfoldingWin(){
 		  return getJson(treeStore.getRootNode());
 	}
 	
+	function addNewNode(obj){
+		var parent = tree.getRootNode();
+		var index = parent.childNodes.length+1;
+		if(selectedNode){
+			if(selectedNode.get("type") == "group" && selectedNode.isExpanded()){
+				parent = selectedNode;
+				index = 0;
+			}else{
+				parent = selectedNode.parentNode;
+				index = parent.indexOf(selectedNode)+1;
+			}
+		}
+		var node = parent.insertChild(index, obj);
+		tree.getSelectionModel().select(node);
+	}
+	
 	var selectedNode;
 	var treeStore = new Ext.data.TreeStore({
 			fields: [{
@@ -238,7 +256,7 @@ function showUnfoldingWin(){
             });
 		}
 	var tree = Ext.create('Ext.tree.Panel', {
-	    title: getText('Unfolding Steps'),
+	    title: getText('Story Steps'),
 		disabled: !(mySetting.getAttribute("unfoldingStatus")=="on"),
 	    useArrows: true,
 		flex: 1,
@@ -305,6 +323,8 @@ function showUnfoldingWin(){
 				removeSelected(json);
 				treeStore.setRootNode(json);
 				configs.getLayout().setActiveItem(0);
+				
+				selectedNode = null;
             }
 			}, "->", {
 			iconCls: 'units-add-icon',
@@ -314,60 +334,56 @@ function showUnfoldingWin(){
 				items: [{
 			        text: getText('Change Visibility'),
 					handler: function(){
-						var node = tree.getRootNode().appendChild({
+						addNewNode({
 							text: getText("Visibility Change"),
 							data: "{\"opacity\": 100, \"ids\": []}",
 							type: "visibility",
 							leaf: true
 						});
-						tree.getSelectionModel().select(node);
 					}
 			    },{
 			        text: getText('Show Message'),
 					handler: function(){
-						var node = tree.getRootNode().appendChild({
+						addNewNode({
 							text: getText("Show Message"),
 							data: getText("Enter your message..."),
 							type: "note",
 							leaf: true
 						});
-						tree.getSelectionModel().select(node);
 					}
 			    },{
 			        text: getText('Toggle Folders'),
 					handler: function(){
-						var node = tree.getRootNode().appendChild({
+						addNewNode({
 							text: getText("Toggle Folders"),
 							data: "{\"mode\": \"expand\", \"ids\": []}",
 							type: "folder",
 							leaf: true
 						});
-						tree.getSelectionModel().select(node);
 					}
 			    },
 				'-',
 				{
 			        text: getText('Run Action'),
 					handler: function(){
-						var node = tree.getRootNode().appendChild({
+						addNewNode({
 							text: getText("Run Action"),
 							data: "",
 							type: "action",
 							leaf: true
 						});
-						tree.getSelectionModel().select(node);
 					}
 			    },
 				'-'
 				,{
 			        text: getText('Group Steps'),
 					handler: function(){
-						var node = tree.getRootNode().appendChild({
+						addNewNode({
 							text: getText("New Group"),
 							type: "group",
-							leaf: false
+							leaf: false,
+							expanded: true
 						});
-						tree.getSelectionModel().select(node);
 					}
 			    }]
 			}
@@ -648,7 +664,7 @@ function showUnfoldingWin(){
 	};
 
 	var win = new Ext.Window({
-		title: getText('Model Unfolding Designer'),
+		title: getText('Story Designer'),
 		layout: 'fit',
 		closeAction: 'destroy',
 		border: false,
@@ -681,7 +697,7 @@ function showUnfoldingWin(){
 		 {
 			xtype: "combo",
 			id: "autoCombo",
-			fieldLabel: getText("Automatically Unfold")+":",
+			fieldLabel: getText("Automatically View")+":",
 			labelWidth: 130,
 			store: [["never", getText("Never")], ["editors", getText("For Editors")], ["non-editors", getText("For Non-Editors")], ["always", getText("Always")]],
 			forceSelection: true,
@@ -718,7 +734,9 @@ function showUnfoldingWin(){
 				}
 				handleUnfoldToolbar(true);
 				
+				
 				win.close();
+				
 				
 			}
 		}]

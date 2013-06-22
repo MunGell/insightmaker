@@ -98,14 +98,16 @@ Ext.ConverterWindow = function(args)
 
 
     var data = [];
-    var items = obj.args.oldKeys.split(";");
-    for (var i = 0; i < items.length; i++) {
-        var xy = items[i].split(",")
-        data.push({
-            xVal: parseFloat(xy[0]),
-            yVal: parseFloat(xy[1])
-        });
-    }
+	if(! isUndefined(obj.args.oldKeys)){
+	    var items = obj.args.oldKeys.split(";");
+	    for (var i = 0; i < items.length; i++) {
+	        var xy = items[i].split(",")
+	        data.push({
+	            xVal: parseFloat(xy[0]),
+	            yVal: parseFloat(xy[1])
+	        });
+	    }
+	}
 
     var dataFields = [{
         name: 'xVal',
@@ -135,7 +137,7 @@ Ext.ConverterWindow = function(args)
             headersDisabled: true,
             markDirty: false
         },
-        tbar: [{
+        tbar: ['->',{
             iconCls: 'units-add-icon',
             text: getText('Add Point'),
             handler: function() {
@@ -144,29 +146,19 @@ Ext.ConverterWindow = function(args)
                     yVal: 0
                 };
                 editor.completeEdit();
-                var index = 0;
-                store.insert(index, e);
+                store.insert(0, e);
+				store.sort('xVal', 'ASC');
                 gridPan.getView().refresh();
+
+                var index = store.findBy(function(record){
+                	return record.get("xVal")==0 && record.get("yVal")==0;
+                });
                 gridPan.getSelectionModel().selectRange(index, index);
                 editor.startEdit(index, index);
-            }
-        },
-        {
-            id: "converterRemoveBut",
-            iconCls: 'units-remove-icon',
-            text: getText('Remove Point'),
-            disabled: true,
-            handler: function() {
-                editor.completeEdit();
-                var s = gridPan.getSelectionModel().getSelection();
-                for (var i = 0, r; r = s[i]; i++) {
-                    store.remove(r);
-                }
             }
         }],
 
         columns: [
-        new Ext.grid.RowNumberer(),
         {
             id: 'xVal',
             header: getText('Input Value'),
@@ -193,7 +185,24 @@ Ext.ConverterWindow = function(args)
                 decimalPrecision: 10,
 				selectOnFocus:true
             }
-        }
+        },
+		{
+			xtype: "actioncolumn",
+			width:40,
+			items:[
+				{
+					iconCls: "units-remove-icon",
+					tooltip: getText("Delete"),
+					handler: function(grid, rowIndex, columnIndex){
+						store.remove(store.getAt(rowIndex));
+
+						store.sort('xVal', 'ASC');
+				        makeDiscrete();
+		                gridPan.getView().refresh();
+					}
+				}
+			]
+		}
         ]
     });
 
@@ -240,7 +249,7 @@ Ext.ConverterWindow = function(args)
                 fields: ["xVal"],
                 title: getText("Input")+" (" + clean(sourceName) + ")",
                 grid: true,
-				maximum: getXRange()[1],/*minimum: getXRange()[0],*/
+				maximum: getXRange()[1],minimum: getXRange()[0],
 				labelTitle: {
 					font: '14px Verdana'
 				}
@@ -256,15 +265,100 @@ Ext.ConverterWindow = function(args)
                     'stroke-width': 3
                 },
                 xField: 'xVal',
-                yField: "yVal",
-                tips: {
-                    trackMouse: true,
-                    width: 100,
-                    renderer: function(storeItem, item) {
-                        this.setTitle("<center>(" + item.value[0] + ", " + item.value[1] + ")</center>");
-                    }
-                }
-            }]
+                yField: "yVal"
+            }],
+			listeners:{
+				click: function(e){
+					var xy= chart.getEventXY(e);
+					var x = 0;
+					var y = 1;
+					var dx = 0.01;
+					var dy = 0.01;
+					
+					if(chart.revX){
+						x = chart.revX(xy[0]);
+						y = chart.revY(xy[1]);
+						dx = chart.revX(xy[0]+1)-x;
+						dy = chart.revY(xy[1]-1)-y;
+					}
+				
+					
+					var nx, ny;
+					
+					var diff = dx.toExponential().split("e")[1];
+					if(diff[1]=="-"){
+						nx = (Math.round(x/Math.pow(10, diff+1))*Math.pow(10, diff+1)).toPrecision(9);
+					}else{
+						nx = (Math.round(x/Math.pow(10, diff-1))*Math.pow(10, diff-1)).toPrecision(9);
+					}
+					var diff = dy.toExponential().split("e")[1];
+					if(diff[1]=="-"){
+						ny = (Math.round(y/Math.pow(10, diff+1))*Math.pow(10, diff+1)).toPrecision(9);
+					}else{
+						ny = (Math.round(y/Math.pow(10, diff-1))*Math.pow(10, diff-1)).toPrecision(9);
+					}
+					
+					if(e.shiftKey){
+						var pt = store.findBy(function(record){
+							return (record.get("xVal")>x-dx*4 && record.get("xVal")<x+dx*4 && record.get("yVal")>y-dy*4 && record.get("yVal")<y+dy*4)
+						});
+						if(pt > -1){
+							store.remove(store.getAt(pt));
+						}
+					}else if(e.altKey){
+						if(store.count()>0){
+							var pt = store.getAt(0);
+							for(var i=1; i< store.count(); i++){
+								if(Math.abs(pt.get("xVal")-x) > Math.abs(store.getAt(i).get("xVal")-x)){
+									pt = store.getAt(i);
+								}
+							}
+							
+							pt.set("xVal", nx);
+							pt.set("yVal", ny);
+							
+						}
+					}else{
+						var pt = store.findBy(function(record){
+							return (record.get("xVal")>x-dx*3 && record.get("xVal")<x+dx*3)
+						});
+						if(pt>-1){
+							pt = store.getAt(pt)
+						}else{
+							pt = null;
+						}
+					
+						if(! pt){
+		                	var e = {
+		                    	xVal: nx,
+		                    	yVal: ny
+		                	};
+		               	 	editor.completeEdit();
+		            		store.insert(0, e);
+							
+			           
+					
+						}else{
+							pt.set("xVal", nx);
+							pt.set("yVal", ny);
+						}
+					}
+			        store.sort('xVal', 'ASC');
+					
+					if(!e.shiftKey){
+	                	var index = store.findBy(function(record){
+	                		return record.get("xVal")==nx && record.get("yVal")==ny;
+	                	});
+						if(index >= 0){
+	                		gridPan.getSelectionModel().selectRange(index, index);
+						}
+					}
+					
+			        makeDiscrete();
+	                gridPan.getView().refresh();
+					
+				}
+			}
         });
 		
 		
@@ -375,13 +469,13 @@ Ext.ConverterWindow = function(args)
     }
 	
 	function getXRange(){
-        return [store.getAt(0).data.xVal, store.getAt(store.getCount()-1).data.xVal]
+		if(store.getCount()==0){
+			return [0,1];
+		}else{
+       		return [store.getAt(0).data.xVal, store.getAt(store.getCount()-1).data.xVal];
+		}
 	}
 
-    gridPan.getSelectionModel().on('selectionchange',
-    function(sm) {
-        Ext.getCmp("converterRemoveBut").setDisabled(sm.getCount() < 1);
-    });
 
 
 
@@ -412,3 +506,9 @@ Ext.ConverterWindow = function(args)
     }
 }
 
+function setConverterInit(converter){
+	var start = parseFloat(getTimeStart(), 10);
+	var end = parseFloat(getTimeStart(), 10) + parseFloat(getTimeLength(), 10);
+	
+	converter.setAttribute("Data", start+","+Math.pow(start,2)+"; "+(start+end)/2+","+Math.pow((start+end)/2,2)+"; "+end+","+Math.pow(end,2))
+}

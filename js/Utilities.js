@@ -735,9 +735,9 @@ function replaceAll(txt, replace, with_this) {
 }
 
 function loadBackgroundColor() {
-    mxPanel.body.dom.style["background-color"] = getSetting().getAttribute("BackgroundColor");
+    mxPanel.el.dom.style["background-color"] = getSetting().getAttribute("BackgroundColor");
 
-    mxPanel.body.dom.style.backgroundColor = getSetting().getAttribute("BackgroundColor");
+    mxPanel.el.dom.style.backgroundColor = getSetting().getAttribute("BackgroundColor");
 }
 
 function isUndefined(item){

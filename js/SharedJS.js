@@ -65,7 +65,7 @@ function setTopLinks() {
         if (is_embed) {
             links = links + '<a target="_blank" href="'+base_path+'/insight/' + drupal_node_ID + '">'+getText("Full Screen Insight")+'</a> | ';
         } else {
-            links = links + '<a target="_blank" href="'+base_path+'/insight/">'+getText("Make new Insight")+'</a> | ';
+            links = links + '<a target="_blank" href="'+base_path+'/insight/">'+getText("Make New Insight")+'</a> | ';
             links = links + '<a target="_blank" href="'+base_path+'/node/' + drupal_node_ID + '/clone">'+getText("Clone Insight")+'</a> | ';
         }
         links = links + '<a href="'+base_path+'/help" target="_blank">'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()" id="toolbarToggle">'+arrow+'</a></nobr></div>';

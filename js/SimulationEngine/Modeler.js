@@ -31,13 +31,14 @@ function runSimulation(config) {
 		if (err.msg) {
 			errOut = {
 				error: err.msg,
-				errorPrimitive: findID(err.primitive.id)
+				errorPrimitive: isDefined(err.primitive)?findID(err.primitive.id):null
 			};
 		} else {
 			errOut = {
-				error: "Unknown model error.",
+				error: getText("An unknown simulation error occurred"),
 				errorPrimitive: null
 			};
+			err.msg = errOut.msg;
 		}
 		
 		
@@ -91,7 +92,12 @@ function innerRunSimulation(config) {
 			if (Ext.String.trim(u[2]) != "") { //It has a synonym, otherwise we don't need to add it
 				newSources.push(u[0]);
 				newScalings.push(u[1]);
-				newTargets.push(createUnitStore(u[2]).toStringShort());
+				var newU = createUnitStore(u[2]);
+				if(isUndefined(newU)){
+					throw {msg: 'You cannot define a units synonym for "unitless".'};
+				}else{
+					newTargets.push(newU.toStringShort());
+				}
 			}
 		}
 		loadUnits(newSources, newTargets, newScalings);
@@ -109,7 +115,7 @@ function innerRunSimulation(config) {
 			
 			var id = item.getAttribute("Agent");
 			if(isUndefined(id)){
-				throw {msg: "You must select a base agent for <i>"+clean(item.getAttribute("name"))+"</i>.", primitive: item, showEditor: false};
+				throw {msg: getText("You must select a base agent for %s.", "<i>"+clean(item.getAttribute("name"))+"</i>"), primitive: item, showEditor: false};
 			}
 				
 			var x = new Agents();
@@ -220,7 +226,7 @@ function innerRunSimulation(config) {
 			evaluateMacros(setting.getAttribute("Macros"));
 		}catch(err){
 			showMacros();
-			var msg = "An error with the macros prevented the simulation from running.";
+			var msg = getText("An error with the macros prevented the simulation from running.");
 			if(err.msg){
 				msg = msg + "<br/><br/>" + err.msg;
 			}else if(err.toString().substr(0,4)=="MSG:"){
@@ -250,7 +256,7 @@ function innerRunSimulation(config) {
 				if (isLocal()) {
 					console.log(err);
 				}
-				var msg = "An error with the custom network function prevented the simulation from running.";
+				var msg = getText("An error with the custom network function prevented the simulation from running.");
 				if(err.msg){
 					msg = msg + "<br/><br/>" + err.msg;
 				}else if(err.toString().substr(0,4)=="MSG:"){
@@ -273,7 +279,7 @@ function innerRunSimulation(config) {
 				if (isLocal()) {
 					console.log(err);
 				}
-				var msg = "An error with the agent placement function prevented the simulation from running.";
+				var msg = getText("An error with the agent placement function prevented the simulation from running.");
 				if(err.msg){
 					msg = msg + "<br/><br/>" + err.msg;
 				}else if(err.toString().substr(0,4)=="MSG:"){
@@ -302,7 +308,7 @@ function innerRunSimulation(config) {
 	} else {
 		threads++;
 		simulatorProgress = Ext.MessageBox.show({
-			msg: "Processing Model...",
+			msg: getText("Processing Model..."),
 			icon: 'run-icon',
 			width: 300,
 			closable: false,
@@ -367,7 +373,7 @@ function simpleNum(mat, units){
 	}
 	
 	if(unitless(units) && (! unitless(mat.units))){
-		throw("The result of the calculation has units "+mat.units.toString()+", but the no units are specified for the calculation. Please set the units for the calculation so we can determine the proper output.");
+		throw(getText("The result of the calculation has units %s, but no units are specified for the calculation. Please set the units for the calculation so we can determine the proper output.", mat.units.toString()));
 	}
 	
 	if( unitless(mat.units) ){
@@ -402,7 +408,7 @@ function simpleUnitsTest(mat, units){
 				console.log(mat.units);
 				console.log(units);
 			}
-			throw("MSG: Wrong units generated. Expected <i>"+clean(this.units.toString())+"</i>, and got <i>"+clean(m.units.toString())+"</i>.");
+			throw("MSG: "+getText("Wrong units generated. Expected %s, and got %s.", "<i>"+clean(this.units.toString())+"</i>", "<i>"+clean(m.units.toString())+"</i>."));
 		} else {
 			//console.log("----+")
 			mat.value = mat.value * scale;
@@ -591,6 +597,8 @@ function handleErrorObject(err) {
 		mxUtils.alert(err.msg);
 	} else if(err.error) {
 		mxUtils.alert(err);
+	}else{
+		mxUtils.alert(getText("An unknown model simulation error occurred."));
 	}
 }
 
@@ -626,12 +634,12 @@ function getDNA(cell){
 			dna.value = createTree(getValue(cell));
 		}catch(err){
 			if(isLocal()){
-				console.log(this);
-				console.log(eq);
-				console.log(neighborhood);
+				//console.log(this);
+				//console.log(eq);
+				//console.log(neighborhood);
 				console.log(err);	
 			}
-			error("The primitive <i>"+clean(dna.name)+"</i> has an equation error that must be corrected before the model can be run.", cell, true);
+			error(getText("The primitive %s has an equation error that must be corrected before the model can be run.", "<i>"+clean(dna.name)+"</i>"), cell, true);
 		}
 	}
 	
@@ -641,7 +649,7 @@ function getDNA(cell){
 		try{
 			dna.triggerValue = createTree(cell.getAttribute("Value"));
 		}catch(err){
-			error("The trigger for <i>"+clean(dna.name)+"</i> has an equation error that must be corrected before the model can be run.", dna.cell, false);
+			error(getText("The trigger for %s has an equation error that must be corrected before the model can be run.", "<i>"+clean(dna.name)+"</i>"), dna.cell, false);
 		}
 	}else if(type == "Transition"){
 		dna.trigger = cell.getAttribute("Trigger");
@@ -660,7 +668,7 @@ function getDNA(cell){
 				}
 
 				throw ({
-					msg: "Invalid conveyor delay.",
+					msg: getText("Invalid conveyor delay."),
 					primitive: cell,
 					showEditor: false
 				});
@@ -671,7 +679,20 @@ function getDNA(cell){
 	} else if (type == "Converter") {
 		dna.source = cell.getAttribute("Source");
 		dna.interpolation = cell.getAttribute("Interpolation") == "Linear" ? "linear" : "discrete";
+		
+		
+		if( isUndefined(cell.getAttribute("Data")) || cell.getAttribute("Data").trim()=="" ){
+			
+			throw ({
+				msg: getText("The converter %s does not have any data.", "<i>"+clean(dna.name)+"</i>"),
+				primitive: cell,
+				showEditor: true
+			});
+		}
+		
 		var data = cell.getAttribute("Data").split(";");
+		
+		
 		var inp = [];
 		var out = [];
 		var myU;
@@ -704,7 +725,7 @@ function getDNA(cell){
 					console.log(err);
 				}
 				throw {
-					msg: "Invalid units specified for primitive: \"" + clean(u) + "\".",
+					msg: getText("Invalid units specified for primitive: \"%s\".", clean(u)),
 					primitive: cell,
 					showEditor: true
 				};
@@ -789,12 +810,12 @@ function linkPrimitive(primitive, dna){
 			try{
 				primitive.equation = trimTree(dna.triggerValue,  myNeighborhood);
 			}catch(err){
-				error("The trigger for <i>"+clean(dna.name)+"</i> has an equation error that must be corrected before the model can be run.", dna.cell, false);
+				error(getText("The trigger for %s has an equation error that must be corrected before the model can be run.", "<i>"+clean(dna.name)+"</i>"), dna.cell, false);
 			}
 			try{
 				primitive.action = trimTree(dna.value,  myNeighborhood);
 			}catch(err){
-				error("The primitive <i>"+clean(dna.name)+"</i> has an equation error that must be corrected before the model can be run.", dna.cell, true);
+				error(getText("The primitive $s has an equation error that must be corrected before the model can be run.", "<i>"+clean(dna.name)+"</i>"), dna.cell, true);
 			}
 			primitive.resetTimer();
 		}else if (type == "Converter") {
@@ -940,7 +961,7 @@ function buildPlacements(submodel, items){
 		//console.log("ZZ");
 		var layout = new Layout.ForceDirected(graph, 400.0, 600.0, 0.5);
 							
-		for(var i=0; i<30; i++){
+		for(var i=0; i<60; i++){
 			layout.applyCoulombsLaw();
 			layout.applyHookesLaw();
 			layout.attractToCentre();

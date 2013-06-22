@@ -641,7 +641,9 @@ Removes all primitives from the model.
 
 function clearModel() {
 	graph.getModel().beginUpdate();
+	graph.allowButtonSelect = true;
 	graph.selectAll();
+	graph.allowButtonSelect = false;
 	graph.removeCells(graph.getSelectionCells(), false);
 	graph.getModel().endUpdate();
 }
@@ -1266,6 +1268,10 @@ function createPrimitive(name, type, position, size) {
 	
 	setName(vertex, name);
 	
+	if(vertex.value.nodeName == "Converter"){
+		setConverterInit(vertex);
+	}
+	
 	if (isValued(vertex) || vertex.value.nodeName == "Agents") {
 		var displays = primitives("Display");
 		for (var i = 0; i < displays.length; i++) {
@@ -1392,6 +1398,7 @@ function highlight(primitive) {
 		}
 		folder = getParent(folder);
 	}
+	
 	setSelected(primitive);
 	graph.scrollCellToVisible(primitive);
 }
@@ -1431,11 +1438,13 @@ See also:
 */
 
 function setSelected(primitives) {
+	graph.allowButtonSelect = true;
 	if (primitives instanceof Array) {
 		graph.setSelectionCells(primitives);
 	}else{
 		graph.setSelectionCells([primitives]);
 	}
+	graph.allowButtonSelect = false;
 }
 
 /*
@@ -2044,6 +2053,7 @@ function setOpacity(primitive, opacity) {
 	});
 	
 }
+
 
 /*
 Method: getLineColor
@@ -3388,7 +3398,7 @@ See also:
 <getParent>
 */
 
-function setParent(primitive, parent) {
+function setParent(primitive, parent, perserveLoc) {
 	var p = (parent==null?graph.getDefaultParent():parent);
 	//console.log(p)
 	//console.log(primitive);
@@ -3397,7 +3407,9 @@ function setParent(primitive, parent) {
 		var loc = getPosition(primitive);
 		var edit = new mxChildChange(graph.getModel(), 	p, primitive);
 		graph.getModel().execute(edit);
-		setPosition(primitive, loc);
+		if(! perserveLoc){
+			setPosition(primitive, loc);
+		}
 	});
 }
 

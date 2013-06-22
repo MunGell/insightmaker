@@ -64,11 +64,12 @@ Ext.UnitsWindow = function(args) {
 		flex: 1,
 		margin: '5,5,5,5',
 		rootVisible: false,
+		folderSort: false,
 		listeners: {
 			selectionchange: function(v, selections, opts) {
 
-				if (!selections[0].data.isFolder) {
-					obj.setUnitsText(selections[0].data.id);
+				if (selections[0].data.leaf) {
+					obj.setUnitsText(selections[0].data.text);
 				}
 			}
 		}
@@ -76,15 +77,12 @@ Ext.UnitsWindow = function(args) {
 
 
 	obj.setupUnits = function(tree) {
-
-		tree.store.removeAll();
 		tree.setRootNode({
 			text: getText('Units'),
 			draggable: false,
 			id: 'Units',
 			leaf: false,
-			iconCls: 'icon-folder',
-			isFolder: true
+			iconCls: 'icon-folder'
 		});
 		var root = tree.getRootNode();
 
@@ -96,21 +94,18 @@ Ext.UnitsWindow = function(args) {
 		var roots = [root];
 		var lastNode = {};
 
-		roots[roots.length - 1].appendChild({
+		root.appendChild({
 			text: "Unitless",
 			draggable: false,
-			id: "Unitless",
 			leaf: true,
 			expanded: true
 		});
 		
-		lastNode = roots[roots.length - 1].appendChild({
+		lastNode = root.appendChild({
 			text: getText("Units Used in Model"),
 			draggable: false,
-			id: "Custom",
 			leaf: false,
-			expanded: true,
-			isFolder: true
+			expanded: true
 		});
 		
 		var modelUnits = unitsUsedInModel();
@@ -118,27 +113,23 @@ Ext.UnitsWindow = function(args) {
 			lastNode.appendChild({
 				text: modelUnits[i],
 				draggable: false,
-				id: modelUnits[i],
 				leaf: true,
 				expanded: true
 			});
 		}
 		
 
-		lastNode = roots[roots.length - 1].appendChild({
+		lastNode = root.appendChild({
 			text: getText("Custom Units"),
 			draggable: false,
-			id: "Custom",
 			leaf: false,
-			expanded: true,
-			isFolder: true
+			expanded: true
 		});
 		var cU = customUnits();
 		for (var i = 0; i < cU.length; i++) {
 			lastNode.appendChild({
 				text: clean(cU[i][0]),
 				draggable: false,
-				id: cU[i][0],
 				leaf: true,
 				expanded: false
 			});
@@ -154,7 +145,6 @@ Ext.UnitsWindow = function(args) {
 
 					lastNode.leaf = false;
 					lastNode.iconCls = 'icon-folder';
-					lastNode.isFolder = true;
 					lastNode = roots[roots.length - 1].appendChild(lastNode);
 					roots.push(lastNode);
 				} else if (currIndentation < indentation) {
@@ -172,14 +162,12 @@ Ext.UnitsWindow = function(args) {
 				lastNode = {
 					text: res[1],
 					draggable: false,
-					id: res[1],
 					leaf: true,
 					expanded: false
 				};
 			}
 		}
 
-		roots[roots.length - 1].appendChild(lastNode);
 	}
 
 	obj.setupUnits(obj.args.tree);
@@ -359,7 +347,6 @@ Ext.UnitsWindow = function(args) {
 					height: 330,
 					resizable: true,
 					closeAction: 'close',
-					plain: true,
 					closable: false,
 					items: [grid],
 					obj: obj,

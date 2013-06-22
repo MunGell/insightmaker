@@ -1223,9 +1223,6 @@ function trueValue(q){
 	return q && (isUndefined(q.value) || (q.value.toString() != "0" && q.value.toString() != "0.") )
 }
 
-function isLocal() {
-	return (document.location.hostname == "localhost");
-}
 
 function isUndefined(item){
 	return typeof(item)=="undefined";

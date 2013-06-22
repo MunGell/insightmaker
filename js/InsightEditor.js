@@ -46,7 +46,7 @@ window.addEventListener('message', callAPI, false);
 
 function callAPI(e) {
 	try {
-		e.source.postMessage(eval(e.data));
+		e.source.postMessage(eval(e.data), "*");
 	} catch (err) {
 
 	}
@@ -124,6 +124,7 @@ function main() {
 		return; // resources not loaded. error message should already have been shown.
 	}
 	mxConstants.DEFAULT_HOTSPOT = 0.3;
+	mxConstants.LINE_HEIGHT = 1.15;
 
 	//Change the settings for touch devices
 	if (isTouch()) {
@@ -151,7 +152,7 @@ function main() {
 	mxEdgeHandler.prototype.removeEnabled = true;
 
 	graph.isHtmlLabel = function(cell) {
-		var isHTML = cell != null && cell.value != null && (cell.value.nodeName != "Flow" && cell.value.nodeName != "Display");
+		var isHTML = cell != null && cell.value != null && ( cell.value.nodeName != "Display");
 
 		return isHTML;
 	};
@@ -160,15 +161,16 @@ function main() {
 	graph.isCellLocked = function(cell) {
 		return (!is_editor);
 	}
+	graph.allowButtonSelect=false;
 	graph.isCellSelectable = function(cell) {
-		return (cell.value.nodeName != "Setting" && cell.value.nodeName != "Display");
+		return (cell.value.nodeName != "Setting" && cell.value.nodeName != "Display" && (graph.allowButtonSelect || cell.value.nodeName != "Button"));
 		//(is_editor && (cell.value.nodeName!="Setting"));
 	}
 	graph.isCellEditable = function(cell) {
 		if (!is_editor) {
 			return false;
 		}
-		return (cell.value.nodeName != "Display" && cell.value.nodeName != "Setting" && cell.value.nodeName != "Ghost");
+		return (cell.value.nodeName != "Display" && cell.value.nodeName != "Setting" && cell.value.nodeName != "Ghost" && ( cell.value.nodeName != "Button" || graph.isCellSelected(cell)));
 	}
 
 	graph.getCursorForCell = function(cell) {
@@ -192,11 +194,39 @@ function main() {
 	var cellLabelChanged = graph.cellLabelChanged;
 	graph.labelChanged = function(cell, newValue, evt) {
 		if (validPrimitiveName(newValue, cell)) {
+
+			var oldName = cell.getAttribute("name");
+			
 			graph.model.beginUpdate();
 			var edit = new mxCellAttributeChange(cell, "name", newValue);
 			graph.getModel().execute(edit);
 			selectionChanged(false);
 			propogateGhosts(cell);
+			
+			if(isValued(cell)){
+				//console.log(oldName)
+				var patt = new RegExp("\\["+oldName+"\\]","gi");
+				
+				var connected = graph.getConnections(cell);
+				for(var i=0; i < connected.length; i++){
+					var neighbor;
+					if(connected[i].value.nodeName=="Flow" || connected[i].value.nodeName=="Transition"){
+						neighbor = connected[i];
+					}else if(connected[i].target.id == cell.id){
+						neighbor = connected[i].source;
+					}else {
+						neighbor = connected[i].target;
+					}
+					//console.log(neighbor.getAttribute("name"))
+					if(isValued(neighbor) || (neighbor && neighbor.value.nodeName=="Action")){
+						//console.log(getValue(neighbor))
+						setValue(neighbor, getValue(neighbor).replace(patt, "["+newValue+"]"))
+					}
+				}
+				
+				
+			}
+			
 			graph.model.endUpdate();
 			return cell;
 		}
@@ -389,7 +419,7 @@ function main() {
 	primitiveBank.setting.setAttribute("StrictUnits", "true");
 
 	
-	mxPanel = Ext.create('Ext.Panel', {
+	mxPanel = Ext.create('Ext.Component', {
 		border: false
 	});
 	
@@ -402,14 +432,17 @@ function main() {
 		    xtype: 'toolbar',
 		    dock: 'bottom',
 			hidden: false,
-			id: 'unfoldToolbar',
+			id: 'unfoldToolbar',layout:{align:"bottom"},
 		    items: [
 			{
 				iconCls: 'units-add-icon',
-	            text: getText('Unfold Model'),
+	            text: getText('View Story'),
 				scope: this,
 				id: 'unfoldUnfoldBut',
 	            handler: function(){
+					if(is_editor && (! is_embed)){
+						mxUtils.alert("Edits to the model will not be saved while you are viewing the story.")
+					}
 					revealUnfoldButtons(true);
 					beginUnfolding();
 	            }
@@ -428,7 +461,7 @@ function main() {
 				scale: "large",
 				iconAlign: 'top',
 				iconCls: 'cancel-icon',
-	            text: getText('Exit Unfolding'),
+	            text: getText('Exit Story'),
 				scope: this,
 				id: 'exitUnfoldBut',
 	            handler: function(){
@@ -442,7 +475,7 @@ function main() {
 				flex: 1,
 				xtype: "box",
 				style: {"font-size": "larger"},
-				margin: '4 10 4 10'
+				margin: '4 10 4 10', align:"middle", minHeight:32
 			},
 			{
 				scale: "large",
@@ -486,9 +519,9 @@ function main() {
 		}
 	});
 
-	mainPanel.body.insertHtml("beforeBegin",  "<div id='mainGraph'  style='z-index:1000;position:absolute; width:100%;height:100%;display:none;'></div>");
+	mainPanel.el.insertHtml("beforeBegin",  "<div id='mainGraph'  style='z-index:1000;position:absolute; width:100%;height:100%;display:none;'></div>");
 
-	mxPanel.body.dom.style.overflow = 'auto';
+	mxPanel.el.dom.style.overflow = 'auto';
 	if (mxClient.IS_MAC && mxClient.IS_SF) {
 		graph.addListener(mxEvent.SIZE, function(graph) {
 			graph.container.style.overflow = 'auto';
@@ -562,6 +595,7 @@ function main() {
 						vertex = graph.insertVertex(parent, null, primitiveBank.text.cloneNode(true), pt.x - 100 - x0, pt.y - 25 - y0, 200, 50, "text");
 					} else if (panel.getComponent('converter').pressed) {
 						vertex = graph.insertVertex(parent, null, primitiveBank.converter.cloneNode(true), pt.x - 50 - x0, pt.y - 25 - y0, 120, 50, "converter");
+						setConverterInit(vertex);
 					} else if (panel.getComponent('buttonBut').pressed) {
 						vertex = graph.insertVertex(parent, null, primitiveBank.button.cloneNode(true), pt.x - 50 - x0, pt.y - 25 - y0, 120, 40, "button");
 					} else if (panel.getComponent('picture').pressed) {
@@ -608,7 +642,7 @@ function main() {
 
 
 	// Initializes the graph as the DOM for the panel has now been created	
-	graph.init(mxPanel.body.dom);
+	graph.init(mxPanel.el.dom);
 	graph.setConnectable(is_editor);
 	graph.setDropEnabled(true);
 	graph.setSplitEnabled(false);
@@ -642,7 +676,9 @@ function main() {
 
 	graph.panningHandler.popup = mxUtils.bind(mxPanel, function(x, y, cell, evt) {
 		if (!evt.shiftKey) {
-			showContextMenu(null, evt);
+			if(is_editor && ! (is_embed)){
+				showContextMenu(null, evt);
+			}
 		}
 	});
 	
@@ -1165,44 +1201,103 @@ function main() {
 	// Enables guides
 	mxGraphHandler.prototype.guidesEnabled = true;
 
-	mxGraphHandler.prototype.mouseDown = function(sender, me) {
-		//console.log(sender);
-		var cell = this.getInitialCellForEvent(me);
-		if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
-			if (me.evt.shiftKey == false) {
-				pressButton(cell);
-				me.consume();
-				return false;
+	/*mxGraphHandler.prototype.mouseDown = function(sender, me)
+		{
+			if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() &&
+				!this.graph.isForceMarqueeEvent(me.getEvent()) && me.getState() != null)
+			{
+				
+				var cell = this.getInitialCellForEvent(me);
+				if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
+					if (me.evt.shiftKey == false) {
+						pressButton(cell);
+						me.consume();
+						return false;
+					}else{
+						graph.allowButtonSelect = true;
+					}
+				}
+				
+				this.cell = null;
+				this.delayedSelection = this.isDelayedSelection(cell);
+		
+				if (this.isSelectEnabled() && !this.delayedSelection)
+				{
+					this.graph.selectCellForEvent(cell, me.getEvent());
+				}
+		
+				if (this.isMoveEnabled())
+				{
+					var model = this.graph.model;
+					var geo = model.getGeometry(cell);
+
+					if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 ||
+						(geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null ||
+						model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || 
+						(this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable())))
+					{
+						this.start(cell, me.getX(), me.getY());
+					}
+			
+					this.cellWasClicked = true;
+			
+					// Workaround for SELECT element not working in Webkit, this blocks moving
+					// of the cell if the select element is clicked in Safari which is needed
+					// because Safari doesn't seem to route the subsequent mouseUp event via
+					// this handler which leads to an inconsistent state (no reset called).
+					// Same for cellWasClicked which will block clearing the selection when
+					// clicking the background after clicking on the SELECT element in Safari.
+					if ((!mxClient.IS_SF && !mxClient.IS_GC) || me.getSource().nodeName != 'SELECT')
+					{
+						me.consume();
+					}
+					else if (mxClient.IS_SF && me.getSource().nodeName == 'SELECT')
+					{
+						this.cellWasClicked = false;
+						this.first = null;
+					}
+				}
 			}
-		}
-		if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() && !this.graph.isForceMarqueeEvent(me.getEvent()) && me.getState() != null) {
+		};*/
+
+
+		mxGraphHandler.prototype.mouseDown = function(sender, me) {
+			//console.log(sender);
+			graph.allowButtonSelect=false;
 			var cell = this.getInitialCellForEvent(me);
-			this.cell = null;
-			this.delayedSelection = this.isDelayedSelection(cell);
-			if (this.isSelectEnabled() && !this.delayedSelection) {
-				this.graph.selectCellForEvent(cell, me.getEvent());
-			}
-			if (this.isMoveEnabled()) {
-				var model = this.graph.model;
-				var geo = model.getGeometry(cell);
-				if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 || (geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null || model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || (this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable()))) {
-					this.start(cell, me.getX(), me.getY());
-				}
-				this.cellWasClicked = true;
-				if ((!false && !true) || me.getSource().nodeName != 'SELECT') {
+			if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
+				if (me.evt.shiftKey == false) {
+					pressButton(cell);
 					me.consume();
-				} else if (false && me.getSource().nodeName == 'SELECT') {
-					this.cellWasClicked = false;
-					this.first = null;
+					return false;
+				}else{
+					graph.allowButtonSelect=true;
+				}
+			}
+			
+			if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() && !this.graph.isForceMarqueeEvent(me.getEvent()) && me.getState() != null) {
+				var cell = this.getInitialCellForEvent(me);
+				this.cell = null;
+				this.delayedSelection = this.isDelayedSelection(cell);
+				if (this.isSelectEnabled() && !this.delayedSelection) {
+					this.graph.selectCellForEvent(cell, me.getEvent());
+				}
+				if (this.isMoveEnabled()) {
+					var model = this.graph.model;
+					var geo = model.getGeometry(cell);
+					if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 || (geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null || model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || (this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable()))) {
+						this.start(cell, me.getX(), me.getY());
+					}
+					this.cellWasClicked = true;
+					if ((!false && !true) || me.getSource().nodeName != 'SELECT') {
+						me.consume();
+					} else if (false && me.getSource().nodeName == 'SELECT') {
+						this.cellWasClicked = false;
+						this.first = null;
+					}
 				}
 			}
 		}
-	}
-
-	graph.addListener(mxEvent.CLICK, function(me, evt) {
-		evt.consume();
-	});
-
 
 	// Alt disables guides
 	mxGuide.prototype.isEnabledForEvent = function(evt) {
@@ -1657,6 +1752,7 @@ function main() {
 						var step = parseFloat(slids[i].getAttribute("SliderStep"))?parseFloat(slids[i].getAttribute("SliderStep")):undefined;
 						var perc = step?Math.ceil(-Math.log(step) /Math.log(10)):Math.floor(-(Math.log(Math.max(0.1, slids[i].getAttribute("SliderMax") - slids[i].getAttribute("SliderMin"))) / Math.log(10) - 4));
 
+						perc = Math.max(0, perc);
 						var slid = Ext.create("Ext.slider.Single", {
 							flex: 1,
 							minValue: parseFloat(slids[i].getAttribute("SliderMin")),
@@ -1667,6 +1763,9 @@ function main() {
 							increment: step
 						});
 						sliders.push(slid);
+						
+						console.log(perc);
+						
 
 						var t = Ext.create("Ext.form.field.Number", {
 							slider: slid,
@@ -1733,7 +1832,7 @@ function main() {
 
 
 
-			bottomDesc = descBase + '<p>A stock stores a material or a resource. Lakes and Bank Accounts are both examples of stocks. One stores water while the other stores money. The Initial Value defines how much material is initially in the Stock.</p>' + (is_editor ? ' <br/><h1>Examples of valid Initial Values:</h1><center><table class="undefined"><tr><td align=center>Static Value</td></tr><tr><td align=center><i>10</i></td></tr><tr><td>Mathematical Equation</td></tr><tr><td align=center><i>cos(2.78)+7*2</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>5+[My Variable]</i></td></tr></table></center>' : '');
+			bottomDesc = descBase + '<p>A stock stores a material or a resource. Lakes and Bank Accounts are both examples of stocks. One stores water while the other stores money. The Initial Value defines how much material is initially in the Stock.</p>' + (is_editor ? ' <br/><b>Examples of valid Initial Values:</b><center><table class="undefined"><tr><td align=center>Static Value</td></tr><tr><td align=center><i>10</i></td></tr><tr><td>Mathematical Equation</td></tr><tr><td align=center><i>cos(2.78)+7*2</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>5+[My Variable]</i></td></tr></table></center>' : '');
 			properties.push({
 				'name': 'InitialValue',
 				'text': getText('Initial Value')+' =',
@@ -1769,7 +1868,7 @@ function main() {
 			});
 
 		} else if (cellType == "Variable") {
-			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><h1>Examples of valid Values:</h1><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><b>Examples of valid Values:</b><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'Equation',
 				'text': getText('Value/Equation')+' =',
@@ -1809,12 +1908,13 @@ function main() {
 				'value': cell.getAttribute("Function"),
 				'group': ' '+getText('Configuration'),
 				'editor': new Ext.form.TextArea({
-					grow: true
+					grow: true,
+					growMax: 80
 				})
 			})
 
 		} else if (cell.value.nodeName == "Flow") {
-			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><h1>Examples of valid Flow Rates:</h1><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><b>Examples of valid Flow Rates:</b><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'FlowRate',
 				'text': getText('Flow Rate')+' =',
@@ -2001,7 +2101,7 @@ function main() {
 			
 			properties.push({
 				'name': 'Network',
-				'text': getText('Network Method'),
+				'text': getText('Network Structure'),
 				'value': cell.getAttribute("Network"),
 				'group': ' '+getText('Network'),
 				'editor': new Ext.form.ComboBox({
@@ -2090,14 +2190,12 @@ function main() {
 
 		if (topDesc != "") {
 			topItems.push(Ext.create('Ext.Component', {
-				xtype: "component",
 				html: topDesc,
 				margin: '5 5 5 5'
 			}));
 		}
 		if (bottomDesc != "") {
 			bottomItems.push(Ext.create('Ext.Component', {
-				xtype: "component",
 				html: bottomDesc,
 				margin: '5 5 5 5'
 			}))
@@ -2351,7 +2449,7 @@ function showContextMenu(node, e) {
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
-				var cell = createPrimitive(getText("New State"), "State", [pt.x, pt.y], [120, 40]);
+				var cell = createPrimitive(getText("New State"), "State", [pt.x, pt.y], [100, 40]);
 				graph.model.endUpdate();
 				if(folder){
 					setParent(cell, selectedItems[0]);

@@ -1056,6 +1056,8 @@ function renderDisplay(display, displayInformation) {
 				isVertical: false
 			});
 		}
+		
+		
 
 	} else if (type == "Scatterplot") {
 		var displayIds = [];
@@ -1310,6 +1312,8 @@ function renderDisplay(display, displayInformation) {
 		buildMapStore(displayInformation.maps[displayInformation.maps.length - 1], displayInformation.scripter.time);
 
 	}
+	
+	
 
 	if (type != "Tabular") {
 		var items = [];

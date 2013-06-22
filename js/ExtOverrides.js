@@ -1,5 +1,4 @@
     Ext.chart.series.Line.prototype.drawSeries= function() {
-		//console.log("drawSeries!");
         var me = this,
             chart = me.chart,
             chartAxes = chart.axes,
@@ -30,7 +29,7 @@
             yValueMap = {},
             onbreak = false,
             storeIndices = [],
-            markerStyle = me.markerStyle,
+            markerStyle = Ext.apply({}, me.markerStyle),
             seriesStyle = me.seriesStyle,
             colorArrayStyle = me.colorArrayStyle,
             colorArrayLength = colorArrayStyle && colorArrayStyle.length || 0,
@@ -39,6 +38,8 @@
             boundAxes = me.getAxesForXAndYFields(),
             boundXAxis = boundAxes.xAxis,
             boundYAxis = boundAxes.yAxis,
+            xAxisType = boundXAxis ? chartAxes.get(boundXAxis).type : '',
+            yAxisType = boundYAxis ? chartAxes.get(boundYAxis).type : '',
             shadows, shadow, shindex, fromPath, fill, fillPath, rendererAttributes,
             x, y, prevX, prevY, firstX, firstY, markerCount, i, j, ln, axis, ends, marker, markerAux, item, xValue,
             yValue, coords, xScale, yScale, minX, maxX, minY, maxY, line, animation, endMarkerStyle,
@@ -72,7 +73,7 @@
 
         //prepare style objects for line and markers
         endMarkerStyle = Ext.apply(markerStyle || {}, me.markerConfig, {
-            fill: me.seriesStyle.fill || colorArrayStyle[seriesIdx % colorArrayStyle.length]
+            fill: me.seriesStyle.fill || colorArrayStyle[me.themeIdx % colorArrayStyle.length]
         });
         type = endMarkerStyle.type;
         delete endMarkerStyle.type;
@@ -159,7 +160,9 @@
         for (i = 0, ln = data.length; i < ln; i++) {
             record = data[i];
             xValue = record.get(me.xField);
-
+            if (xAxisType == 'Time' && typeof xValue == "string") {
+                xValue = Date.parse(xValue);
+            }
             // Ensure a value
             if (typeof xValue == 'string' || typeof xValue == 'object' && !Ext.isDate(xValue)
                 //set as uniform distribution if the axis is a category axis.
@@ -173,6 +176,9 @@
 
             // Filter out values that don't fit within the pan/zoom buffer area
             yValue = record.get(me.yField);
+            if (yAxisType == 'Time' && typeof yValue == "string") {
+                yValue = Date.parse(yValue);
+            }
             //skip undefined values
             if (typeof yValue == 'undefined' || (typeof yValue == 'string' && !yValue)) {
                 //<debug warn>
@@ -201,7 +207,7 @@
         }
 
         me.items = [];
-
+		
 		//SFR
 		chart.scaleX = function(xValue){
 			return (bbox.x + (xValue - minX) * xScale).toFixed(2);
@@ -209,8 +215,14 @@
 		chart.scaleY = function(yValue){
 			return ((bbox.y + bbox.height) - (yValue - minY) * yScale).toFixed(2);
 		}
-		// /SFR
-		
+		chart.revX = function(x){
+			return (x-bbox.x)/xScale +  minX;
+		}
+		chart.revY = function(y){
+			return  -(y-(bbox.y + bbox.height))/yScale + minY;
+		}
+		// END SFR
+
         count = 0;
         ln = xValues.length;
         for (i = 0; i < ln; i++) {
@@ -224,8 +236,8 @@
                 me.items.push(false);
                 continue;
             } else {
-                x = chart.scaleX(xValue);//SFR
-                y = chart.scaleY(yValue);//SFR
+                x = (bbox.x + (xValue - minX) * xScale).toFixed(2);
+                y = ((bbox.y + bbox.height) - (yValue - minY) * yScale).toFixed(2);
                 if (onbreak) {
                     onbreak = false;
                     path.push('M');
@@ -353,7 +365,7 @@
             });
             if (!endLineStyle.stroke && colorArrayLength) {
                 me.line.setAttributes({
-                    stroke: colorArrayStyle[seriesIdx % colorArrayLength]
+                    stroke: colorArrayStyle[me.themeIdx % colorArrayLength]
                 }, true);
             }
             if (enableShadows) {
@@ -380,7 +392,7 @@
                 me.fillPath = surface.add({
                     group: group,
                     type: 'path',
-                    fill: endLineStyle.fill || colorArrayStyle[seriesIdx % colorArrayLength],
+                    fill: endLineStyle.fill || colorArrayStyle[me.themeIdx % colorArrayLength],
                     path: dummyPath
                 });
             }
@@ -432,7 +444,7 @@
                 me.onAnimate(me.fillPath, {
                     to: Ext.apply({}, {
                         path: fillPath,
-                        fill: endLineStyle.fill || colorArrayStyle[seriesIdx % colorArrayLength],
+                        fill: endLineStyle.fill || colorArrayStyle[me.themeIdx % colorArrayLength],
                         'stroke-width': 0,
                         opacity: fillOpacity
                     }, endLineStyle || {})
@@ -447,7 +459,7 @@
                         if (item) {
                             rendererAttributes = me.renderer(item, store.getAt(i), item._to, i, store);
                             me.onAnimate(item, {
-                                to: Ext.apply(rendererAttributes, endMarkerStyle || {})
+                                to: Ext.applyIf(rendererAttributes, endMarkerStyle || {})
                             });
                             item.show(true);
                         }
@@ -521,91 +533,109 @@
         }
         me.renderLabels();
         me.renderCallouts();
-		
-		
 
         me.fireEvent('draw', me);
     }
 	
-	
 	Ext.chart.Chart.prototype.redraw = function(resize) {
-	        var me = this,
-	            seriesItems = me.series.items,
-	            seriesLen = seriesItems.length,
-	            axesItems = me.axes.items,
-	            axesLen = axesItems.length,
-	            i,
-	            chartBBox = me.chartBBox = {
-	                x: 0,
-	                y: 0,
-	                height: me.curHeight,
-	                width: me.curWidth
-	            },
-	            legend = me.legend;
-	        me.surface.setSize(chartBBox.width, chartBBox.height);
-	        // Instantiate Series and Axes
-	        for (i = 0; i < seriesLen; i++) {
-	            me.initializeSeries(seriesItems[i],i);
-	        }
-	        for (i = 0; i < axesLen; i++) {
-	            me.initializeAxis(axesItems[i]);
-	        }
-	        //process all views (aggregated data etc) on stores
-	        //before rendering.
-	        for (i = 0; i < axesLen; i++) {
-	            axesItems[i].processView();
-	        }
-	        for (i = 0; i < axesLen; i++) {
-	            axesItems[i].drawAxis(true);
-	        }
+        var me = this,
+            seriesItems = me.series.items,
+            seriesLen = seriesItems.length,
+            axesItems = me.axes.items,
+            axesLen = axesItems.length,
+            themeIndex = 0,
+            i, item,
+            chartBBox = me.chartBBox = {
+                x: 0,
+                y: 0,
+                height: me.curHeight,
+                width: me.curWidth
+            },
+            legend = me.legend, 
+            series;
+            
+        me.surface.setSize(chartBBox.width, chartBBox.height);
+        // Instantiate Series and Axes
+        for (i = 0; i < seriesLen; i++) {
+            item = seriesItems[i];
+            if (!item.initialized) {
+                series = me.initializeSeries(item, i, themeIndex);
+            } else {
+                series = item;
+            }
+            // Allow the series to react to a redraw, for example, a pie series
+            // backed by a remote data set needs to build legend labels correctly
+            series.onRedraw();
+            // For things like stacked bar charts, a single series can consume
+            // multiple colors from the index, so we compensate for it here
+            if (Ext.isArray(item.yField)) {
+                themeIndex += item.yField.length;
+            } else {
+                ++themeIndex;
+            }
+        }
+        for (i = 0; i < axesLen; i++) {
+            item = axesItems[i];
+            if (!item.initialized) {
+                me.initializeAxis(item);
+            }
+        }
+        //process all views (aggregated data etc) on stores
+        //before rendering.
+        for (i = 0; i < axesLen; i++) {
+            axesItems[i].processView();
+        }
+        for (i = 0; i < axesLen; i++) {
+            axesItems[i].drawAxis(true);
+        }
 
-	        // Create legend if not already created
-	        if (legend !== false && legend.visible) {
-	            if (legend.update || !legend.created) {
-	              legend.create();
-	            }
-	        }
+        // Create legend if not already created
+        if (legend !== false && legend.visible) {
+            if (legend.update || !legend.created) {
+                legend.create();
+            }
+        }
 
-	        // Place axes properly, including influence from each other
-	        me.alignAxes();
+        // Place axes properly, including influence from each other
+        me.alignAxes();
 
-	        // Reposition legend based on new axis alignment
-	        if (legend !== false && legend.visible) {
-	            legend.updatePosition();
-	        }
+        // Reposition legend based on new axis alignment
+        if (legend !== false && legend.visible) {
+            legend.updatePosition();
+        }
 
-	        // Find the max gutter
-	        me.getMaxGutter();
+        // Find the max gutters
+        me.getMaxGutters();
 
-	        // Draw axes and series
-	        me.resizing = !!resize;
+        // Draw axes and series
+        me.resizing = !!resize;
 
-	        for (i = 0; i < axesLen; i++) {
-	            axesItems[i].drawAxis();
-	        }
-	        for (i = 0; i < seriesLen; i++) {
-	            me.drawCharts(seriesItems[i]);
-	        }
-			
-			//SFR
-			//console.log("update!");
-			if(this.oldLinks){
-				for(var i=0; i<this.oldLinks.length; i++){
-					this.oldLinks[i].remove();
-				}
-				this.oldLinks = []; 
-			}
-			if(this.links){
-				this.oldLinks = []
-				for(var link in this.links){
-					drawLink(this, this.links[link][0], this.links[link][1])
-				}
-			}
-			//SFR
-			
-	        me.resizing = false;
-	    }
+        for (i = 0; i < axesLen; i++) {
+            axesItems[i].drawAxis();
+        }
+        for (i = 0; i < seriesLen; i++) {
+            me.drawCharts(seriesItems[i]);
+        }
 		
+		//SFR
+		//console.log("update!");
+		if(this.oldLinks){
+			for(var i=0; i<this.oldLinks.length; i++){
+				this.oldLinks[i].remove();
+			}
+			this.oldLinks = []; 
+		}
+		if(this.links){
+			this.oldLinks = []
+			for(var link in this.links){
+				drawLink(this, this.links[link][0], this.links[link][1])
+			}
+		}
+		//SFR
+		
+        me.resizing = false;
+    }
+	
 	function drawLink(chart, start, end){
 		//console.log(start);
 		//console.log(start.items[0]);

@@ -1118,7 +1118,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				},
 				{
 					hidden: (!is_editor) || is_embed,
-					text: getText('Unfolding'),
+					text: getText('Add Story'),
 					iconCls: 'unfold-icon',
 					tooltip: getText('Display the model step-by-step to share a story'),
 					handler: showUnfoldingWin,
@@ -1242,17 +1242,13 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				}]
 			}, "->",
 			{
-				scale: "large",
-				iconAlign: 'top',
-				cls: 'button',
+				xtype: 'box',
 				width: 154,
 				id: 'logo',
 				text: '',
 				iconCls: "logo-icon",
 				tooltip: 'InsightMaker.com',
-				handler: function() {
-					showURL("http://InsightMaker.com")
-				},
+				html: "<a href='http://insightmaker.com'><img src='http://insightmaker.com/builder/images/logo.png'/></a>",
 				scope: this
 
 			}]
