@@ -29,9 +29,9 @@ var timeSettingsFn = function()
         configWin = new Ext.Window({
             layout: 'fit',
             modal: true,
-            width: 370,
             title: getText("Simulation Time Settings"),
-            height: 380,
+	        width:  Math.min(Ext.getBody().getViewSize().width, 370),
+	        height:  Math.min(Ext.getBody().getViewSize().height, 380),
             resizable: false,
             closeAction: 'hide',
             plain: true,

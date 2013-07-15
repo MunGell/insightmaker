@@ -57,8 +57,8 @@ Ext.RichTextWindow = function(args) {
 		resizable: false,
 		shadow: true,
 		buttonAlign: 'right',
-		width: 420,
-		height: 350,
+        width:  Math.min(Ext.getBody().getViewSize().width, 420),
+        height:  Math.min(Ext.getBody().getViewSize().height, 350),
 		items: [new Ext.form.field.HtmlEditor({
 			enableColors: false,
 			enableSourceEdit: true,

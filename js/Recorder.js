@@ -58,7 +58,8 @@ function generateRecording(){
 		lastRes = recordingRes[recordingRes.length-1];
 	}
 	
-	return JSON.stringify(cleanIds(recordingRes)).replace(/\}\,\{/g,"},\n\n{");
+	var x = JSON.stringify(cleanIds(recordingRes)).replace(/\}\,\{(.[^x])/g,"}\n\n{$1");
+	return x.substr(1, x.length-2);
 }
 
 function cleanIds(dat){
@@ -90,6 +91,7 @@ function cleanIds(dat){
 var capture = false;
 var folderItems = [];
 function serializeChange(i){
+	//console.log(i)
 	if(i instanceof mxCellAttributeChange){
 		if(i.value == i.previous || (i.value=="" && isUndefined(i.previous))){
 			return null;
@@ -147,6 +149,9 @@ function serializeChange(i){
 		}
 		if(geo.targetPoint && ! ((geo.sourcePoint.x==0 && geo.sourcePoint.y==100) || (geo.sourcePoint.x==100 && geo.sourcePoint.y==0))){
 			g.geometry.targetPoint = {x: geo.targetPoint.x, y: geo.targetPoint.y};
+		}
+		if(geo.points){
+			g.geometry.points = geo.points.slice().map(function(x){return {x: x.x, y: x.y}});
 		}
 	//	console.log(g)
 		return g;

@@ -159,8 +159,8 @@ function textEquations(){
         layoutConfig: {
             columns: 1
         },
-        width: 500,
-        height: 400,
+        width:  Math.min(Ext.getBody().getViewSize().width, 500),
+        height:  Math.min(Ext.getBody().getViewSize().height, 400),
         items: tab,
         buttons: [
         {

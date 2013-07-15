@@ -850,7 +850,7 @@ defineFunction("MoveTowards", {params: [{needAgent: true, name: "[Mover]"}, {nam
 		}
 	}
 	
-	var dir = new Vector([distx, disty])
+	var dir = new Vector([distx, disty], ["x","y"])
 	
 	//var dir = minus(agent(x[1]).location, agent(x[0]).location);
 
@@ -877,6 +877,10 @@ function shiftLocation(agent, newLocation){
 	}
 	
 	agent.location = newLocation;
+	if(! agent.location.names){
+		agent.location.names = ["x","y"];
+		agent.location.namesLC = ["x","y"];
+	}
 }
 
 function isUndefined(item) {

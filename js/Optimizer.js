@@ -78,13 +78,17 @@ function doOptimizer(){
 	        {header: getText('Minimum Bound'), sortable: false, menuDisabled: true, dataIndex: 'minBound',width:90,
 	            editor: {
 	                xtype: 'numberfield',
-	                allowBlank: false
+	                allowBlank: false,
+					allowDecimals: true,
+					decimalPrecision: 9
 	            }
 	        },
 	        {header: getText('Maximum Bound'), sortable: false, menuDisabled: true, dataIndex: 'maxBound',width:90,
 	            editor: {
 	                xtype: 'numberfield',
-	                allowBlank: false
+	                allowBlank: false,
+					allowDecimals: true,
+					decimalPrecision: 9
 	            }
 	        },
 	        {header: getText('Accuracy'), sortable: false, menuDisabled: true, dataIndex: 'desiredAccuracy',width:65,
@@ -92,7 +96,9 @@ function doOptimizer(){
 	                xtype: 'numberfield',
 	                allowBlank: false,
 					step: 0.1,
-					minValue: 0
+					minValue: 0,
+					allowDecimals: true,
+					decimalPrecision: 9
 	            }
 	        }
 	    ],
@@ -232,8 +238,8 @@ function doOptimizer(){
         layoutConfig: {
             columns: 1
         },
-        width: 380,
-        height: 425,
+        width:  Math.min(Ext.getBody().getViewSize().width, 380),
+        height:  Math.min(Ext.getBody().getViewSize().height, 425),
         items: [Ext.create("Ext.tab.Panel", {
 			xtype: "tabpanel",
 			layout: "vbox",
@@ -702,7 +708,7 @@ function metFinishedConditions(){
 
 function reduceStepSizes(){
 	optimizerController.metAccuracyConditions = true;
-	for(i = 0; i < optimizerController.stepSizes.length; i++){
+	for(var i = 0; i < optimizerController.stepSizes.length; i++){
 		if( optimizerController.stepSizes[i]*optimizerController.stepScale >= optimizerController.accuracies[i] ){
 			optimizerController.metAccuracyConditions = false;
 			break;

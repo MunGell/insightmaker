@@ -187,8 +187,8 @@ Ext.UnitsWindow = function(args) {
 		layoutConfig: {
 			columns: 1
 		},
-		width: 508,
-		height: 400,
+        width:  Math.min(Ext.getBody().getViewSize().width, 508),
+        height:  Math.min(Ext.getBody().getViewSize().height, 400),
 		items: [unitsLabel, obj.args.tree],
 		buttons: [{
 			id: 'units_but',
@@ -342,9 +342,9 @@ Ext.UnitsWindow = function(args) {
 				var unitsWin = new Ext.Window({
 					layout: 'fit',
 					modal: true,
-					width: 430,
 					title: getText("Configure Custom Units"),
-					height: 330,
+			        width:  Math.min(Ext.getBody().getViewSize().width, 430),
+			        height:  Math.min(Ext.getBody().getViewSize().height, 330),
 					resizable: true,
 					closeAction: 'close',
 					closable: false,

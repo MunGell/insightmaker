@@ -73,8 +73,8 @@ function importData(targetStore){
         layoutConfig: {
             columns: 1
         },
-        width: 380,
-        height: 410,
+        width:  Math.min(Ext.getBody().getViewSize().width, 380),
+        height:  Math.min(Ext.getBody().getViewSize().height, 410),
         items: [p],
         buttons: [
         {

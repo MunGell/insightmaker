@@ -35,7 +35,7 @@ function getRandPos() {
 
 function Rand(minVal, maxVal) {
   if (minVal != null) {
-    return Rand() * (maxVal - minVal) + parseFloat(minVal);
+    return Rand() * (maxVal - minVal) + (0+minVal);
   }
   if(RKOrder == 1){
   	return Math.random();
@@ -62,7 +62,7 @@ function RandNormal(mu, sigma) {
 
   var z;
   z = Math.sqrt((-2) * Math.log((1) - Rand())) * Math.cos(Rand() * (2) * (3.141593));
-  return z * sigma + parseFloat(mu);
+  return z * (sigma) + (0+mu);
 }
 function RandExp(lambda) {
     if (lambda == null) {
@@ -119,9 +119,9 @@ function RandTriangular(minimum, maximum, peak) {
 	if(minimum == maximum){
 		throw "MSG: Maximum can't equal the minimum for the triangular distribution.";
 	}
-	var a = parseFloat(minimum);
-	var b = parseFloat(maximum);
-	var c = parseFloat(peak);
+	var a = (0+minimum);
+	var b = (0+maximum);
+	var c = (0+peak);
 	
 	var fc = (c-a)/(b-a);
 	

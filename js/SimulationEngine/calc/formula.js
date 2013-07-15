@@ -66,8 +66,10 @@ Number.prototype.toNum = function(){
 	return this.valueOf();
 }
 
-var Vector = function(items){
+var Vector = function(items, names){
 	this.items = items;
+	this.names = names;
+	this.namesLC = names?names.map(function(x){return x?x.toLowerCase():undefined}):undefined;
 }
 Vector.prototype.toNum = function(){
 	if(this.isNum){
@@ -80,31 +82,133 @@ Vector.prototype.toNum = function(){
 	return this;
 };
 Vector.prototype.toString = function(){
-	return '&laquo;'+this.items.map(function(x){return prepareDisplay(x.toNum().toString())}).join(", ")+'&raquo;';
+	//console.log(this.names);
+	var items = [];
+	for(var i=0; i<this.items.length; i++){
+		var str = prepareDisplay(this.items[i].toNum().toString())
+		if(this.names && this.names[i]){
+			str = this.names[i]+": "+str; 
+		}
+		items.push(str);
+	}
+	return '&laquo;'+items.join(", ")+'&raquo;';
 };
 Vector.prototype.length = function(){
 	return this.items.length;
 };
-Vector.prototype.combine = function(other, operation, rhs){	
+Vector.prototype.cloneCombine = function(other, operation, rhs, noswitch){
+	return this.fullClone().combine(other, operation, rhs, noswitch);
+}
+Vector.prototype.combine = function(other, operation, rhs, noswitch){	
 	if(other instanceof Vector){
-		if(this.length() != other.length()){
+		if((this.length() != other.length()) && (! this.names) && (! other.names)){
 			throw "MSG: Vectors must have equal length when combined.";
+		}
+	}
+	if((other instanceof Vector) && this.names && other.names){
+		if((! noswitch) && other.depth() > this.depth()){
+			return other.combine(this, operation, ! rhs);
+		}
+		if(! this.keysMatch(other.namesLC)){
+			if(this.items[0] instanceof Vector){
+				for(var i=0; i< this.items.length; i++){
+					this.items[i].combine(other, operation, rhs, true)
+				}
+				return this;
+			}else{
+				throw "MSG: Keys do not match for vector operation."
+			}
 		}
 	}
 	for(var i=0; i< this.length(); i++){
 		var x;
 		if(other instanceof Vector){
-			x = other.items[i];
+			if(this.names && other.names){
+				var index = other.namesLC.indexOf(this.namesLC[i]);
+				if(this.names=="*"){
+					index = -2;
+				}
+				if(isUndefined(index) || index == -1){
+					index = other.names.indexOf("*");
+				}
+				if(isUndefined(index) || index == -1){
+					throw "MSG: Mismatched keys for vector operation."
+				}
+				if( index == -2){
+					x = undefined;
+				}else{
+					x = other.items[index];
+				}
+			}else{
+				x = other.items[i];
+			}
 		}else{
 			x = other;
 		}
-		if(rhs){
-			this.items[i] = operation(x, this.items[i]);
-		}else{
-			this.items[i] = operation(this.items[i], x);
+		if(isDefined(x)){
+			if(rhs){
+				this.items[i] = operation(x, this.items[i]);
+			}else{
+				this.items[i] = operation(this.items[i], x);
+			}
+		}
+	}
+	if(this.names && this.names.indexOf("*") > -1 && (other instanceof Vector) && other.names){
+		var starred = this.items[this.names.indexOf("*")]
+		for(var i = 0; i < other.names.length; i++){
+			if(other.names[i] && (this.namesLC.indexOf(other.namesLC[i]) == -1 || other.names == "*")){
+
+				if(rhs){
+					this.items.push(operation(other.items[i], starred));
+				}else{
+					this.items.push(operation(starred, other.items[i]));
+				}
+				this.names.push(other.names[i])
+				this.namesLC.push(other.namesLC[i])
+			}
 		}
 	}
 	return this;
+};
+Vector.prototype.depth = function(){
+	if(this.items.length == 0 || !(this.items[0] instanceof Vector)){
+		return 1;
+	}
+	return this.items[0].depth()+1;
+};
+Vector.prototype.keysMatch = function(keys){
+	if(this.names){
+		if(keys.indexOf("*") == -1){
+			for(var i = 0; i < this.names.length; i++){
+				if(this.names[i] != "*"){
+					if(isUndefined(this.names[i])){
+						return false;
+					}
+					if(keys.indexOf(this.namesLC[i])==-1){
+						return false
+					}
+				}
+			}
+		}
+		if(this.names.indexOf("*") == -1){
+			for(var i = 0; i < keys.length; i++){
+				if(keys[i] != "*"){
+					if(isUndefined(keys[i])){
+						return false;
+					}
+					if(this.namesLC.indexOf(keys[i])==-1){
+						return false
+					}
+				}
+			}
+		}
+	}else{
+		return false
+	}
+	return true;
+};
+Vector.prototype.cloneApply = function(operation){
+	return this.fullClone().apply(operation);
 };
 Vector.prototype.apply = function(operation){
 	for(var i=0; i < this.items.length; i++){
@@ -112,6 +216,112 @@ Vector.prototype.apply = function(operation){
 	}
 	return this;
 };
+Vector.prototype.stackApply = function(operation){
+	//console.log("Stacking")
+	if(this.depth() == 1){
+		return operation(this);
+	}
+	var s = this.stack();
+	//console.log(s);
+	return s.recurseApply(operation);
+};
+Vector.prototype.stack = function(selector){
+	//console.log("Stack!")
+	var res = [];
+	
+	selector = selector || [0];
+	
+	var base = this.select(selector);
+	
+	
+	for(var i=1; i<this.items.length; i++){
+		selector[0] = i;
+		var alt = this.select(selector);
+		if((base instanceof Vector ) && (alt instanceof Vector)){
+			if((base.items.length != alt.items.length) || (base.names && (! alt.names)) || (alt.names && (! base.names))){
+				throw "MSG: Mismatched keys for vector collapsing.";
+			}
+		}else if(! ((base instanceof Vector ) || (alt instanceof Vector)) ){
+			throw "MSG: Mismatched keys for vector collapsing.";
+		}
+	}
+	selector[0] = 0
+	
+	selector.push(0)
+	
+	//console.log(base.items.length);
+	for(var i = 0; i < base.items.length; i++){
+		//console.log(i)
+		selector[selector.length-1] = base.names?base.namesLC[i]:i;
+		
+		if(base.items[i] instanceof Vector){
+			res.push(this.stack(selector.slice()));
+		}else{
+			var vecs = [];
+			var baseSub;
+			for(var j = 0; j < this.items.length; j++){
+				var newSelector = selector.slice();
+				newSelector[0] = j
+				
+				vecs.push(this.select(newSelector));
+			}
+			var v = new Vector(vecs);
+			v.terminateApply = true; 
+			res.push(v);
+		}
+	}
+	
+	return new Vector(res, base.names?base.names.slice():undefined);
+};
+Vector.prototype.select = function(selector){
+	var b = this;
+	
+	for(var s = 0; s < selector.length; s++){
+		if(! b.items){
+			throw "MSG: Number where vector expected in vector collapsing.";
+		}
+		if((typeof selector[s]) == "string"){
+			var ind = b.namesLC.indexOf(selector[s]);
+			if(ind == -1){
+				throw "MSG: Mismatched keys for vector collapsing.";
+			}
+			b = b.items[ind];
+		}else{
+			b = b.items[selector[s]];
+		}
+	}
+	return b;
+};
+Vector.prototype.recurseApply = function(operation){
+	for(var i=0; i < this.items.length; i++){
+		if((this.items[i] instanceof Vector) && !(this.items[i].terminateApply)){
+			this.items[i] = this.items[i].recurseApply(operation);
+		}else{
+			this.items[i] = operation(this.items[i]);
+		}
+	}
+	return this;
+};
+Vector.prototype.fullNames = function(){
+	if(this.items[0] instanceof Vector){
+		var subn = this.items[0].fullNames()
+		var n = [];
+		for(var i = 0; i < this.names.length; i++){
+			for(var j = 0; j< subn.length; j++){
+				n.push([this.names[i]].concat(subn[j]))
+			}
+		}
+		//console.log(n)
+		return n;
+	}else{
+		//console.log(this.names)
+		//console.log(this.names.map(function(x){return [x]}))
+		var n = this.names.map(function(x){return [x]});
+		//console.log("++")
+		//console.log(n)
+		return n
+	}
+}
 Vector.prototype.clone = function(){
 	var newItems = [];
 	for(var i=0; i<this.items.length; i++){
@@ -121,13 +331,25 @@ Vector.prototype.clone = function(){
 			newItems.push(this.items[i]);
 		}
 	}
-	return new Vector(newItems);
+	return new Vector(newItems, this.names?this.names.slice():undefined);
 };
-Vector.prototype.fullClone = Vector.prototype.clone;
+Vector.prototype.fullClone = function(){
+	var newItems = [];
+	for(var i=0; i<this.items.length; i++){
+		if(this.items[i].fullClone){
+			newItems.push(this.items[i].fullClone());
+		}else{
+			newItems.push(this.items[i]);
+		}
+	}
+	return new Vector(newItems, this.names?this.names.slice():undefined);
+};
+
 Vector.prototype.equals = function(vec){
 	if(this.length() != vec.length()){
 		return false;
 	}
+	
 	for(var i = 0; i < this.items.length; i++){
 		if(! strictEquals(this.items[i], vec.items[i])){
 			return false;
@@ -312,7 +534,7 @@ funcEvalMap["NEGATE"] = function(node, scope) {
 };
 function negate(x){
 	if(x instanceof Vector){
-		return x.apply(negate);
+		return x.cloneApply(negate);
 	}
 	
 	if((typeof x == 'boolean')){
@@ -331,9 +553,9 @@ funcEvalMap["AND"] = function(node, scope) {
 
 function funAnd(lhs,rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, funAnd, false);
+		return lhs.cloneCombine(rhs, funAnd, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, funAnd, true);
+		return rhs.cloneCombine(lhs, funAnd, true);
 	}
 	
 	return trueValue(lhs) && trueValue(rhs);
@@ -345,12 +567,26 @@ funcEvalMap["OR"] = function(node, scope) {
 
 function funOr(lhs,rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, funOr, false);
+		return lhs.cloneCombine(rhs, funOr, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, funOr, true);
+		return rhs.cloneCombine(lhs, funOr, true);
 	}
 	
 	return trueValue(lhs) || trueValue(rhs);
+};
+
+funcEvalMap["XOR"] = function(node, scope) {
+	return funXor(evaluateNode(node.children[0], scope).toNum(), evaluateNode(node.children[1], scope).toNum())
+};
+
+function funXor(lhs,rhs){
+	if(lhs instanceof Vector){
+		return lhs.cloneCombine(rhs, funXor, false);
+	}else if(rhs instanceof Vector){
+		return rhs.cloneCombine(lhs, funXor, true);
+	}
+	
+	return (trueValue(lhs) || trueValue(rhs)) && ! (trueValue(lhs) && trueValue(rhs));
 };
 
 
@@ -360,7 +596,7 @@ funcEvalMap["NOT"] = function(node, scope) {
 
 function fNot(x){
 	if(x instanceof Vector){
-		return x.apply(fNot);
+		return x.cloneApply(fNot);
 	}
 	
 	return ! trueValue(x);
@@ -379,9 +615,9 @@ function neq(lhs, rhs){
 	}
 	
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, neq, false);
+		return lhs.cloneCombine(rhs, neq, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, neq, true);
+		return rhs.cloneCombine(lhs, neq, true);
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -410,9 +646,9 @@ function eq(lhs, rhs){
 	}
 	
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, eq, false);
+		return lhs.cloneCombine(rhs, eq, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, eq, true);
+		return rhs.cloneCombine(lhs, eq, true);
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -433,9 +669,9 @@ funcEvalMap["LT"] = function(node, scope) {
 };
 function lessThan(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, lessThan, false);
+		return lhs.cloneCombine(rhs, lessThan, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, lessThan, true);
+		return rhs.cloneCombine(lhs, lessThan, true);
 	}
 	
 	
@@ -458,9 +694,9 @@ funcEvalMap["LTEQ"] = function(node, scope) {
 function lessThanEq(lhs, rhs){
 	
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, lessThanEq, false);
+		return lhs.cloneCombine(rhs, lessThanEq, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, lessThanEq, true);
+		return rhs.cloneCombine(lhs, lessThanEq, true);
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -483,9 +719,9 @@ funcEvalMap["GT"] = function(node, scope) {
 function greaterThan(lhs, rhs){
 	
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, greaterThan, false);
+		return lhs.cloneCombine(rhs, greaterThan, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, greaterThan, true);
+		return rhs.cloneCombine(lhs, greaterThan, true);
 	}
 	
 	if (! unitsEqual(lhs.units, rhs.units)) {
@@ -509,9 +745,9 @@ function greaterThanEq(lhs, rhs){
 	
 	
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, greaterThanEq, false);
+		return lhs.cloneCombine(rhs, greaterThanEq, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, greaterThanEq, true);
+		return rhs.cloneCombine(lhs, greaterThanEq, true);
 	}
 	
 	
@@ -533,9 +769,9 @@ funcEvalMap["PLUS"] = function(node, scope) {
 
 function plus(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, plus, false);
+		return lhs.cloneCombine(rhs, plus, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, plus, true);
+		return rhs.cloneCombine(lhs, plus, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -543,6 +779,9 @@ function plus(lhs, rhs){
 	}
 	if((lhs instanceof Agent) || (rhs instanceof Agent)){
 		throw "MSG: Cannot convert Agents to Numbers.";
+	}
+	if((typeof lhs == 'string') || (typeof rhs == 'string')){
+		return lhs.toString()+rhs.toString();
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -566,9 +805,9 @@ funcEvalMap["MINUS"] = function(node, scope) {
 function minus(lhs, rhs){
 
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, minus, false);
+		return lhs.cloneCombine(rhs, minus, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, minus, true);
+		return rhs.cloneCombine(lhs, minus, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -597,9 +836,9 @@ funcEvalMap["MULT"] = function(node, scope) {
 
 function mult(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, mult, false);
+		return lhs.cloneCombine(rhs, mult, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, mult, true);
+		return rhs.cloneCombine(lhs, mult, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -630,9 +869,9 @@ funcEvalMap["DIV"] = function(node, scope) {
 
 function div(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, div, false);
+		return lhs.cloneCombine(rhs, div, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, div, true);
+		return rhs.cloneCombine(lhs, div, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -680,9 +919,9 @@ funcEvalMap["POWER"] = function(node, scope) {
 
 function power(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, power, false);
+		return lhs.cloneCombine(rhs, power, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, power, true);
+		return rhs.cloneCombine(lhs, power, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -710,9 +949,9 @@ funcEvalMap["MOD"] = function(node, scope) {
 
 function doMod(lhs, rhs){
 	if(lhs instanceof Vector){
-		return lhs.combine(rhs, doMod, false);
+		return lhs.cloneCombine(rhs, doMod, false);
 	}else if(rhs instanceof Vector){
-		return rhs.combine(lhs, doMod, true);
+		return rhs.cloneCombine(lhs, doMod, true);
 	}
 	
 	if((typeof lhs == 'boolean') || (typeof rhs == 'boolean')){
@@ -761,11 +1000,231 @@ funcEvalMap["IDENT"] = function(node, scope) {
 	}
 };
 
+funcEvalMap["INNER"] = function(node, scope) {
+	if(node.children.length == 1){
+		return evaluateNode(node.children[0], scope);
+	}else{
+		
+		return selectFromMatrix(evaluateNode(node.children[0], scope).toNum(), createMatrixSelector(node, scope, 1, true));
+	}
+};
+
+function createMatrixSelector(node, scope, offset, createFunctions){
+	var selector = [];
+	var lastComma = true;
+	offset = offset || 0;
+	for(var i=offset; i<node.children.length; i++){
+		var child = node.children[i];
+		if(child.typeName=="COMMA"){
+			if(lastComma){
+				selector.push("*")
+			}
+			if(i == node.children.length-1){
+				selector.push("*");
+			}
+			lastComma = true;
+		}else{
+			lastComma = false;
+			if(createFunctions && node.children[i].typeName=="IDENT" && functionBank[node.children[i].text]){
+				var fn = functionBank[node.children[i].text];
+				if(fn.fn){
+					fn = fn.fn;
+				}
+				selector.push(function(x){
+					return x[0].stackApply(function(x){
+						return fn([x]);	
+					});
+				});
+			}else{
+				selector.push(evaluateNode(node.children[i], scope).toNum());
+			}
+		}
+	}
+	return selector
+}
+
+function selectFromMatrix(mat, items, fill){
+	//console.log("--")
+	//console.log(items)
+	var root = selectFromVector(mat, items.shift(), items.length==0?fill:undefined)
+	var children = [];
+	if(root.collapsed){
+	 	children = [root.data];
+	}else{
+		children = root.data.items;
+	}
+	//console.log(children);
+	while(items.length > 0){
+		//console.log("iteration");
+		//console.log(children);
+		var newChildren = [];
+		var selector = items.shift();
+		for(var i = 0; i < children.length; i++){
+			//console.log("child")
+			//console.log(children[i])
+			if(! (children[i] instanceof Vector)){
+				throw "MSG: Invalid dimensions for vector selection.";
+			}
+			var vec = selectFromVector(children[i], selector, items.length==0?fill:undefined);
+
+			
+			if(vec.collapsed){
+
+				if(! fill){
+					children[i].items = [vec.data];
+					children[i].names = ["!!BREAKOUT DATA"]; 
+				}
+			
+				newChildren=newChildren.concat(vec.data)
+			}else{
+				newChildren=newChildren.concat(vec.data.items)
+
+				if(! fill){
+					children[i].items = vec.data.items;
+					children[i].names = vec.data.names;
+				}
+			}
+		}
+		children = newChildren;
+	}
+	
+	//console.log("done:")
+	//console.log(root.data)
+
+	return doBreakouts(root.data);
+}
+
+function doBreakouts(vec){
+	if(! (vec instanceof Vector)){
+		return vec;
+	}
+	if(vec.items.length==1 && vec.names && vec.names[0]=="!!BREAKOUT DATA"){
+		return vec.items[0]
+	}
+	for(var i=0; i < vec.items.length; i++){
+		vec.items[i] = doBreakouts(vec.items[i])
+	}
+	return vec;
+}
+
+function selectFromVector(vec, items, fill){
+
+	if(items=="*"){
+		return {data: vec};
+	}else if(items instanceof Function){
+		return {data: items([vec]), collapsed: true};
+	}
+	
+	var handleIndex = function(index){
+		if(index<0 || index>=vec.items.length){
+			throw "MSG: Index not in vector.";
+		}
+		if(isUndefined(index)){
+			throw "MSG: Key not in vector";
+		}
+		if(fill){
+			vec.items[index] = fill;
+		}
+		res.push(vec.items[index]);
+		if(names){
+			names.push(vec.names[index]);
+		}
+	}
+	
+	var res = [];
+	var names = vec.names?[]:undefined;
+	if(items instanceof Vector){
+		for(var i=0; i < items.items.length; i++){
+			if(typeof items.items[i] == "string"){
+				if(!vec.names){
+					throw "MSG: Key '"+items.items[i]+"' not in vector."
+				}
+				var index = vec.namesLC.indexOf(items.items[i].toLowerCase());
+				if(index<0 || isUndefined(index)){
+					index = vec.names.indexOf("*");
+				}
+				handleIndex(index);
+			}else if(typeof items.items[i] == "boolean"){
+				if(items.items[i]){
+					handleIndex(i);
+				}
+			}else{
+				handleIndex(minus(items.items[i].toNum(), new Material(sn("#e"+1))));
+			}
+		}
+	}else{
+		if( typeof items == "string"){
+			if(!vec.names){
+				throw "MSG: Key '"+items+"' not in vector."
+			}
+			var index = vec.namesLC.indexOf(items.toLowerCase());
+			if(index<0 || isUndefined(index)){
+				index = vec.names.indexOf("*");
+			}
+			handleIndex(index);
+			
+		}else{
+			handleIndex(minus(items.toNum(), new Material(sn("#e"+1))));
+		}
+		
+		return {collapsed: true, parent: vec, data: res[0]};
+	}
+	return {collapsed: false, parent: vec, data: new Vector(res, names)};
+}
+
+
 funcEvalMap["ARRAY"] = function(node, scope) {
 	var vals = [];
+	var names = [];
+	var hasName = false;
 	for (var i = 0; i < node.children.length; i++){
-		vals.push(evaluateNode(node.children[i], scope));
+		vals.push(evaluateNode(node.children[i].children[0], scope));
+		if(node.children[i].children.length>1){
+			names.push(node.children[i].children[1]);
+			hasName = true;
+		}else{
+			names.push(undefined);
+		}
 	}
+	return new Vector(vals, hasName?names:undefined);
+};
+
+funcEvalMap["MINARRAY"] = function(node, scope) {
+	if(node.children.length==1){
+		return evaluateNode(node.children[0], scope);
+	}
+	var vals = [];
+	var start = evaluateNode(node.children[0], scope).toNum();
+	var end = evaluateNode(node.children[1], scope).toNum();
+
+	vals.push(start.fullClone());
+	if (!unitsEqual(start.units, end.units)) {
+		var scale = convertUnits(start.units, end.units);
+		if (scale != 1) {
+			//console.log(scale)
+			throw "MSG: Units on both sides of ':' must be equal."
+		}
+	}
+	//throw "modsa";
+	var step = new Material(1, start.units?start.units.clone():undefined);
+	
+	if(eq(start,end)){
+		
+	}else if(lessThan(start, end)){
+		var it = plus(start, step);
+		while(lessThanEq(it, end)){
+			vals.push(it);
+			it = plus(it, step);
+		}
+	}else if(greaterThan(start, end)){
+		var it = minus(start, step);
+		while(greaterThanEq(it, end)){
+			vals.push(it);
+			it = minus(it, step);
+		}
+	}
+	//console.log(vals)
+	
 	return new Vector(vals);
 };
 
@@ -932,7 +1391,13 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 				node.children[i].primitive.setValue(x.items[i]);
 			}
 		}else{
-			var varName = node.children[i].text;
+			//console.log(node);
+			var varName = node.children[i].children[0].text;
+			if(node.children[i].children.length > 1){
+				var selector = createMatrixSelector(node.children[i], scope, 1);
+			}
+			//console.log(selector);
+			
 			var origScope = scope;
 			while(scope["-parent"] !== null){
 				if(isDefined(scope[varName])){
@@ -943,10 +1408,17 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 			if(scope["-parent"]===null && isUndefined(scope[varName])){
 				scope = origScope;
 			}
-			if(items==1){
-				scope[varName] = x;
+			
+			var v;
+			if(items == 1){
+				v = x;
 			}else{
-				scope[varName] = x.items[i];
+				v = x.items[i];
+			}
+			if(node.children[i].children.length == 1){
+				scope[varName] = v;
+			}else{
+				selectFromMatrix(scope[varName], selector, v);
 			}
 		}
 	}
@@ -1083,6 +1555,7 @@ function evaluateNode(node, scope) {
 
 var trimEvalMap = new Object();
 
+
 trimEvalMap["POWER"] = function(node, primitives) {
 	if(node.children.length == 1){
 		return trimNode(node.children[0], primitives);
@@ -1094,6 +1567,8 @@ trimEvalMap["POWER"] = function(node, primitives) {
 		return n;
 	}
 };
+trimEvalMap["INNER"] = trimEvalMap["POWER"];
+trimEvalMap["MINARRAY"] = trimEvalMap["POWER"];
 trimEvalMap["TRUE"] = function(node) {
 	return true;
 };
@@ -1142,6 +1617,7 @@ trimEvalMap["MULT"] = function(node, scope) {
 		return n;
 	}
 };
+
 trimEvalMap["DIV"] = function(node, scope) {
 	var lhs = trimNode(node.children[0], scope);
 	var rhs = trimNode(node.children[1], scope);
@@ -1223,6 +1699,9 @@ function trueValue(q){
 	return q && (isUndefined(q.value) || (q.value.toString() != "0" && q.value.toString() != "0.") )
 }
 
+function isLocal() {
+	return (document.location.hostname == "localhost" || document.location.hostname == "insightmaker.dev" || document.location.hostname == "calc.dev" );
+}
 
 function isUndefined(item){
 	return typeof(item)=="undefined";

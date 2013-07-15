@@ -104,8 +104,8 @@ function doSensitivity(){
         layoutConfig: {
             columns: 1
         },
-        width: 380,
-        height: 425,
+        width:  Math.min(Ext.getBody().getViewSize().width, 380),
+        height:  Math.min(Ext.getBody().getViewSize().height, 425),
         items: [p],
         buttons: [
         {

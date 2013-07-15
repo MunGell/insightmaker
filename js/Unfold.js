@@ -1,4 +1,12 @@
 "use strict";
+/*
+
+Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
+
+This file may distributed and/or modified under the
+terms of the Insight Maker Public License (http://insightMaker.com/impl).
+
+*/
 
 var unfoldingManager = {unfolding: false};
 
@@ -672,8 +680,8 @@ function showUnfoldingWin(){
 		resizable: true,
 		shadow: true,
 		buttonAlign: 'right',
-		width: 480,
-		height: 420,
+        width:  Math.min(Ext.getBody().getViewSize().width, 480),
+        height:  Math.min(Ext.getBody().getViewSize().height, 420),
 		items: [p],
 		tbar: [
 		 {

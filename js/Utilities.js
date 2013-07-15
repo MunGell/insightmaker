@@ -189,10 +189,10 @@ function neighborhood(target) {
             for (var i = 0; i < flows.length; i++)
             {
                 if (flows[i].source == target) {
-                    hood.push({item: flows[i], type: "direct"});
+                    hood.push({item: flows[i], type: "direct", linkHidden: true});
                 }
                 if (flows[i].target == target) {
-                    hood.push({item: flows[i], type: "direct"});
+                    hood.push({item: flows[i], type: "direct", linkHidden: true});
                 }
             }
             for (var i = 0; i < links.length; i++)

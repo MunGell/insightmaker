@@ -64,12 +64,12 @@ defineFunction("RandTriangular", {params:[{name:"Minimum", noUnits:true, noVecto
 	return new Material(RandTriangular(x[0].toNum().value, x[1].toNum().value, x[2].toNum().value));
 });
 
-defineFunction("Real", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("Real", {params:[{name: "Number"}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn["real-part"](r.value);
 	return r;
 });
-defineFunction("Imag", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("Imag", {params:[{name: "Number"}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn["imag-part"](r.value);
 	return r;
@@ -82,15 +82,15 @@ defineFunction("Magnitude", {params:[{name: "Number"}]}, function(x){
 	r.value = fn.magnitude(r.value);
 	return r;
 });
-defineFunction("Angle", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("Angle", {params:[{name: "Number"}], recurse: true}, function(x){
 	return new Material(fn.angle(x[0].toNum().value), new UnitStore(["Radians"], [1]));
 });
-defineFunction("Abs", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("Abs", {params:[{name: "Number"}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.abs(r.value);
 	return r;
 });
-defineFunction("sin", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("sin", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
 	if(! unitless(z.units)){
@@ -102,7 +102,7 @@ defineFunction("sin", {params:[{name: "Number", noVector: true}]}, function(x){
 		throw "MSG: Non-angular units cannot be used in Sin().";
 	}
 });
-defineFunction("cos", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("cos", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
 	if(! unitless(z.units)){
@@ -115,7 +115,7 @@ defineFunction("cos", {params:[{name: "Number", noVector: true}]}, function(x){
 	}
 	
 });
-defineFunction("tan", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("tan", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
 	if(! unitless(z.units)){
@@ -130,27 +130,27 @@ defineFunction("tan", {params:[{name: "Number", noVector: true}]}, function(x){
 });
 
 
-defineFunction("asin", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("asin", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.asin(x[0].toNum().value));
 });
-defineFunction("acos", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("acos", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.acos(x[0].toNum().value));
 });
-defineFunction("atan", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("atan", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.atan(x[0].toNum().value));
 });
 
-defineFunction("arcsin", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("arcsin", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.asin(x[0].toNum().value), new UnitStore(["Radians"], [1]));
 });
-defineFunction("arccos", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("arccos", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.acos(x[0].toNum().value), new UnitStore(["Radians"], [1]));
 });
-defineFunction("arctan", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("arctan", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.atan(x[0].toNum().value), new UnitStore(["Radians"], [1]));
 });
 
-defineFunction("Sqrt", {params:[{name: "Number", noVector: true}]}, function(x){
+defineFunction("Sqrt", {params:[{name: "Number"}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.sqrt(r.value);
 	if(r.units){
@@ -160,38 +160,38 @@ defineFunction("Sqrt", {params:[{name: "Number", noVector: true}]}, function(x){
 	}
 	return r;
 });
-defineFunction("Ln", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("Ln", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.log(x[0].toNum().value));
 });
-defineFunction("Log", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("Log", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.log(x[0].toNum().value, 10));
 });
-defineFunction("Logit", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("Logit", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn["-"](fn.log(r.value), fn.log(fn["-"](1, r.value)));
 	return r;
 });
-defineFunction("Expit", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("Expit", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn["/"](1, fn["+"](1, fn.exp(fn["-"](r.value)))) ;
 	return r;
 });
-defineFunction("Round", {params:[{name: "Number", noVector: true, noUnits: false}]}, function(x){
+defineFunction("Round", {params:[{name: "Number", noUnits: false}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.round(r.value);
 	return r;
 });
-defineFunction("Ceiling", {params:[{name: "Number", noVector: true, noUnits: false}]}, function(x){
+defineFunction("Ceiling", {params:[{name: "Number", noUnits: false}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.ceiling(r.value);
 	return r;
 });
-defineFunction("Floor", {params:[{name: "Number", noVector: true, noUnits: false}]}, function(x){
+defineFunction("Floor", {params:[{name: "Number",  noUnits: false}], recurse: true}, function(x){
 	var r = x[0].toNum();
 	r.value = fn.floor(r.value);
 	return r;
 });
-defineFunction("Exp", {params:[{name: "Number", noVector: true, noUnits: true}]}, function(x){
+defineFunction("Exp", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(fn.exp(x[0].toNum().value));
 });
 functionBank["ifthenelse"] = function(x) {
@@ -307,7 +307,7 @@ functionBank["filter"] = function(x) {
 		v = v.toNum();
 	}
 	if(! (v instanceof Vector)){
-		throw "MSG: Filter() requires a vector as its first agrument.";
+		throw "MSG: Filter() requires a vector as its first argument.";
 	}
 	var t = functionBank["map"](x);
 	return  functionBank["select"]([v,t]);
@@ -316,6 +316,8 @@ functionBank["filter"].delayEvalParams = true;
 
 functionBank["join"] = function(x){
 	var res = [];
+	var names = [];
+	var hasNames = false;
 	for(var i = 0; i < x.length; i++){
 		var y = x[i];
 		
@@ -325,23 +327,40 @@ functionBank["join"] = function(x){
 		
 		if(y instanceof Vector){
 			res = res.concat(y.items);
+			if(y.names){
+				names = names.concat(y.names)
+				hasNames = true;
+			}else{
+				for(var j=0; j<y.items.length; j++){
+					names.push(undefined)
+				}
+			}
 		}else{
 			res.push(y);
+			names.push(undefined);
 		}
 	}
-	return new Vector(res);
+	return new Vector(res, hasNames?names:undefined);
 };
 
 functionBank["repeat"] = function(x){
 	testArgumentsSize(x, "Repeat", 2, 2);
-	var count = evaluateNode(x[1].node, x[1].scope).toNum();
+	var items = evaluateNode(x[1].node, x[1].scope).toNum();
+	var count = items;
+	if(items instanceof Vector){
+		count = items.items.length;
+	}
 	var res = [];
-	var scope = {x: null, "-parent": x[1].scope}
+	var scope = {x: null, "-parent": x[1].scope, key: null}
 	for(var  i = 0; i < count; i++){
+		if(items instanceof Vector){
+			scope.key = items.items[i];
+		}
 		scope.x = new Material(i+1);
 		res.push(evaluateNode(x[0].node, scope));
 	}
-	return  new Vector(res);
+	
+	return  new Vector(res, (items instanceof Vector)?items.items.slice():undefined);
 	
 };
 functionBank["repeat"].delayEvalParams = true;
@@ -360,25 +379,35 @@ defineFunction("Select", {params:[{name: "Haystack", needVector: true, noUnits: 
 		}
 		if(isBoolean==true){
 			var res = [];
+			var names = x[0].names?[]:undefined;
 			if(v.length()!=x[0].length()){
 				throw "MSG: Length of vector must be equal for boolean selection.";
 			}
 			for(var i=0; i<v.length();i++){
 				if( trueValue(v.items[i]) ){
 					res.push(x[0].items[i]);
+
+					if(x[0].names){
+						names.push(x[0].names[i])
+					}
 				}
 			}
-			return new Vector(res);
+			return new Vector(res, names);
 		}else{
 			var res = [];
+			var names = x[0].names?[]:undefined;
 			for(var i=0; i<v.length();i++){
 				var q = v.items[i].value
 				if(q<=0 || q > x[0].length()){
 					throw "MSG: Selected element out of range.";
 				}
 				res.push(x[0].items[q-1]);
+				
+				if(x[0].names){
+					names.push(x[0].names[q-1])
+				}
 			}
-			return new Vector(res);
+			return new Vector(res, names);
 		}
 	}else{
 		if(x[1].value>0 && x[1].value <= x[0].length()){
@@ -390,53 +419,82 @@ defineFunction("Select", {params:[{name: "Haystack", needVector: true, noUnits: 
 });
 
 defineFunction("Reverse", {allowEmpty:true, params:{name: "Items..."}, prep: function(x){
-	return functionBank["join"](x).items;
+	return functionBank["join"](x);
 }}, function(x){
 
+	var names = x.names?[]:undefined;
 	var res = [];
-	for (var i = x.length-1; i >= 0; i--) {
-		res.push(x[i]);
+	for (var i = x.items.length-1; i >= 0; i--) {
+		res.push(x.items[i]);
+		if(names){
+			names.push(x.names[i])
+		}
 	}
-	return new Vector(res);
+	return new Vector(res, names);
 });
 
 defineFunction("Sort", {allowEmpty:true, params:{name: "Items..."}, prep: function(x){
-	return functionBank["flatten"](x).toNum().items;
+	return functionBank["join"](x).toNum();
 }}, function(x){
+	var res = x.stackApply(function(x){
+		var items = [];
+		for(var i=0; i<x.items.length; i++){
+			items.push({item: x.items[i], name: x.names?x.names[i]:undefined})
+		}
 
-	return new Vector(x.sort(function(a,b){
-		if(lessThan(a,b)){
-			return -1;
+		var res = items.sort(function(a,b){
+			if(lessThan(a.item, b.item)){
+				return -1;
+			}
+			if(greaterThan(a.item, b.item)){
+				return 1;
+			}
+			return 0;
+		});
+	
+	
+		var names = x.names?[]:undefined;
+		items = []
+	
+		for(var i = 0; i < res.length; i++){
+			items.push(res[i].item);
+			if(names){
+				names.push(res[i].name)
+			}
 		}
-		if(greaterThan(a,b)){
-			return 1;
-		}
-		return 0;
-	}));
+	
+		return new Vector(items, names);
+	});
+	return res;
 });
 
 defineFunction("Unique", {allowEmpty:true, params:{name: "Items....", allowBoolean:true}, prep: function(x){
-	return functionBank["join"](x).toNum().items;
+	return functionBank["join"](x).toNum();
 }}, function(x){	
-	if(x.length==0){
+	if(x.items.length==0){
 		return new Vector([]);
 	}
 	
 	var res = [];
+	var names = x.names?[]:undefined;
 	
-	for(var i = 0; i < x.length; i++){
+	for(var i = 0; i < x.items.length; i++){
 		var found = false;
+		
 		for(var j = 0; j < res.length; j++){
-			if(strictEquals(x[i], res[j])){
+			if(strictEquals(x.items[i], res[j])){
 				found = true;
 				break;
 			}
 		}
 		if(! found){
-			res.push(x[i]);
+			res.push(x.items[i]);
+			if(names){
+				names.push(x.names[i]);
+			}
 		}
 	}
-	return new Vector(res);
+	return new Vector(res, names);
 });
 
 defineFunction("Union", {params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
@@ -495,41 +553,40 @@ defineFunction("Difference", {params:[{name: "Vector 1", needVector: true}, {nam
 	return functionBank["unique"](res);
 });
 
-defineFunction("Factorial", {params: [{name: "Number", noUnits: true, noVector:true}]}, function(x){
+defineFunction("Factorial", {params: [{name: "Number", noUnits: true}], recurse: true}, function(x){
 	return new Material(factorial(x[0].toNum().value));
 });
 
-defineFunction("Max", {params: {name: "Items..."}, prep: function(x){return functionBank["join"](x).toNum().items}}, function(x){
-	var maxIndex = 0;
-	for (var i = 0; i < x.length; i++) {
-	 	if(! isNaN(0+x[i].value)){
-	 		maxIndex = i;
-			break;
-	 	}
- 	}
-	i=i+1;
-	for (i; i < x.length; i++) {
-		if (greaterThan(x[i], x[maxIndex])) {
-			maxIndex = i;
+defineFunction("Max", {params: {name: "Items..."}, prep: function(x){return functionBank["join"](x).toNum()}}, function(x){
+	
+	var res = x.stackApply(function(v){
+		//console.log(v);
+		var x = v.items;
+		var max = x[0];
+		for (var i=1; i < x.length; i++) {
+			if(greaterThan(x[i], max)){
+				max = x[i];
+			}
 		}
-	}
-	return x[maxIndex];
+		return max;
+	});
+	
+	return res;
 });
-defineFunction("Min", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
-	var minIndex = 0;
-	for (var i = 0; i < x.length; i++) {
-	 	if(! isNaN(0+x[i].value)){
-	 		minIndex = i;
-			break;
-	 	}
- 	}
-	i=i+1
-	for (i; i < x.length; i++) {
-		if (lessThan(x[i], x[minIndex])) {
-			minIndex = i;
+
+defineFunction("Min", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+	var res = x.stackApply(function(v){
+		var x = v.items;
+		var min = x[0];
+		for (var i=1; i < x.length; i++) {
+			if(lessThan(x[i], min)){
+				min = x[i];
+			}
 		}
-	}
-	return x[minIndex];
+		return min;
+	});
+	
+	return res;
 });
 defineFunction("Mean", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
 	var sum = x[0];
@@ -552,30 +609,37 @@ defineFunction("Product", {params:{name: "Items..."}, prep:function(x){return fu
 	}
 	return total;
 });
-defineFunction("Median", {params:{name: "Items..."}, prep:function(x){return functionBank["sort"](x).toNum().items}}, function(x){
-	if (Math.floor((x.length - 1) / 2) == (x.length - 1) / 2) {
-		return x[(x.length - 1) / 2];
-	} else {
-		return div(plus(x[Math.floor(((x.length - 1) / 2))], x[Math.ceil(((x.length - 1) / 2))]), new Material(2));
-	}
-});
-defineFunction("StdDev", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
-	
-	if (x.length > 1) {
-
-		var mean = functionBank["mean"](x);
-		var sum = power(minus(x[0], mean), new Material(2));
-
-		for (var i = 1; i < x.length; i++) {
-
-			sum = plus(sum, power(minus(x[i], mean), new Material(2)));
+defineFunction("Median", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+	var res = x.stackApply(function(v){
+		var x = functionBank["sort"]([v]).items;
+		if (Math.floor((x.length - 1) / 2) == (x.length - 1) / 2) {
+			return x[(x.length - 1) / 2];
+		} else {
+			return div(plus(x[Math.floor(((x.length - 1) / 2))], x[Math.ceil(((x.length - 1) / 2))]), new Material(2));
 		}
-		var r = power(div(sum, new Material(x.length - 1)), new Material(0.5));
+	});
+	return res;
+});
+defineFunction("StdDev", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+	var res = x.stackApply(function(v){
+		var x = v.items;
+		if (x.length > 1) {
 
-		return functionBank["real"]([r]);
-	}else{
-		throw "MSG: You must have at least two elements to calculate the standard deviation.";
-	}
+			var mean = functionBank["mean"](x);
+			var sum = power(minus(x[0], mean), new Material(2));
+
+			for (var i = 1; i < x.length; i++) {
+
+				sum = plus(sum, power(minus(x[i], mean), new Material(2)));
+			}
+			var r = power(div(sum, new Material(x.length - 1)), new Material(0.5));
+
+			return functionBank["real"]([r]);
+		}else{
+			throw "MSG: You must have at least two elements to calculate the standard deviation.";
+		}
+	});
+	return res;
 });
 defineFunction("Correlation", {params:  [{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x) {
 	var v1 = x[0].toNum();
@@ -606,20 +670,32 @@ functionBank["count"] = function(x) {
 	return new Material(sn("#e"+x.length));
 };
 functionBank["flatten"] = function(x) {
-	x = functionBank["join"](x).items;
-	return new Vector(flatten(new Vector(x)));
+	var res = flatten(functionBank["join"](x));
+	return new Vector(res.items, res.hasName?res.names:[]);
 };
 
 function flatten(x){
 	var res = [];
+	var names = [];
+	var hasName = undefined;
+	
 	for(var i=0; i<x.length(); i++){
 		if(x.items[i] instanceof Vector){
-			res = res.concat(flatten(x.items[i]));
+			var z = flatten(x.items[i]);
+			res = res.concat(z.items);
+			names = names.concat(z.names);
+			hasName = hasName || z.hasName;
 		}else{
 			res.push(x.items[i]);
+			if(x.names){
+				names.push(x.names[i]);
+				hasName = true;
+			}else{
+				names.push(undefined);
+			}
 		}
 	}
-	return res;
+	return {items: res, names: names, hasName: hasName};
 }
 
 
@@ -720,7 +796,11 @@ function defineFunction(name, definition, fn){
 			}
 		}
 		
-		return fn(x, id);
+		if(definition.recurse && (x[0] instanceof Vector)){
+			return x[0].cloneApply(function(x){return functionBank[name.toLowerCase()]([x], id)});
+		}else{
+			return fn(x, id);
+		}
 	}
 }
 
@@ -729,7 +809,7 @@ function factorial(x) {
 	if (Math.round(x) != x) {
 		throw "MSG: The factorial() function only accepts integers.";
 	} else if (x < 0) {
-		throw "MSG: The factorial() function is only defined for integers 0 or larger."
+		throw "MSG: The factorial() function is only defined for integers 0 or larger.";
 	}
 	if (x > 1) {
 		return x * factorial(x - 1);

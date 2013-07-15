@@ -317,7 +317,7 @@ Example:
 
 function showData(title, tabs, size) {
 	if(! size){
-		size = [640, 480];
+		size = [Math.min(Ext.getBody().getViewSize().width, 640), Math.min(Ext.getBody().getViewSize().height, 480)];
 	}
 	
 	var tabItems = [];
@@ -544,7 +544,7 @@ function showData(title, tabs, size) {
 /*
 Method: frontWindow
 
-Gets the front most window (if one exists).
+Gets the frontmost window (if one exists).
 
 Returns:
 
@@ -1667,7 +1667,7 @@ Sets the upper and lower bounds on the passed primitive to test against during s
 Parameters:
 
 primitive - The primitive for which the units will be set. May also be an array of primitives in which case they will all be set to the same constraints.
-constraints - The constraints of the primitive as an array. The format is [MinimumConstraint, MinimumConstraintMode, MaximumConstraint, MAximumConstraintMode]. Constraint mode is false to disable the constraint and true to enable it.
+constraints - The constraints of the primitive as an array. The format is [MinimumConstraint, MinimumConstraintMode, MaximumConstraint, MaximumConstraintMode]. Constraint mode is false to disable the constraint and true to enable it.
 
 
 See also:

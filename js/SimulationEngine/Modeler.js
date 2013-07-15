@@ -12,6 +12,7 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 var simulatorProgress;
 var strictUnits = null;
 var submodels = null;
+var arrays = [];
 
 
 function runSimulation(config) {
@@ -55,6 +56,14 @@ function runSimulation(config) {
 
 var timeUnits = null;
 function innerRunSimulation(config) {
+	if(getSetting().getAttribute("arrays")){
+		arrays = JSON.parse(getSetting().getAttribute("arrays"));
+		arrays.each(function(x){
+			x.data = JSON.decode(x.data);
+		});
+	}else{
+		arrays = [];
+	}
 	
 	allPlaceholders = [];
 	var model = {};
@@ -181,7 +190,23 @@ function innerRunSimulation(config) {
 				submodel.agents.push(agent);
 			}
 			for(var i = 0; i < submodel.DNAs.length; i++){
-				decodeDNA(submodel.DNAs[i], agent);
+				if(submodel.DNAs[i].dimensions){
+					var dims = submodel.DNAs[i].dimensions;
+					var keys = dims[0].data.keys.map(function(x){return [x];});
+					for(var d=1; d<dims.length; d++){
+						var newKeys = [];
+						for(var k=0; k<dims[d].data.keys.length; k++){
+							for(var k2=0; k2<keys.length; k2++){
+								newKeys.push(keys[k2].slice());
+								newKeys[newKeys.length-1].push(dims[d].data.keys[k]);
+							}
+						}
+						keys = newKeys
+					}
+					decodeDNA(submodel.DNAs[i], agent, keys[k]);
+				}else{
+					decodeDNA(submodel.DNAs[i], agent);
+				}
 			}
 		}
 	}
@@ -466,6 +491,27 @@ function aggregateAgentSeries(res){
 	return ret;
 }
 
+function indexedSeries(res){
+	var names = res.results[res.results.length-1].fullNames()
+	var series = {};
+	//console.log("---")
+	//console.log(names);
+	
+	for(var i=0; i<names.length; i++){
+		var key = names[i].join(", ");
+		series[key] = [];
+		for(var j=0; j<res.results.length; j++){
+			if(res.results[j] instanceof Vector){
+				series[key].push(selectFromMatrix(res.results[j].fullClone(), names[i].slice()));
+			}else{
+				series[key].push(res.results[j]);
+			}
+		}
+	}
+	//	console.log(series);
+	return series;
+}
+
 function finishSim(res, displayInformation, config) {
 	var ids = [];
 	var headers = [];
@@ -475,6 +521,10 @@ function finishSim(res, displayInformation, config) {
 	var displayedHeaders = []
 	var colors = [];
 	var renderers = [];
+	var indexedData = {};
+	var indexNames = [];
+	
+//	console.log(res);
 	
 	
 	for(var i = 0; i < displayInformation.ids.length; i++){
@@ -495,23 +545,40 @@ function finishSim(res, displayInformation, config) {
 				headers.push(getName(innerItem));
 				colors.push(getLineColor(innerItem));
 				agentKeys.push(key);
+				indexNames.push(false);
 				if(res[id].dataMode == "float"){
 					renderers.push(commaStr);
 				}else if(res[id].dataMode == "agents"){
-					renderers.push(function(){return "Agent Population";});
+					renderers.push(function(x){return x;});
 				}else{
 					renderers.push(undefined);
 				}
 			}
 		}else{
-			ids.push(id)
-			headers.push(getName(item));
-			colors.push(getLineColor(item));
-			agentKeys.push(false);
-			if(res[id].dataMode == "float"){
-				renderers.push(commaStr);
+			if((res[id].results[res[id].results.length-1] instanceof Vector) && res[id].results[res[id].results.length-1].names){
+				var names = res[id].results[res[id].results.length-1].fullNames();
+				var col = getLineColor(item);
+				//console.log(id);
+				indexedData[id.toString()] = indexedSeries(res[id]);
+				for(var n=0; n<names.length; n++){
+					ids.push(id);
+					headers.push(getName(item)+" ("+names[n].join(", ")+")");
+					colors.push(col);
+					indexNames.push(names[n].join(", "));
+					renderers.push(commaStr);
+				}
+				
 			}else{
-				renderers.push(undefined);
+				ids.push(id)
+				headers.push(getName(item));
+				colors.push(getLineColor(item));
+				agentKeys.push(false);
+				indexNames.push(false);
+				if(res[id].dataMode == "float"){
+					renderers.push(commaStr);
+				}else{
+					renderers.push(undefined);
+				}
 			}
 		}
 		
@@ -529,6 +596,8 @@ function finishSim(res, displayInformation, config) {
 	
 	displayInformation.times = res["Time"];
 	var storeData = [];
+	
+//	console.log(indexedData);
 
 	for (var k = 0; k < res.Time.length; k++) {
 		storeData.push({});
@@ -537,6 +606,9 @@ function finishSim(res, displayInformation, config) {
 		for (var i = 0; i < ids.length; i++) {
 			if(agentKeys[i]){
 				storeData[k]["series" + i] = agents[ids[i].toString()].aggregate[agentKeys[i].toString()][k];
+			}else if(indexNames[i]){
+				//console.log(id);
+				storeData[k]["series" + i] = indexedData[ids[i].toString()][indexNames[i].toString()][k];
 			}else{
 				storeData[k]["series" + i] = res[ids[i]].results[k];
 			}
@@ -747,10 +819,20 @@ function getDNA(cell){
 	dna.toBase = dna.units?(new Quantities(dna.units)).toBase:1;
 	dna.unitless = (! dna.units) || unitless(dna.units);
 	
+	dna.dimensions = [];
+	for(var i = 0; i < arrays.length; i++){
+		if(arrays[i].data.ids.indexOf(dna.id) > -1){
+			dna.dimensions.push({index: i, name: arrays[i].text});
+		}
+	}
+	if(dna.dimensions.length == 0){
+		dna.dimensions = undefined;
+	}
+	
 	return dna;
 }
 
-function decodeDNA(dna, agent){
+function decodeDNA(dna, agent, keys){
 	var type = dna.type;
 	var x;
 	if (type == "Variable") {
@@ -775,6 +857,7 @@ function decodeDNA(dna, agent){
 		x.index = agent.index;
 		x.agentId = agent.agentId;
 		x.parent = agent;
+		x.keys = keys;
 		x.createIds();
 		
 		agent.children.push(x);

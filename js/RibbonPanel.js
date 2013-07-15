@@ -959,7 +959,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
-							iconCls: 'right-icon',
+							iconCls: 'left-icon',
 							handler: function() {
 								var cells = excludeType(getSelected(), "Ghost");
 				                graph.getModel().beginUpdate();
@@ -997,7 +997,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							checked: false,
 							group: 'vrp-group',
 							scope: this,
-							iconCls: 'left-icon',
+							iconCls: 'right-icon',
 							handler: function() {
 								var cells = excludeType(getSelected(), "Ghost");
 				                graph.getModel().beginUpdate();

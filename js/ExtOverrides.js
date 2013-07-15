@@ -684,3 +684,199 @@
 		
 		canvas.oldLinks.push(sprite);
 	}
+	
+
+	var unfilteredRange = function () {
+        var me = this,
+            chart = me.chart,
+            store = chart.getChartStore(),
+            data = store.queryBy(function(x) {
+				return true;
+			}).items,
+            series = chart.series.items,
+            position = me.position,
+            axes,
+            seriesClasses = Ext.chart.series,
+            aggregations = [],
+            min = Infinity, max = -Infinity,
+            vertical = me.position === 'left' || me.position === 'right' || me.position === 'radial',
+            i, ln, ln2, j, k, dataLength = data.length, aggregates,
+            countedFields = {},
+            allFields = {},
+            excludable = true,
+            fields, fieldMap, record, field, value;
+
+        fields = me.fields;
+        for (j = 0, ln = fields.length; j < ln; j++) {
+            allFields[fields[j]] = true;
+        }
+
+        for (i = 0, ln = series.length; i < ln; i++) {
+            if (series[i].seriesIsHidden) {
+                continue;
+            }
+            if (!series[i].getAxesForXAndYFields) {
+                continue;
+            }
+            axes = series[i].getAxesForXAndYFields();
+            if (axes.xAxis && axes.xAxis !== position && axes.yAxis && axes.yAxis !== position) {
+                // The series doesn't use this axis.
+                continue;
+            }
+
+            if (seriesClasses.Bar && series[i] instanceof seriesClasses.Bar && !series[i].column) {
+                // If this is a horizontal bar series, then flip xField and yField.
+                fields = vertical ? Ext.Array.from(series[i].xField) : Ext.Array.from(series[i].yField);
+            } else {
+                fields = vertical ? Ext.Array.from(series[i].yField) : Ext.Array.from(series[i].xField);
+            }
+
+            if (me.fields.length) {
+                for (j = 0, ln2 = fields.length; j < ln2; j++) {
+                    if (allFields[fields[j]]) {
+                        break;
+                    }
+                }
+                if (j == ln2) {
+                    // Not matching fields, skipping this series.
+                    continue;
+                }
+            }
+
+            if (aggregates = series[i].stacked) {
+                // If this is a bar/column series, then it will be aggregated if it is of the same direction of the axis.
+                if (seriesClasses.Bar && series[i] instanceof seriesClasses.Bar) {
+                    if (series[i].column != vertical) {
+                        aggregates = false;
+                        excludable = false;
+                    }
+                }
+                // Otherwise it is stacked vertically
+                else if (!vertical) {
+                    aggregates = false;
+                    excludable = false;
+                }
+            }
+
+
+            if (aggregates) {
+                fieldMap = {};
+                for (j = 0; j < fields.length; j++) {
+                    if (excludable && series[i].__excludes && series[i].__excludes[j]) {
+                        continue;
+                    }
+                    if (!allFields[fields[j]]) {
+                        Ext.Logger.warn('Field `' + fields[j] + '` is not included in the ' + position + ' axis config.');
+                    }
+                    allFields[fields[j]] = fieldMap[fields[j]] = true;
+                }
+                aggregations.push({
+                    fields: fieldMap,
+                    positiveValue: 0,
+                    negativeValue: 0
+                });
+            } else {
+
+                if (!fields || fields.length == 0) {
+                    fields = me.fields;
+                }
+                for (j = 0; j < fields.length; j++) {
+                    if (excludable && series[i].__excludes && series[i].__excludes[j]) {
+                        continue;
+                    }
+                    allFields[fields[j]] = countedFields[fields[j]] = true;
+                }
+            }
+        }
+
+        for (i = 0; i < dataLength; i++) {
+            record = data[i];
+            for (k = 0; k < aggregations.length; k++) {
+                aggregations[k].positiveValue = 0;
+                aggregations[k].negativeValue = 0;
+            }
+            for (field in allFields) {
+                value = record.get(field);
+                if (me.type == 'Time' && typeof value == "string") {
+                    value = Date.parse(value);
+                }
+                if (isNaN(value)) {
+                    continue;
+                }
+                if (value === undefined) {
+                    value = 0;
+                } else {
+                    value = Number(value);
+                }
+                if (countedFields[field]) {
+                    if (min > value) {
+                        min = value;
+                    }
+                    if (max < value) {
+                        max = value;
+                    }
+                }
+                for (k = 0; k < aggregations.length; k++) {
+                    if (aggregations[k].fields[field]) {
+
+                        if (value >= 0) {
+                            aggregations[k].positiveValue += value;
+                            if (max < aggregations[k].positiveValue) {
+                                max = aggregations[k].positiveValue;
+                            }
+                            // If any aggregation is actually hit, then the min value should be at most 0.
+                            if (min > 0) {
+                                min = 0;
+                            }
+                        } else {
+                            aggregations[k].negativeValue += value;
+                            if (min > aggregations[k].negativeValue) {
+                                min = aggregations[k].negativeValue;
+                            }
+                            // If any aggregation is actually hit, then the max value should be at least 0.
+                            if (max < 0) {
+                                max = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!isFinite(max)) {
+            max = me.prevMax || 0;
+        }
+        if (!isFinite(min)) {
+            min = me.prevMin || 0;
+        }
+
+        if (typeof min === 'number') {
+            min = Ext.Number.correctFloat(min);
+        }
+         
+        if (typeof max === 'number') {
+            max = Ext.Number.correctFloat(max);
+        }
+        
+        //normalize min max for snapEnds.
+        if (min != max && (max != Math.floor(max) || min != Math.floor(min))) {
+            min = Math.floor(min);
+            max = Math.floor(max) + 1;
+        }
+
+        if (!isNaN(me.minimum)) {
+            min = me.minimum;
+        }
+
+        if (!isNaN(me.maximum)) {
+            max = me.maximum;
+        }
+
+        if (min >= max) {
+            // snapEnds will return NaN if max >= min;
+            min = Math.floor(min);
+            max = min + 1;                
+        }
+
+        return {min: min, max: max};
+    }

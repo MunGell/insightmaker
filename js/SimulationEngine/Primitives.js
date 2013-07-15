@@ -15,6 +15,8 @@ function Primitive() {
 	this.index = null;
 	this.fullId = null;
 	this.instanceId = null;
+	
+	this.keys = null;
 
 	this.parent = null;
 
@@ -167,10 +169,18 @@ Primitive.method("expDelayF", function( order , delay , initialV ){
     return dat[dat.length-1].out.fullClone();
   });
 Primitive.method("testUnits", function(m, ignoreFlow) {
-	if(unitless(this.dna.units) && (! (m instanceof Vector) && ! unitless(m.units))){
-		error("Wrong units generated for <i>"+clean(this.dna.name)+"</i>. Expected no units and got <i>"+clean(m.units.toString())+"</i>. Either specify units for the primitive or adjust the equation.", this, true);
-	}else if (! unitless(this.dna.units) && m instanceof Vector) {
-		error("Units error for <i>"+clean(this.dna.name)+"</i>. Expected <i>"+clean(this.dna.units.toString())+"</i> and the equation resulted in a vector.", this, true);
+	//console.log("testing units")
+	if(m instanceof Vector){
+		var me = this;
+		m.recurseApply(function(x){
+			me.testUnits(x, ignoreFlow);
+			return x;
+		});
+		return
+	}
+	
+	if(unitless(this.dna.units) && ! unitless(m.units)){
+		error(getText("Wrong units generated for %s. Expected no units and got %s. Either specify units for the primitive or adjust the equation.", "<i>"+clean(this.dna.name)+"</i>", "<i>"+clean(m.units.toString())+"</i>"), this, true);
 	}else if (! unitsEqual(this.dna.units, m.units)) {
 		var scale = convertUnits(m.units, this.dna.units, true);
 		if (scale == 0) {
@@ -178,20 +188,28 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 				console.log(m.units);
 				console.log(this.dna.units);
 			}
-			error("Wrong units generated for <i>"+clean(this.dna.name)+"</i>. Expected <i>"+clean(this.dna.units.toString())+"</i>, and got <i>"+clean(m.units.toString())+"</i>.", this, true);
+			error(getText("Wrong units generated for %s. Expected %s, and got %s.", "<i>"+clean(this.dna.name)+"</i>", "<i>"+clean(this.dna.units.toString())+"</i>", "<i>"+clean(m.units.toString())+"</i>"), this, true);
 			return
 		} else {
 			//console.log("----+")
+			//console.log("mod1")
+			//console.log(m.units.exponents)
 			m.value = m.value * scale;
 			m.units = this.dna.units.clone();
+			//console.log(m.units.exponents)
 			//console.log((this instanceof Flow));
 			//console.log(ignoreFlow);	
 		}
 	}
 	if((this instanceof Flow) && (ignoreFlow != true) && this.dna.flowUnitless){
+			//console.log("mod2")
+			//console.log(m.units.exponents)
 		var x = mult(m, new Material(1, timeLength.units.clone()));
 		m.value = x.value;
 		m.units = x.units;
+
+		//console.log(m.units.exponents)
+		//console.log("done")
 	}
 });
 Primitive.method("setValue", function() {
@@ -221,7 +239,25 @@ Primitive.method("value", function() {
 		}
 		if(! (this instanceof State)){
 			//console.log(this.name);
+			/*if(this instanceof Flow){
+				console.log("--")
+				console.log(RKPosition);
+				console.log("A: ")
+				if(this.primaryRateScaled.items){
+					console.log(this.primaryRateScaled.items[0].units.exponents)
+				}else{
+					console.log(this.primaryRateScaled.units.exponents)
+				}
+			}*/
 			this.testUnits(x);
+			/*if(this instanceof Flow){
+				console.log("B: ")
+				if(this.primaryRateScaled.items){
+					console.log(this.primaryRateScaled.items[0].units.exponents)
+				}else{
+					console.log(this.primaryRateScaled.units.exponents)
+				}
+			}*/
 			this.testConstraints(x);
 		}
 		if (this.pastValues.length - 1 < timeIndex-1) {
@@ -248,11 +284,20 @@ Primitive.method("value", function() {
 	}
 });
 Primitive.method("testConstraints", function(x) {
-	if ((this.dna.maxConstraintType == 1 && x.value > this.dna.maxConstraint) || (this.dna.maxConstraintType == 2 && x.value >= this.dna.maxConstraint)) {
-		constraintAlert(this, "max", x);
+	var me = this;
+	var test = function(x){
+		if ((me.dna.maxConstraintType == 1 && x.value > me.dna.maxConstraint) || (me.dna.maxConstraintType == 2 && x.value >= me.dna.maxConstraint)) {
+			constraintAlert(me, "max", x);
+		}
+		if ((me.dna.minConstraintType == 1 && x.value < me.dna.minConstraint) || (me.dna.minConstraintType == 2 && x.value <= me.dna.minConstraint)) {
+			constraintAlert(me, "min", x);
+		}
+		return x;
 	}
-	if ((this.dna.minConstraintType == 1 && x.value < this.dna.minConstraint) || (this.dna.minConstraintType == 2 && x.value <= this.dna.minConstraint)) {
-		constraintAlert(this, "min", x);
+	if(x instanceof Vector){
+		x.recurseApply(test);
+	}else{
+		test(x);
 	}
 });
 Primitive.method("setEquation", function(tree, neighborhood) {
@@ -359,10 +404,7 @@ State.method("setInitialActive", function() {
 		}
 	}
 	
-	if(init instanceof Vector){
-		error(getText("Cannot set the initial active state to a vector."), this, true);
-	}
-
+	
 	this.active = trueValue(init);
 	//console.log(this.active);
 	if (this.active) {
@@ -406,9 +448,7 @@ Transition.method("calculateValue", function() {
 	//if(this.alpha && this.alpha.getActive()){
 		var x = evaluateTree(this.equation, varBank).toNum();
 		
-		if(x instanceof Vector){
-			error("You cannot set the value of a transition to a vector.", this, true);
-		}
+		
 		
 		if(x===true){
 			return new Material(1);
@@ -627,8 +667,12 @@ Agents.method("add", function(base){
 		if(this.placement == "Custom Function"){
 			hood.self = agent;
 			agent.location = simpleUnitsTest(simpleEquation(this.placementFunction, varBank, hood), this.geoDimUnitsObject);
+			if(! agent.location.names){
+				agent.location.names = ["x", "y"];
+				agent.location.namesLC = ["x", "y"];
+			}
 		}else{
-			agent.location = new Vector([mult(this.geoWidth, new Material(Rand())),mult(this.geoHeight, new Material(Rand()))]);
+			agent.location = new Vector([mult(this.geoWidth, new Material(Rand())),mult(this.geoHeight, new Material(Rand()))], ["x", "y"]);
 		}
 		if(this.network == "Custom Function"){
 			var tree = trimTree(createTree(this.networkFunction), hood);
@@ -818,9 +862,7 @@ Stock.method("setInitialValue", function() {
 		}
 	}
 	
-	if(init instanceof Vector){
-		error(getText("Cannot set the initial value of a stock to a vector."), this, true);
-	}
+	
 	if(typeof init == "boolean"){
 		if(init){
 			init = new Material(1);
@@ -829,11 +871,24 @@ Stock.method("setInitialValue", function() {
 		}
 	}
 	
-	if (this.dna.nonNegative && init.value < 0) {
-		init = new Material(0, this.dna.units?this.dna.units.clone():undefined);
-	}
-	if (unitless(init.units)) {
-		init.units = this.dna.units?this.dna.units.clone():undefined;
+	if(init instanceof Vector){
+		var d = this.dna;
+		init.recurseApply(function(x){
+			if (d.nonNegative && x.value < 0) {
+				x = new Material(0, d.units?d.units.clone():undefined);
+			}
+			if (unitless(x.units)) {
+				x.units = d.units?d.units.clone():undefined;
+			}
+			return x;
+		})
+	}else{
+		if (this.dna.nonNegative && init.value < 0) {
+			init = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		}
+		if (unitless(init.units)) {
+			init.units = this.dna.units?this.dna.units.clone():undefined;
+		}
 	}
 
 	//this.testUnits(init);
@@ -852,14 +907,36 @@ Stock.method("setInitialValue", function() {
 });
 Stock.method("subtract", function(amnt) {
 	this.level[this.level.length - 1] = minus(this.level[this.level.length - 1], amnt);
-	if (this.dna.nonNegative && this.level[this.level.length - 1].value < 0) {
-		this.level[this.level.length - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+	if (this.dna.nonNegative) {
+		if(this.level[this.level.length - 1] instanceof Vector){
+			var d = this.dna;
+			this.level[this.level.length - 1].recurseApply(function(x){
+				if(x.value < 0){
+					return new Material(0, d.units?d.units.clone():undefined);
+				}else{
+					return x;
+				}
+			});
+		}else if(this.level[this.level.length - 1].value < 0){
+			this.level[this.level.length - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		}
 	}
 });
 Stock.method("add", function(amnt) {
 	this.level[0] = plus(this.level[0], amnt);
-	if (this.dna.nonNegative && this.level[0].value < 0) {
-		this.level[0] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+	if (this.dna.nonNegative) {
+		if(this.level[0] instanceof Vector) {
+			var d = this.dna;
+			this.level[0].recurseApply(function(x){
+				if(x.value < 0){
+					return new Material(0, d.units?d.units.clone():undefined);
+				}else{
+					return x;
+				}
+			});
+		}else if(this.level[0].value < 0){
+			this.level[0] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		}
 	}
 });
 Stock.method("totalContents", function() {
@@ -1028,11 +1105,26 @@ Flow.method("calculateValue", function() {
 	this.predict();
 	var sr = this.primaryRateScaled.fullClone();
 	if ((!this.dna.onlyPositive) || sr.value >= 0) {
+		
 		return sr;
 	} else {
-		return new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		if(sr instanceof Vector){
+			var d = this.dna;
+			sr.recurseApply(function(x){
+				if(x.value >= 0 ){
+					return x
+				}else{
+					return new Material(0, d.units?d.units.clone():undefined);
+				}
+			});
+			//console.log(sr.items[0].units.exponents[0])
+			return sr;
+		}else{
+			return new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		}
 	}
 });
+
 Flow.method("clean", function() {
 	this.primaryRate = null;
 	this.primaryRateScaled = null;
@@ -1046,7 +1138,7 @@ Flow.method("predict", function() {
 			var x = evaluateTree(this.equation, varBank).toNum();
 			//console.log(this.equation);
 			//console.log(x);
-			if(! isFinite(x.value)){
+			if(!((x instanceof Vector) || isFinite(x.value))){
 				//console.log(x)
 				throw("MSG: "+getText("The result of this calculation is not finite. Flows must have finite values. Are you dividing by 0?"));
 			}
@@ -1064,9 +1156,7 @@ Flow.method("predict", function() {
 				error(err, this, true);
 			}
 		}
-		if(x instanceof Vector){
-			error(getText("Cannot set the value of a flow to a vector."), this, true);
-		}else if(typeof x== "boolean"){
+		if(typeof x== "boolean"){
 			if(x){
 				x = new Material(1);
 			}else{
@@ -1076,30 +1166,69 @@ Flow.method("predict", function() {
 		
 		this.primaryRate = x.fullClone();
 		
+		//console.log("--")
 		//console.log(this.primaryRate.units);
-		if (unitless(this.primaryRate.units)) {
+		if(this.primaryRate instanceof Vector){
+			var d = this.dna;
+			//console.log(this.dna.units)
+			this.primaryRate.recurseApply(function(x){
+				if (unitless(x.units)) {
+					//console.log("setting units")
+					x.units = d.units?d.units.clone():undefined;
+				}
+				return x
+			})
+		}else if (unitless(this.primaryRate.units)) {
 			this.primaryRate.units = this.dna.units?this.dna.units.clone():undefined;
 		}
 		//console.log("---")
-//		console.log(this.primaryRate)
+		/*
+		console.log("C: ")
+		if(this.primaryRate.items){
+			console.log(this.primaryRate.items[0].units.exponents)
+		}else{
+			console.log(this.primaryRate.units.exponents)
+		}*/
 		this.testUnits(this.primaryRate, true);
-		
-		
+		/*console.log("D: ")
+		if(this.primaryRate.items){
+			console.log(this.primaryRate.items[0].units.exponents)
+		}else{
+			console.log(this.primaryRate.units.exponents)
+		}
+		*/
 		//console.log("+++")
 		
 		//console.log("--")
-		//console.log(this.primaryRate)
+		//console.log(this.primaryRate.items[0].units.exponents)
 		this.primaryRate = mult(this.primaryRate, timeStep);
-		//console.log(this.primaryRate)
+		//console.log(this.primaryRate.items[0].units.exponents)
 		//console.log("push: "+this.id)
 		this.RKPrimary.push(this.primaryRate);
-		
+		/*
+		console.log("E: ")
+		if(this.primaryRate.items){
+			console.log(this.primaryRate.items[0].units.exponents)
+		}else{
+			console.log(this.primaryRate.units.exponents)
+		}
+		*/
 		this.primaryRateScaled = this.scaledPrimaryRate();
+		/*
+		console.log("F: ")
+		if(this.primaryRateScaled.items){
+			console.log(this.primaryRateScaled.items[0].units.exponents)
+		}else{
+			console.log(this.primaryRateScaled.units.exponents)
+		}*/
+		//console.log("-0-")
+		//console.log(this.primaryRateScaled.units.exponents[0]);
 	}
 });
 Flow.method("scaledPrimaryRate", function() {
+	//console.log("--")
 	var sr = this.primaryRate==null?null:this.primaryRate.fullClone();
-	
+	//console.log(sr.items[0].units.exponents[0])
 	
 	//console.log("--")
 	//console.log(RKPosition);
@@ -1113,64 +1242,140 @@ Flow.method("scaledPrimaryRate", function() {
 		} else if (RKPosition == 4) {
 			//console.log(this);
 			//console.log(this.RKPrimary);
+			//console.log("adjusting")
 			
 			sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[4])), new Material(6));
 		}
 	}
+
+	//console.log(sr.items[0].units.exponents[0])
 	
 	//console.log(sr.value*2);
-
+	/*
+	console.log(this.RKPrimary);
+	
+	console.log("G:");
+	if(sr.items){
+		console.log(sr.items[0].units.exponents)
+	}else{
+		console.log(sr.units.exponents)
+	}*/
+	
 	sr = div(sr, timeStep);
+
+	//console.log(sr.items[0].units.exponents[0])
 	
 	
 	return sr;
 });
 Flow.method("apply", function() {
+	
 	try{
 		var rate = this.primaryRateScaled.fullClone();
 	
 		//console.log(rate);
 	
-		
+
+		//console.log("--")
+		//console.log(rate.units.exponents[0])
 		rate = mult(rate, timeStep);
-		
-		
-		
+		//console.log(rate.units.exponents[0])
 
 		//console.log("Applying: "+rate.value);
+		//console.log("+++");
+		if(this.dna.onlyPositive){
+			//console.log("===");
+			if(rate instanceof Vector){
+				rate.recurseApply(function(x){
+					if(x.value >= 0 ){
+						return x
+					}else{
+						return new Material(0, x.units?x.units.clone():undefined);
+					}
+				});
+			//	console.log("--")
+			//	console.log(rate)
+			}else{
+				if(rate.value <= 0){
+					this.primaryRate = null;
+					return;
+				}
+			}
+		}
 	
-		var in_r = rate;
-		var out_r = rate;
-
-		if (this.dna.onlyPositive == false || rate.value >= 0) {
-			if (this.omega !== null && this.omega.dna.nonNegative) {
-				if (plus(this.omega.value().toNum(), out_r).value < 0 ) {
-					var modifier = plus(this.omega.value().toNum(), out_r);
-					out_r = minus(out_r, modifier);
-					in_r = minus(in_r, modifier);
+		if (this.omega !== null && this.omega.dna.nonNegative) {
+			var modifier = plus(this.omega.value().toNum(), rate);
+			if(modifier instanceof Vector){
+				modifier.recurseApply(function(x){
+					if (x.value < 0 ) {
+						return x;
+					}else{
+						return new Material(0, x.units?x.units.clone():undefined);
+					}
+				})
+				rate = minus(rate, modifier);
+			}else{
+				if (modifier.value < 0 ) {
+					rate = minus(rate, modifier);
 				}
 			}
+		}
+	
+		if (this.alpha !== null && this.alpha.dna.nonNegative) {
+			
+			var modifier = minus(this.alpha.value().toNum(), rate);
+			if(modifier instanceof Vector){
+				modifier.recurseApply(function(x){
+					if (x.value < 0 ) {
+						return x;
+					}else{
+						return new Material(0, x.units?x.units.clone():undefined);
+					}
+				})
+				rate = minus(rate, modifier);
+			}else{
+				if (modifier.value < 0 ) {
+					rate = plus(rate, modifier);
+				}
+			}
+		}
 		
-			if (this.alpha !== null && this.alpha.dna.nonNegative) {
-				if (minus(this.alpha.value().toNum(), in_r).value < 0) {
-					var modifier = minus(this.alpha.value().toNum(), in_r);
-					out_r = plus(out_r, modifier);
-					in_r = plus(in_r, modifier);
+		if (this.omega !== null && this.omega.dna.nonNegative) {
+			if(rate instanceof Vector){
+				var vec = functionBank["flatten"]([plus(this.omega.value().toNum(), rate)]);
+				for(var i=0; i<vec.items.length; i++){
+					if (vec.items[i].value < 0 ) {
+						error(getText("Inconsistent non-negative constraints for flow."), this, false);
+					}
 				}
-			}
-			if (this.omega !== null && this.omega.dna.nonNegative) {
-				if (plus(this.omega.value().toNum(), out_r).value < 0) {
+			}else{
+				if (plus(this.omega.value().toNum(), rate).value < 0) {
 					error(getText("Inconsistent non-negative constraints for flow."), this, false);
 				}
 			}
+		}
 
+		var additionTest = 0;
+		try{
 			if (this.omega !== null) {
-				this.omega.add(out_r);
+				additionTest = 1;
+				this.omega.add(rate);
 			}
 			if (this.alpha !== null) {
-				this.alpha.subtract(in_r);
+				additionTest = 2;
+				this.alpha.subtract(rate);
 			}
+		}catch(err){
+			//throw err;
+			var stock = "";
+			if(additionTest==1){
+				stock= this.omega;
+			}else if(additionTest==2){
+				stock= this.alpha;
+			}
+			error(getText("Incompatible units for flow %s and connected stock %s. Stock has units of %s. The flow should have the equivalent units divided by some time unit such as Years.", "<i>["+clean(this.dna.name)+"]</i>", "<i>["+clean(stock.dna.name)+"]</i>", "<i>"+(stock.dna.units?clean(stock.dna.units.toString()):"unitless")+"</i>"), this, false);
 		}
+		
 		//console.log("null: "+this.id)
 		this.primaryRate = null;
 	}catch(err){
@@ -1180,7 +1385,7 @@ Flow.method("apply", function() {
 		if(err.substr(0,4)=="MSG:"){
 			error(err.substr(4,err.length), this, true);
 		}else{
-			error(err, thi, true);
+			error(err, this, true);
 		}
 	}
 });

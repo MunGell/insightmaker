@@ -82,31 +82,42 @@ Ext.EquationWindow = function(args) {
 		}
 	}
 
-	var refstore = new Ext.data.Store({
-		autoDestroy: true,
-		idIndex: 0,
-		fields: [{
-			type: "string",
-			name: 'name'
-		}, {
-			type: "string",
-			name: 'item'
-		}],
-		data: neighbors
-	});
-
-	var neighList = new Ext.grid.Panel({
-		store: refstore,
-		region: 'east',
-		width: 200,
-		margin: '3 3 3 3',
-		columns: [{
-			header: 'References',
-			flex: 1,
-			dataIndex: 'item',
-			sortable: false
-		}]
-	});
+	var neighList;
+	
+	if(neighbors.length == 0){
+		neighList = new Ext.Component({
+			margin: 10,
+			width: 200,
+			region: 'east',
+			html: "<big><i class='gray'>"+getText("No references to other primitives available.<br/><br/>You can connect primitives and create references using Links.")+"</i></big>"
+		});
+	}else{
+		var refstore = new Ext.data.Store({
+			autoDestroy: true,
+			idIndex: 0,
+			fields: [{
+				type: "string",
+				name: 'name'
+			}, {
+				type: "string",
+				name: 'item'
+			}],
+			data: neighbors
+		});
+		
+		neighList = new Ext.grid.Panel({
+			store: refstore,
+			region: 'east',
+			width: 200,
+			margin: '3 3 3 3',
+			columns: [{
+				header: 'References',
+				flex: 1,
+				dataIndex: 'item',
+				sortable: false
+			}]
+		});
+	}
 
 	codeEditor = new Ext.form.TextArea({
 		id: 'myCode',
@@ -215,9 +226,9 @@ Ext.EquationWindow = function(args) {
 	["Find Furthest", "FindFurthest(##[Agent Population]$$, ##[Target]$$, ##Count=1$$)", "Returns the agent farthest from the target agent. The number of agents returned is specified by the optional Count.", ["FindFurthest([Population], [Target], 4)", "The four furthest agents from the target"]],
 	["Value", "Value(##[Agent Population]$$, ##[Primitive]$$)", "Returns the values of the specified primitive for each agent in the population as a vector.", ["Mean(Value([University], [GPA]))", "The average GPA of all students in the University population"]],
 	["Set Value", "SetValue(##[Agent Population]$$, ##[Primitive]$$, ##Value$$)", "Sets the value of the specified primitive for each agent in the population to the given value.", ["SetValue([University], [Smoker], false)", "Make all the smokers quit smoking"]],
-	["Location", "Location(##[Agent]$$)", "Returns the location of an agent as the vector <<x, y>>.", ["Select(Location([Self]), 1)", "The x-coordinate of the agent"]],
+	["Location", "Location(##[Agent]$$)", "Returns the location of an agent as the vector «x, y».", ["Location([Self])<<'x'>>", "The x-coordinate of the agent"]],
 	["Distance", "Distance(##[Agent 1]$$, ##[Agent 2]$$)", "Returns the distance between two agents."],
-	["Move", "Move(##[Agent]$$, ##<<x, y>>$$)", "Moves an agent the amount specified.", ["Move([Self], <<Rand, Rand>>)", "Take a random walk"]],
+	["Move", "Move(##[Agent]$$, ##<<x, y>>$$)", "Moves an agent the amount specified.", ["Move([Self], «Rand, Rand»)", "Take a random walk"]],
 	["MoveTowards", "MoveTowards(##[Agent]$$, ##[Target]$$, ##Distance$$)", "Moves an agent towards a target agent the distance specified.", ["MoveTowards([Self], [Prey], 10)", "Chase after the prey"]],
 	["Connected", "Connected(##[Agent]$$)", "Returns the agents connected in the network to an agent.", ["Count(Connected([Self]))", "The number of connections an agent has"]],
 	["Connect", "Connect(##[Agent 1]$$, ##[Agent 2]$$)", "Connects two agents in the network. The second parameter can also be a vector of agents.", ["Connect([Self], FindNearest([Population], [Self]))", "Connects an agent to the nearest agent to it in the population"]],
@@ -239,11 +250,10 @@ Ext.EquationWindow = function(args) {
 	["Difference", "Difference(##Vector 1$$, ##Vector 2$$)", "Returns the elements that exist in only one of the two vectors.", ["Difference(<<1, 2>>, <<2, 3>>)", "<<1, 3>>"]],
 	["Sort", "Sort(##Vector$$)", "Sorts a vector from smallest value to largest value.", ["Sort(<<1, 3, 2>>)", "<<1, 2, 3>>"]],
 	["Reverse", "Reverse(##Vector$$)", "Reverses the ordering of elements in a vector.", ["Reverse(<<1, 2, 3>>)", "<<3, 2, 1>>"]],
-	["Select", "Select(##Vector$$, ##Items$$)", "Subsets a vector. Items can be a single index (starting with index 1) or a vector of true/false values of equal length to the Vector.", ["Select(<<1, 4, 9>>, 2)", "4"]],
 	["Sample", "Sample(##Vector$$, ##Sample Size$$, ##Allow Repeats=False$$)", "Takes a random sample from a vector. Allow Repeats specified if the same index can be sampled multiple time and is false by default.", ["Sample(<<1, 4, 9>>, 2)", "<<9, 1>>"]],
 	["IndexOf", "IndexOf(##Vector$$, ##Needle$$)", "Returns the position of the needle within the vector (starting with index 1). If the needle is not found, 0 is returned.", ["IndexOf(<<1, 4, 9>>, 9)", "3"]],
 	["Contains", "Contains(##Vector$$, ##Needle$$)", "Returns true if the needle is in the vector. Otherwise returns false.", ["Contains(<<1, 4, 9>>, 9)", "true"]],
-	["Repeat", "Repeat(##x^2$$, ##Times$$)", "Creates a new vector by repeating a function a specified expression a number of times. <i>x</i> refers to the current index.", ["Repeat(x+1, 3)", "<<2, 3, 4>>"]],
+	["Repeat", "Repeat(##x^2$$, ##Times$$)", "Creates a new vector by repeating a function a specified expression a number of times. <i>x</i> refers to the current index. Times may also be a vector of strings in which case a named vector is created.", ["Repeat(x^2, 3)", "<<1, 4, 9>>"]],
 	["Map", "Map(##Vector$$, ##x^2+1$$)", "Applies a function to each element of a vector, denoted with <i>x</i>, and returns the result.", ["Map(<<1, 2, 3>>, x*2)", "<<2, 4, 6>>"]],
 	["Filter", "Filter(##Vector$$, ##x>7$$)", "Tests each element of a vector using a function and returns the elements which evaluate to true.", ["Filter(<<1, 2, 3>>, x >= 2)", "<<2, 3>>"]]
 	]],
@@ -311,17 +321,29 @@ Ext.EquationWindow = function(args) {
 		border: false
 	});
 
+	var title = getText('Equation Editor');
+	if(cell.value.nodeName == "Stock"){
+		title = getText("Initial Value Equation");
+	}else if(cell.value.nodeName == "Variable"){
+		title = getText("Variable Equation");
+	}else if(cell.value.nodeName == "State"){
+		title = getText("Initial Active Equation");
+	}else if(cell.value.nodeName == "Flow"){
+		title = getText("Flow Rate Equation");
+	}else if(cell.value.nodeName == "Transition"){
+		title = getText("Transition Equation");
+	}
 
 	//var form = new Ext.FormPanel({layout:"border",frame:true,border:true, items: [syntax, refList, help]});
 	obj.win = new Ext.Window({
-		title: getText('Equation Editor')+': '+clean(cell.getAttribute("name")),
+		title: title+': '+clean(cell.getAttribute("name")),
 		layout: 'border',
 		closeAction: 'destroy',
 		border: false,
 		modal: true,
 		items: [codeEditor, neighList, tabs, equal],
-		width: 600,
-		height: 400,
+		width: Math.min(Ext.getBody().getViewSize().width, 600),
+		height: Math.min(Ext.getBody().getViewSize().height, 400),
 		resizable: false,
 		shadow: true,
 		buttonAlign: 'left',
@@ -380,8 +402,10 @@ Ext.EquationWindow = function(args) {
 	});
 
 	neighList.on('beforeselect', function(view, node, items, options) {
-		insertAtCursor("[" + node.data.name + "]");
-		codeEditor.focus(false, true);
+		if(node.data.name){
+			insertAtCursor("[" + node.data.name + "]");
+			codeEditor.focus(false, true);
+		}
 		return false;
 	});
 

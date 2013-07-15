@@ -85,177 +85,6 @@ function round(value, precision, mode) {
 	return (isHalf ? value : Math.round(value)) / m;
 }
 
-var unfilteredRange = function() {
-	var me = this,
-		chart = me.chart,
-		store = chart.getChartStore(),
-		data = store.queryBy(function(x) {
-			return true;
-		})
-			.items,
-		//XXX SFR FIXME Change to make it load from all data, not just filtered
-		series = chart.series.items,
-		position = me.position,
-		boundedAxes, seriesClasses = Ext.chart.series,
-		aggregations = [],
-		min = Infinity,
-		max = -Infinity,
-		vertical = me.position === 'left' || me.position === 'right',
-		i, ln, ln2, j, k, dataLength = data.length,
-		aggregates, countedFields = {},
-		allFields = {},
-		excludable = true,
-		fields, fieldMap, record, field, value;
-
-	fields = me.fields;
-	for (j = 0, ln = fields.length; j < ln; j++) {
-		allFields[fields[j]] = true;
-	}
-
-	for (i = 0, ln = series.length; i < ln; i++) {
-		if (series[i].seriesIsHidden) {
-			continue;
-		}
-		if (!series[i].getAxesForXAndYFields) {
-			continue;
-		}
-
-		boundedAxes = series[i].getAxesForXAndYFields();
-		if (boundedAxes.xAxis && boundedAxes.xAxis !== position && boundedAxes.yAxis && boundedAxes.yAxis !== position) {
-			// If the series explicitly exclude current Axis, then exit.
-			continue;
-		}
-
-		if (seriesClasses.Bar && series[i] instanceof seriesClasses.Bar && !series[i].column) {
-			// If this is a horizontal bar series, then flip xField and yField.
-			fields = vertical ? Ext.Array.from(series[i].xField) : Ext.Array.from(series[i].yField);
-		} else {
-			fields = vertical ? Ext.Array.from(series[i].yField) : Ext.Array.from(series[i].xField);
-		}
-
-		if (me.fields.length) {
-			for (j = 0, ln2 = fields.length; j < ln2; j++) {
-				if (allFields[fields[j]]) {
-					break;
-				}
-			}
-			if (j == ln2) {
-				// Not matching fields, skipping this series.
-				continue;
-			}
-		}
-
-		if (aggregates = series[i].stacked) {
-			// If this is a bar/column series, then it will be aggregated if it is of the same direction of the axis.
-			if (seriesClasses.Bar && series[i] instanceof seriesClasses.Bar) {
-				if (series[i].column != vertical) {
-					aggregates = false;
-					excludable = false;
-				}
-			}
-			// Otherwise it is stacked vertically
-			else if (!vertical) {
-				aggregates = false;
-				excludable = false;
-			}
-		}
-
-
-		if (aggregates) {
-			fieldMap = {};
-			for (j = 0; j < fields.length; j++) {
-				if (excludable && series[i].__excludes && series[i].__excludes[j]) {
-					continue;
-				}
-				if (!allFields[fields[j]]) {
-					Ext.Logger.warn('Field `' + fields[j] + '` is not included in the ' + position + ' axis config.');
-				}
-				allFields[fields[j]] = fieldMap[fields[j]] = true;
-			}
-			aggregations.push({
-				fields: fieldMap,
-				value: 0
-			});
-		} else {
-
-			if (!fields || fields.length == 0) {
-				fields = me.fields;
-			}
-			for (j = 0; j < fields.length; j++) {
-				if (excludable && series[i].__excludes && series[i].__excludes[j]) {
-					continue;
-				}
-				allFields[fields[j]] = countedFields[fields[j]] = true;
-			}
-		}
-	}
-
-	for (i = 0; i < dataLength; i++) {
-		record = data[i];
-		for (k = 0; k < aggregations.length; k++) {
-			aggregations[k].value = 0;
-		}
-		for (field in allFields) {
-			value = record.get(field);
-			if (isNaN(value)) {
-				continue;
-			}
-			if (value === undefined) {
-				value = 0;
-			}
-			if (countedFields[field]) {
-				if (min > value) {
-					min = value;
-				}
-				if (max < value) {
-					max = value;
-				}
-			}
-			for (k = 0; k < aggregations.length; k++) {
-				if (aggregations[k].fields[field]) {
-					aggregations[k].value += value;
-					// If any aggregation is actually hit, then the min value should be at most 0.
-					if (min > 0) {
-						min = 0;
-					}
-					if (max < aggregations[k].value) {
-						max = aggregations[k].value;
-					}
-				}
-			}
-		}
-	}
-
-	if (!isFinite(max)) {
-		max = me.prevMax || 0;
-	}
-	if (!isFinite(min)) {
-		min = me.prevMin || 0;
-	}
-
-	//normalize min max for snapEnds.
-	if (min != max && (max != Math.floor(max))) {
-		max = Math.floor(max) + 1;
-	}
-
-	if (!isNaN(me.minimum)) {
-		min = me.minimum;
-	}
-
-	if (!isNaN(me.maximum)) {
-		max = me.maximum;
-	}
-
-	if (min >= max) {
-		// snapEnds will return NaN if max >= min;
-		max = min + 1;
-	}
-
-	return {
-		min: min,
-		max: max
-	};
-};
 
 var displayConfigWin;
 var displayConfigStore;
@@ -288,9 +117,9 @@ function openDisplayConfigure(win) {
 			layout: 'fit',
 			modal: true,
 			autoScroll: true,
-			width: 410,
 			title: getText("Chart/Table Configuration"),
-			height: 580,
+			width: Math.min(Ext.getBody().getViewSize().width, 410),
+			height: Math.min(Ext.getBody().getViewSize().height, 580),
 			resizable: false,
 			closeAction: 'hide',
 			plain: true,
@@ -1546,10 +1375,10 @@ function createResultsWindow(displayInformation) {
 		maximized: is_embed,
 		expandedState: true,
 		displayInformation: displayInformation,
-		minWidth: 450,
-		minHeight: 400,
-		width: 580,
-		height: is_embed ? 400 : (is_editor ? 500 : 490),
+		minWidth: 350,
+		minHeight: 300,
+		width: Math.min(Ext.getBody().getViewSize().width, 580),
+		height: Math.min(Ext.getBody().getViewSize().height, is_embed ? 400 : (is_editor ? 500 : 490)),
 		resizable: true,
 		maximizable: true,
 		minimizable: true,
@@ -1569,6 +1398,7 @@ function createResultsWindow(displayInformation) {
 
 		dockedItems: [{
 			xtype: 'toolbar',
+			enableOverflow: true,
 			dock: 'top',
 			hidden: (!is_editor),
 			items: [{

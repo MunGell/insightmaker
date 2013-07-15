@@ -335,11 +335,9 @@ Ext.ConverterWindow = function(args)
 		                	};
 		               	 	editor.completeEdit();
 		            		store.insert(0, e);
-							
-			           
 					
 						}else{
-							pt.set("xVal", nx);
+							//pt.set("xVal", nx);
 							pt.set("yVal", ny);
 						}
 					}
@@ -388,8 +386,8 @@ Ext.ConverterWindow = function(args)
         layoutConfig: {
             columns: 1
         },
-        width: 508,
-        height: 500,
+        width:  Math.min(Ext.getBody().getViewSize().width, 508),
+        height:  Math.min(Ext.getBody().getViewSize().height, 500),
         items: [chartPanel, gridPan],
         buttons: [{
 			disabled: ! is_editor,

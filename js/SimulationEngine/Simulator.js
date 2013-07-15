@@ -40,7 +40,6 @@ var simulate = function(model, config, callback){
 		simulate.timeLengthNumber = div(model.timeLength, model.timeStep).value.toPrecision(21);
 		
 		simulate.timeCounter = 0;
-	
 		
 
 		simulate.results = {Time: []};
@@ -298,6 +297,27 @@ var simulate = function(model, config, callback){
 		
 	}
 	
+	function adjustNum(v, x){
+		if(v.unitless && (! unitless(x.units))){
+			error(getText("The result of the calculation has units %s, but the primitive is unitless. Please set the units for the primitive so we can determine the proper output.", x.units.toString()), findID(v.id), true);
+		}
+		//console.log(x);
+		if((v instanceof Flow) && (! v.dna.flowUnitless)){
+			x = mult(x, new Material(1, timeLength.units.clone()));
+		}
+		//console.log(x);
+
+		if( (v instanceof State) || unitless(x.units) && (! v instanceof Flow)){
+			x = x.value;
+		}else{
+			x = fn["*"](x.value, unitsToBase(v, x.units, v instanceof Flow));
+		}
+		//console.log(x);
+		//console.log(parseFloat(x));
+		//console.log("--");
+		return x+0;
+	}
+	
 	function printStates(item){
 		item.results["Time"].push(parseFloat(time.value.toPrecision(20)));
 		//console.log("Time: " + time);
@@ -314,29 +334,16 @@ var simulate = function(model, config, callback){
 				//console.log("Counter:"+varBank["counter"].value.toString())
 				//console.log("V: "+v.value().value.toString())
 				
-				if(x instanceof Vector){
+				if((x instanceof Vector) && (! x.names)){
 					item.results[v.id].results.push(x);
 					item.results[v.id].dataMode = "auto";
+				}else if(x instanceof Vector){
+					x.recurseApply(function(x){
+						return adjustNum(v, x);
+					});
+					item.results[v.id].results.push(x);
 				}else{
-					//console.log(x);
-					if(item.displayed[i].unitless && (! unitless(x.units))){
-						error("The result of the calculation has units "+x.units.toString()+", but the primitive is unitless. Please set the units for the primitive so we can determine the proper output.", findID(v.id), true);
-					}
-					//console.log(x);
-					if((item.displayed[i] instanceof Flow) && (! item.displayed[i].dna.flowUnitless)){
-						x = mult(x, new Material(1, timeLength.units.clone()));
-					}
-					//console.log(x);
-			
-					if( (item.displayed[i] instanceof State) || unitless(x.units) && (! v instanceof Flow)){
-						x = x.value;
-					}else{
-						x = fn["*"](x.value, unitsToBase(v, x.units, v instanceof Flow));
-					}
-					//console.log(x);
-					//console.log(parseFloat(x));
-					//console.log("--");
-					item.results[v.id].results.push(0+x);
+					item.results[v.id].results.push(adjustNum(v, x));
 				}
 			}
 		}

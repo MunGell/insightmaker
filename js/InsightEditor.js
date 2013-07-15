@@ -7,6 +7,257 @@ This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
+mxSvgCanvas2D.prototype.text = function(x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation)
+{
+    if (this.textEnabled && str != null)
+    {
+        rotation = (rotation != null) ? rotation : 0;
+        
+        var s = this.state;
+        x += s.dx;
+        y += s.dy;
+        
+        if (this.foEnabled && format == 'html')
+        {
+            var style = 'vertical-align:top;';
+            
+            if (clip)
+            {
+                style += 'overflow:hidden;';
+                
+                if (h > 0)
+                {
+                    style += 'max-height:' + Math.round(h) + 'px;';
+                }
+                
+                if (w > 0)
+                {
+                    style += 'width:' + Math.round(w) + 'px;';
+                }
+            }
+            else if (overflow == 'fill')
+            {
+                style += 'width:' + Math.round(w) + 'px;';
+                style += 'height:' + Math.round(h) + 'px;';
+            }
+            else if (overflow == 'width')
+            {
+                style += 'width:' + Math.round(w) + 'px;';
+                
+                if (h > 0)
+                {
+                    style += 'max-height:' + Math.round(h) + 'px;';
+                }
+            }
+
+            if (wrap && w > 0)
+            {
+                if (!clip)
+                {
+                    style += 'width:' + Math.round(w) + 'px;';
+                }
+                
+                style += 'white-space:normal;';
+            }
+            else
+            {
+                style += 'white-space:nowrap;';
+            }
+            
+            // Uses outer group for opacity and transforms to
+            // fix rendering order in Chrome
+            var group = this.createElement('g');
+            
+            if (s.alpha < 1)
+            {
+                group.setAttribute('opacity', s.alpha);
+            }
+
+            var fo = this.createElement('foreignObject');
+            fo.setAttribute('pointer-events', 'all');
+            
+            var div = this.createDiv(str, align, valign, style, overflow);
+            
+            // Ignores invalid XHTML labels
+            if (div == null)
+            {
+                return;
+            }
+            
+            group.appendChild(fo);
+            this.root.appendChild(group);
+            
+            // Code that depends on the size which is computed after
+            // the element was added to the DOM.
+            var ow = 0;
+            var oh = 0;
+            
+            if (mxClient.IS_IE && !mxClient.IS_SVG)
+            {
+                // Handles non-standard namespace for getting size in IE
+                var clone = document.createElement('div');
+                
+                clone.style.cssText = div.getAttribute('style');
+                clone.style.display = (mxClient.IS_QUIRKS) ? 'inline' : 'inline-block';
+                clone.style.visibility = 'hidden';
+                clone.innerHTML = (mxUtils.isNode(str)) ? str.outerHTML : str;
+
+                document.body.appendChild(clone);
+                ow = clone.offsetWidth;
+                
+                // Handles words that are longer than the given wrapping width
+                if (!clip && div.scrollWidth > ow)
+                {
+                    ow = Math.max(ow, div.scrollWidth);
+                    div.style.width = ow + 'px';
+
+                }
+                
+                // Computes max-height in quirks
+                if (mxClient.IS_QUIRKS && h > 0 && clip)
+                {
+                    // +2 to show background and border are visible
+                    oh = Math.min(h, clone.offsetHeight + 2);
+                }
+                else
+                {
+                    oh = clone.offsetHeight;
+                }
+                
+                clone.parentNode.removeChild(clone);
+                fo.appendChild(div);
+            }
+            // Workaround for export and Firefox 3.x (Opera has same bug but it cannot
+            // be fixed for all cases using this workaround so foreignObject is disabled). 
+            else if (this.root.ownerDocument != document ||
+                navigator.userAgent.indexOf('Firefox/3.') >= 0)
+            {
+                // Getting size via local document for export
+                div.style.visibility = 'hidden';
+                document.body.appendChild(div);
+                
+                ow = div.offsetWidth;
+                oh = div.offsetHeight;
+                
+                // Handles words that are longer than the given wrapping width
+                if (!clip && div.scrollWidth > ow)
+                {
+                    ow = Math.max(ow, div.scrollWidth);
+                    div.style.width = ow + 'px';
+
+                }
+
+                fo.appendChild(div);
+                div.style.visibility = '';
+            }
+            else
+            {
+                fo.appendChild(div);
+                ow = div.offsetWidth;
+                oh = div.offsetHeight;
+                
+                // Handles words that are longer than the given wrapping width
+                if (!clip && div.scrollWidth > ow)
+                {
+                    ow = Math.max(ow, div.scrollWidth);
+                    div.style.width = ow + 'px';
+
+                }
+            }
+            
+            if (overflow == 'fill')
+            {
+                w = Math.max(w, ow);
+                h = Math.max(h, oh);
+            }
+            else if (overflow == 'width')
+            {
+                w = Math.max(w, ow);
+                h = oh;
+            }
+            else
+            {
+                w = ow;
+                h = oh;
+            }
+
+            if (s.alpha < 1)
+            {
+                group.setAttribute('opacity', s.alpha);
+            }
+            
+            var dx = 0;
+            var dy = 0;
+
+            if (align == mxConstants.ALIGN_CENTER)
+            {
+                dx -= w / 2;
+            }
+            else if (align == mxConstants.ALIGN_RIGHT)
+            {
+                dx -= w;
+            }
+            
+            x += dx;
+            
+            if (valign == mxConstants.ALIGN_MIDDLE)
+            {
+                dy -= h / 2;
+            }
+            else if (valign == mxConstants.ALIGN_BOTTOM)
+            {
+                dy -= h;
+            }
+            
+            y += dy;
+
+            var tr = (s.scale != 1) ? 'scale(' + s.scale + ')' : '';
+
+            if (s.rotation != 0 && this.rotateHtml)
+            {
+                tr += 'rotate(' + (s.rotation) + ',' + (w / 2) + ',' + (h / 2) + ')';
+                var pt = this.rotatePoint((x + w / 2) * s.scale, (y + h / 2) * s.scale,
+                    s.rotation, s.rotationCx, s.rotationCy);
+                x = pt.x - w * s.scale / 2;
+                y = pt.y - h * s.scale / 2;
+            }
+            else
+            {
+                x *= s.scale;
+                y *= s.scale;
+            }
+
+            if (rotation != 0)
+            {
+                tr += 'rotate(' + (rotation) + ',' + (-dx) + ',' + (-dy) + ')';
+            }
+
+            group.setAttribute('transform', 'translate(' + Math.round(x) + ',' + Math.round(y) + ')' + tr);
+            fo.setAttribute('width', Math.round(Math.max(1, w)));
+            fo.setAttribute('height', Math.round(Math.max(1, h)));
+            
+            // Adds alternate content if foreignObject not supported in viewer
+            if (this.root.ownerDocument != document)
+            {
+                var alt = this.createAlternateContent(fo, x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation);
+                
+                if (alt != null)
+                {
+                    fo.setAttribute('requiredFeatures', 'http://www.w3.org/TR/SVG11/feature#Extensibility');
+                    var sw = this.createElement('switch');
+                    sw.appendChild(fo);
+                    sw.appendChild(alt);
+                    group.appendChild(sw);
+                }
+            }
+        }
+        else
+        {
+            this.plainText(x, y, w, h, str, align, valign, wrap, overflow, clip, rotation);
+        }
+    }
+};
+
 
 
 Ext.onReady(function() {
@@ -85,6 +336,7 @@ if (!isLocal()) {
 			_gaq.push(['_trackEvent', 'Errors', 'App', msg, null, true]);
 			//alert("Javascript Error\n\n" + err + "\n\n(" + file + " " + line + ")\n\nIf this error persists, please contact us for support.");
 			console.log(msg);
+			
 			return true;
 		}
 	}
@@ -127,16 +379,13 @@ function main() {
 	mxConstants.LINE_HEIGHT = 1.15;
 
 	//Change the settings for touch devices
-	if (isTouch()) {
-		mxConstants.HANDLE_SIZE = 14;
-		mxConstants.DEFAULT_HOTSPOT = 0.5;
-	}
+	
 
 	graph = new mxGraph();
 
 	undoHistory = new mxUndoManager();
 	
-	var node = mxUtils.parseXml('<mxStylesheet> 	<add as="defaultVertex" extend="defaultVertex"> 		<add as="strokeColor" value="#666666"/> 		<add as="fontColor" value="#333333"/> 		<add as="fontSize" value="14"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="2"/> 	</add> 	<add as="defaultEdge" extend="defaultEdge"> 		<add as="labelBackgroundColor" value="white"/> 		<add as="rounded" value="1"/> 		<add as="fontSize" value="14"/> 		<add as="edgeStyle" value="elbowEdgeStyle"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="4"/> 	</add> 	<add as="stock" extend="defaultVertex"> 		<add as="fillColor" value="#A6D3F8"/> 	</add> 	<add as="state" extend="defaultVertex"> 		<add as="fillColor" value="#ffffff"/> 	</add> 	<add as="transition" extend="defaultEdge"> 		<add as="strokeColor" value="#000000"/> 		<add as="fontColor" value="#000000"/> 	</add> 	<add as="agents" extend="defaultVertex"> 		<add as="fillColor" value="#F0E68C"/> 		<add as="shape" value="cloud"/> 	</add> 	<add as="textArea" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	<add as="text" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	 	<add as="parameter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="variable" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="action" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FFFFFF"/> 	</add> 	<add as="converter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#B3E2CD"/> 	</add> 	<add as="button" extend="defaultVertex"> 		<add as="rounded" value="1"/> 		<add as="glass" value="1"/> 		<add as="fillColor" value="#C0C0C0"/> 		<add as="fontColor" value="black"/> 		<add as="strokeWidth" value="3"/> 		<add as="fontFamily" value="Helvetica"/> 	</add> 	<add as="display" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="fillColor" value="#FFFFFF"/> 		<add as="strokeColor" value="#FFFFFF"/> 		<add as="fontColor" value="#FFFFFF"/> 		<add as="opacity" value="0"/> 	</add> 	<add as="picture" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="entity" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	<add as="flow" extend="defaultEdge"> 	</add> 	<add as="link" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	 	<add as="line" extend="defaultVertex"> 		<add as="shape" value="line"/> 		<add as="strokeWidth" value="4"/> 		<add as="labelBackgroundColor" value="white"/> 		<add as="verticalAlign" value="top"/> 		<add as="spacingTop" value="8"/> 	</add> 	<add as="image" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="folder" extend="defaultVertex"> 		<add as="verticalAlign" value="top"/> 		<add as="dashed" value="1"/> 		<add as="fillColor" value="none"/> 		<add as="rounded" value="1"/> 	</add> </mxStylesheet> ');
+	var node = mxUtils.parseXml('<mxStylesheet> 	<add as="defaultVertex" extend="defaultVertex"> 		<add as="strokeColor" value="#666666"/> 		<add as="fontColor" value="#333333"/>  <add as="overflow" value=""/> 		<add as="fontSize" value="14"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="2"/> 	</add> 	<add as="defaultEdge" extend="defaultEdge"> 		<add as="labelBackgroundColor" value="white"/> 		<add as="rounded" value="1"/> 		<add as="fontSize" value="14"/> 		<add as="edgeStyle" value="elbowEdgeStyle"/> 		<add as="fontFamily" value="Comic Sans MS"/> 		<add as="strokeWidth" value="4"/> 	</add> 	<add as="stock" extend="defaultVertex"> 		<add as="fillColor" value="#A6D3F8"/> 	</add> 	<add as="state" extend="defaultVertex"> 		<add as="fillColor" value="#ffffff"/> 	</add> 	<add as="transition" extend="defaultEdge"> 		<add as="strokeColor" value="#000000"/> 		<add as="fontColor" value="#000000"/> 	</add> 	<add as="agents" extend="defaultVertex"> 		<add as="fillColor" value="#F0E68C"/> 		<add as="shape" value="cloud"/> 	</add> 	<add as="textArea" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	<add as="text" extend="defaultVertex"> 		<add as="strokeColor" value="none"/> 		<add as="fillColor" value="none"/> 		<add as="fontColor" value="black"/> 		<add as="fontSize" value="30"/> 		<add as="fontStyle" value="4"/> 	</add> 	 	<add as="parameter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="variable" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FDCDAC"/> 	</add> 	<add as="action" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#FFFFFF"/> 	</add> 	<add as="converter" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="perimeter" value="ellipsePerimeter"/> 		<add as="fillColor" value="#B3E2CD"/> 	</add> 	<add as="button" extend="defaultVertex"> 		<add as="rounded" value="1"/> 		<add as="glass" value="1"/> 		<add as="fillColor" value="#C0C0C0"/> 		<add as="fontColor" value="black"/> 		<add as="strokeWidth" value="3"/> 		<add as="fontFamily" value="Helvetica"/> 	</add> 	<add as="display" extend="defaultVertex"> 		<add as="shape" value="ellipse"/> 		<add as="fillColor" value="#FFFFFF"/> 		<add as="strokeColor" value="#FFFFFF"/> 		<add as="fontColor" value="#FFFFFF"/> 		<add as="opacity" value="0"/> 	</add> 	<add as="picture" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="entity" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	<add as="flow" extend="defaultEdge"> 	</add> 	<add as="link" extend="defaultEdge"> 		<add as="strokeColor" value="#808080"/> 		<add as="fontColor" value="#808080"/> 		<add as="opacity" value="70"/> 		<add as="edgeStyle" value="straight"/> 		<add as="strokeWidth" value="2"/> 		<add as="dashed" value="1"/> 		<add as="noLabel" value="0"/> 	</add> 	 	<add as="line" extend="defaultVertex"> 		<add as="shape" value="line"/> 		<add as="strokeWidth" value="4"/> 		<add as="labelBackgroundColor" value="white"/> 		<add as="verticalAlign" value="top"/> 		<add as="spacingTop" value="8"/> 	</add> 	<add as="image" extend="defaultVertex"> 		<add as="shape" value="image"/> 		<add as="verticalLabelPosition" value="bottom"/> 		<add as="verticalAlign" value="top"/> 	</add> 	 	<add as="folder" extend="defaultVertex"> 		<add as="verticalAlign" value="top"/> 		<add as="dashed" value="1"/> 		<add as="fillColor" value="none"/> 		<add as="rounded" value="1"/> 	</add> </mxStylesheet> ');
 	var dec = new mxCodec(node);
 	dec.decode(node.documentElement, graph.getStylesheet());
 
@@ -146,14 +395,233 @@ function main() {
 	graph.edgeLabelsMovable = true;
 	graph.enterStopsCellEditing = true;
 	graph.allowLoops = false;
+	
 
 
+
+	mxVertexHandler.prototype.rotationEnabled = true;
+
+	// Enables managing of sizers
+	mxVertexHandler.prototype.manageSizers = true;
+
+	// Enables live preview
+	mxVertexHandler.prototype.livePreview = true;
+
+
+	// Larger tolerance and grid for real touch devices
+	if (!(mxClient.IS_TOUCH || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0)){
+		Ext.FocusManager.enable();
+		Ext.FocusManager.keyNav.disable();
+		Ext.FocusManager.shouldShowFocusFrame = function() {
+			return false;
+		};
+	}else
+	{
+		mxShape.prototype.svgStrokeTolerance = 18;
+		mxVertexHandler.prototype.tolerance = 12;
+		mxEdgeHandler.prototype.tolerance = 12;
+		mxGraph.prototype.tolerance = 12;
+		mxConstants.DEFAULT_HOTSPOT = 0.5;
+		mxConstants.HANDLE_SIZE = 16;
+		mxConstants.LABEL_HANDLE_SIZE = 7;
+		
+		graph.addListener(mxEvent.TAP_AND_HOLD, function(sender, evt)
+		{
+			var me = evt.getProperty('event');
+			var cell = evt.getProperty('cell');
+			
+			if (cell !== null && isValued(cell))
+			{
+				showEditor(cell)
+			}
+			
+			// Blocks further processing of the event
+			evt.consume();
+		});
+		
+		mxPanningHandler.prototype.isPanningTrigger = function(me)
+		{
+			var evt = me.getEvent();
+			
+		 	return (me.getState() == null && !mxEvent.isMouseEvent(evt)) ||
+		 		(mxEvent.isPopupTrigger(evt) && (me.getState() == null || mxEvent.isControlDown(evt) || mxEvent.isShiftDown(evt)));
+		};
+
+		// Don't clear selection if multiple cells selected
+		var graphHandlerMouseDown = mxGraphHandler.prototype.mouseDown;
+		mxGraphHandler.prototype.mouseDown = function(sender, me)
+		{
+			graphHandlerMouseDown.apply(this, arguments);
+
+			if (this.graph.isCellSelected(me.getCell()) && this.graph.getSelectionCount() > 1)
+			{
+				this.delayedSelection = false;
+			}
+		};
+
+		
+
+		// Overrides double click handling to use the tolerance
+		// FIXME: Double click on edges in iPad needs focus on textarea
+		var graphDblClick = mxGraph.prototype.dblClick;
+		mxGraph.prototype.dblClick = function(evt, cell)
+		{
+			if (cell == null)
+			{
+				var pt = mxUtils.convertPoint(this.container,
+					mxEvent.getClientX(evt), mxEvent.getClientY(evt));
+				cell = this.getCellAt(pt.x, pt.y);
+			}
+
+			graphDblClick.call(this, evt, cell);
+		};
+
+		// Rounded edge and vertex handles
+		var touchHandle = new mxImage(builder_path+'/images/touch-handle.png', 16, 16);
+		mxVertexHandler.prototype.handleImage = touchHandle;
+		mxEdgeHandler.prototype.handleImage = touchHandle;
+		mxOutline.prototype.sizerImage = touchHandle;
+		
+		// Pre-fetches touch handle
+		new Image().src = touchHandle.src;
+
+		// Adds connect icon to selected vertex
+		var connectorSrc = builder_path+'/images/touch-connector.png';
+		
+
+		new Image().src = connectorSrc;
+
+		var vertexHandlerInit = mxVertexHandler.prototype.init;
+		mxVertexHandler.prototype.init = function()
+		{
+			// TODO: Use 4 sizers, move outside of shape
+			//this.singleSizer = this.state.width < 30 && this.state.height < 30;
+			vertexHandlerInit.apply(this, arguments);
+
+			// Only show connector image on one cell and do not show on containers
+			if (this.graph.connectionHandler.isEnabled() &&
+				this.graph.isCellConnectable(this.state.cell) &&
+				this.graph.getSelectionCount() == 1 &&
+				graph.connectionHandler.isConnectableCell(this.state.cell)
+			)
+			{
+				this.connectorImg = mxUtils.createImage(connectorSrc);
+				this.connectorImg.style.cursor = 'pointer';
+				this.connectorImg.style.width = '29px';
+				this.connectorImg.style.height = '29px';
+				this.connectorImg.style.position = 'absolute';
+				
+				if (!mxClient.IS_TOUCH)
+				{
+					this.connectorImg.setAttribute('title', mxResources.get('connect'));
+					mxEvent.redirectMouseEvents(this.connectorImg, this.graph, this.state);
+				}
+
+				// Starts connecting on touch/mouse down
+				mxEvent.addGestureListeners(this.connectorImg,
+					mxUtils.bind(this, function(evt)
+					{
+						this.graph.popupMenuHandler.hideMenu();
+						this.graph.stopEditing(false);
+						
+						var pt = mxUtils.convertPoint(this.graph.container,
+								mxEvent.getClientX(evt), mxEvent.getClientY(evt));
+						this.graph.connectionHandler.start(this.state, pt.x, pt.y);
+						this.graph.isMouseDown = true;
+						this.graph.isMouseTrigger = mxEvent.isMouseEvent(evt);
+						mxEvent.consume(evt);
+					})
+				);
+
+				this.graph.container.appendChild(this.connectorImg);
+			}
+
+			this.redrawHandles();
+		};
+		
+		var vertexHandlerHideSizers = mxVertexHandler.prototype.hideSizers;
+		mxVertexHandler.prototype.hideSizers = function()
+		{
+			vertexHandlerHideSizers.apply(this, arguments);
+			
+			if (this.connectorImg != null)
+			{
+				this.connectorImg.style.visibility = 'hidden';
+			}
+		};
+		
+		var vertexHandlerReset = mxVertexHandler.prototype.reset;
+		mxVertexHandler.prototype.reset = function()
+		{
+			vertexHandlerReset.apply(this, arguments);
+			
+			if (this.connectorImg != null)
+			{
+				this.connectorImg.style.visibility = '';
+			}
+		};
+		
+		var vertexHandlerRedrawHandles = mxVertexHandler.prototype.redrawHandles;
+		mxVertexHandler.prototype.redrawHandles = function()
+		{
+			vertexHandlerRedrawHandles.apply(this);
+
+			if (this.state != null && this.connectorImg != null)
+			{
+				var pt = new mxPoint();
+				var s = this.state;
+				
+				// Top right for single-sizer
+				if (mxVertexHandler.prototype.singleSizer)
+				{
+					pt.x = s.x + s.width - this.connectorImg.offsetWidth / 2;
+					pt.y = s.y - this.connectorImg.offsetHeight / 2;
+				}
+				else
+				{
+					pt.x = s.x + s.width + mxConstants.HANDLE_SIZE / 2 + 4 + this.connectorImg.offsetWidth / 2;
+					pt.y = s.y + s.height / 2;
+				}
+				
+				var alpha = mxUtils.toRadians(mxUtils.getValue(s.style, mxConstants.STYLE_ROTATION, 0));
+				
+				if (alpha != 0)
+				{
+					var cos = Math.cos(alpha);
+					var sin = Math.sin(alpha);
+					
+					var ct = new mxPoint(s.getCenterX(), s.getCenterY());
+					pt = mxUtils.getRotatedPoint(pt, cos, sin, ct);
+				}
+				
+				this.connectorImg.style.left = (pt.x - this.connectorImg.offsetWidth / 2) + 'px';
+				this.connectorImg.style.top = (pt.y - this.connectorImg.offsetHeight / 2) + 'px';
+			}
+		};
+		
+		var vertexHandlerDestroy = mxVertexHandler.prototype.destroy;
+		mxVertexHandler.prototype.destroy = function(sender, me)
+		{
+			vertexHandlerDestroy.apply(this, arguments);
+
+			if (this.connectorImg != null)
+			{
+				this.connectorImg.parentNode.removeChild(this.connectorImg);
+				this.connectorImg = null;
+			}
+		};
+		
+	}
+	
+	//graph.isLabelClipped = function(cell){return false};
+	
 	mxEdgeHandler.prototype.addEnabled = true;
 	mxEdgeHandler.prototype.removeEnabled = true;
 
 	graph.isHtmlLabel = function(cell) {
+		//return false;
 		var isHTML = cell != null && cell.value != null && ( cell.value.nodeName != "Display");
-
+		
 		return isHTML;
 	};
 	graph.isWrapping = graph.isHtmlLabel;
@@ -504,6 +972,8 @@ function main() {
 		padding: '19 5 5 5',
 		items: [ribbonPanel]
 	});
+	
+	
 
 	var connectionChangeHandler = function(sender, evt) {
 			var item = evt.getProperty("edge");
@@ -673,16 +1143,15 @@ function main() {
 
 	var parent = graph.getDefaultParent();
 
-
-	graph.panningHandler.popup = mxUtils.bind(mxPanel, function(x, y, cell, evt) {
+	graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
 		if (!evt.shiftKey) {
 			if(is_editor && ! (is_embed)){
 				showContextMenu(null, evt);
 			}
 		}
-	});
-	
-	
+	};
+			
+
 	graph.model.addListener(mxEvent.CHANGED, clearPrimitiveCache);
 
 
@@ -1201,66 +1670,67 @@ function main() {
 	// Enables guides
 	mxGraphHandler.prototype.guidesEnabled = true;
 
-	/*mxGraphHandler.prototype.mouseDown = function(sender, me)
+	mxGraphHandler.prototype.mouseDown = function(sender, me)
+	{
+		if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() && me.getState() != null)
 		{
-			if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() &&
-				!this.graph.isForceMarqueeEvent(me.getEvent()) && me.getState() != null)
-			{
-				
-				var cell = this.getInitialCellForEvent(me);
-				if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
-					if (me.evt.shiftKey == false) {
-						pressButton(cell);
-						me.consume();
-						return false;
-					}else{
-						graph.allowButtonSelect = true;
-					}
-				}
-				
-				this.cell = null;
-				this.delayedSelection = this.isDelayedSelection(cell);
-		
-				if (this.isSelectEnabled() && !this.delayedSelection)
-				{
-					this.graph.selectCellForEvent(cell, me.getEvent());
-				}
-		
-				if (this.isMoveEnabled())
-				{
-					var model = this.graph.model;
-					var geo = model.getGeometry(cell);
-
-					if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 ||
-						(geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null ||
-						model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || 
-						(this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable())))
-					{
-						this.start(cell, me.getX(), me.getY());
-					}
+			var cell = this.getInitialCellForEvent(me);
 			
-					this.cellWasClicked = true;
-			
-					// Workaround for SELECT element not working in Webkit, this blocks moving
-					// of the cell if the select element is clicked in Safari which is needed
-					// because Safari doesn't seem to route the subsequent mouseUp event via
-					// this handler which leads to an inconsistent state (no reset called).
-					// Same for cellWasClicked which will block clearing the selection when
-					// clicking the background after clicking on the SELECT element in Safari.
-					if ((!mxClient.IS_SF && !mxClient.IS_GC) || me.getSource().nodeName != 'SELECT')
-					{
-						me.consume();
-					}
-					else if (mxClient.IS_SF && me.getSource().nodeName == 'SELECT')
-					{
-						this.cellWasClicked = false;
-						this.first = null;
-					}
+			if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
+				if (me.evt.shiftKey == false) {
+					pressButton(cell);
+					me.consume();
+					return false;
+				}else{
+					graph.allowButtonSelect = true;
 				}
 			}
-		};*/
+			
+			this.delayedSelection = this.isDelayedSelection(cell);
+			this.cell = null;
+		
+			if (this.isSelectEnabled() && !this.delayedSelection)
+			{
+				this.graph.selectCellForEvent(cell, me.getEvent());
+			}
+		
+			if (this.isMoveEnabled())
+			{
+				var model = this.graph.model;
+				var geo = model.getGeometry(cell);
+
+				if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 ||
+					(geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null ||
+					model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || 
+					(this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable())))
+				{
+					this.start(cell, me.getX(), me.getY());
+				}
+			
+				this.cellWasClicked = true;
+			
+				// Workaround for SELECT element not working in Webkit, this blocks moving
+				// of the cell if the select element is clicked in Safari which is needed
+				// because Safari doesn't seem to route the subsequent mouseUp event via
+				// this handler which leads to an inconsistent state (no reset called).
+				// Same for cellWasClicked which will block clearing the selection when
+				// clicking the background after clicking on the SELECT element in Safari.
+				if ((!mxClient.IS_SF && !mxClient.IS_GC) || me.getSource().nodeName != 'SELECT')
+				{
+					me.consume();
+				}
+				else if (mxClient.IS_SF && me.getSource().nodeName == 'SELECT')
+				{
+					this.cellWasClicked = false;
+					this.first = null;
+				}
+			}
+		}
+	};
 
 
+	
+		/*
 		mxGraphHandler.prototype.mouseDown = function(sender, me) {
 			//console.log(sender);
 			graph.allowButtonSelect=false;
@@ -1297,7 +1767,7 @@ function main() {
 					}
 				}
 			}
-		}
+		}*/
 
 	// Alt disables guides
 	mxGuide.prototype.isEnabledForEvent = function(evt) {
@@ -1325,11 +1795,7 @@ function main() {
 		configPanel.collapse(Ext.Component.DIRECTION_RIGHT, false);
 	}
 
-	Ext.FocusManager.enable();
-	Ext.FocusManager.keyNav.disable();
-	Ext.FocusManager.shouldShowFocusFrame = function() {
-		return false;
-	};
+	
 
 	mxKeyHandler.prototype.isGraphEvent = function(e) {
 		
@@ -1360,17 +1826,7 @@ function main() {
 		graph.foldCells(false);
 	});
 
-	keyHandler.bindKey(8, function() {
-		if (is_editor) {
-			graph.removeCells(graph.getSelectionCells(), false);
-		}
-	});
-
-	keyHandler.bindKey(46, function() {
-		if (is_editor) {
-			graph.removeCells(graph.getSelectionCells(), false);
-		}
-	});
+	
 
 	keyHandler.bindControlKey(65, function() {
 		graph.selectAll();
@@ -1408,12 +1864,6 @@ function main() {
 		undoHistory.undo();
 	});
 
-	keyHandler.bindControlKey(88, function() {
-		if (is_editor) {
-			mxClipboard.cut(graph);
-			clipboardListener();
-		}
-	});
 
 	keyHandler.bindControlKey(67, function() {
 		mxClipboard.copy(graph);
@@ -1428,8 +1878,49 @@ function main() {
 		scratchpadFn();
 	});
 
+	if(is_editor && (! is_embed)){
+		
+		keyHandler.bindKey(8, function() {
+				graph.removeCells(graph.getSelectionCells(), false);
+		});
+
+		keyHandler.bindKey(46, function() {
+				graph.removeCells(graph.getSelectionCells(), false);
+		});
+		
+		keyHandler.bindControlKey(88, function() {
+			mxClipboard.cut(graph);
+			clipboardListener();
+		});
+	
+		keyHandler.bindControlKey(83, function() {
+			saveModel();
+		});
+
+		keyHandler.bindControlKey(86, function() {
+			mxClipboard.paste(graph);
+			clipboardListener()
+		});
+		
+		keyHandler.bindControlKey(192, function() { // `
+			var primitive = graph.getSelectionCell();
+			if (isDefined(primitive) && primitive != null) {
+				var editorWindow = new Ext.RichTextWindow({
+					parent: "",
+					cell: primitive,
+					html: getNote(primitive)
+				});
+				editorWindow.show();
+			}
+		});
+	}
+	
 	keyHandler.bindControlKey(69, function() { // E
 		doSensitivity();
+	});
+	
+	keyHandler.bindControlKey(76, function() { // L
+		timeSettingsFn();
 	});
 	
 	keyHandler.bindControlKey(70, function() { // F
@@ -1441,11 +1932,6 @@ function main() {
 		if(but && (! but.disabled)){
 			findNext();
 		}
-	});
-
-
-	keyHandler.bindControlKey(76, function() { // L
-		timeSettingsFn();
 	});
 	
 	
@@ -1460,30 +1946,7 @@ function main() {
 		}
 	});
 
-	keyHandler.bindControlKey(192, function() { // `
-		var primitive = graph.getSelectionCell();
-		if (isDefined(primitive) && primitive != null) {
-			var editorWindow = new Ext.RichTextWindow({
-				parent: "",
-				cell: primitive,
-				html: getNote(primitive)
-			});
-			editorWindow.show();
-		}
-	});
-
-	keyHandler.bindControlKey(83, function() {
-		if (is_editor) {
-			saveModel();
-		}
-	});
-
-	keyHandler.bindControlKey(86, function() {
-		if (is_editor) {
-			mxClipboard.paste(graph);
-			clipboardListener()
-		}
-	});
+	
 
 	/*keyHandler.bindControlKey(71, function() {
 		if (is_editor) {
@@ -1666,7 +2129,12 @@ function main() {
 						'name': 'MaxConstraint',
 						'text': getText('Max Constraint'),
 						'value': parseFloat(cell.getAttribute("MaxConstraint")),
-						'group': getText('Validation')
+						'group': getText('Validation'),
+						'editor': {
+					        xtype: 'numberfield',
+							allowDecimals: true,
+							decimalPrecision: 9
+					    }
 					});
 
 
@@ -1681,7 +2149,12 @@ function main() {
 						'name': 'MinConstraint',
 						'text': getText('Min Constraint'),
 						'value': parseFloat(cell.getAttribute("MinConstraint")),
-						'group': getText('Validation')
+						'group': getText('Validation'),
+						'editor': {
+					        xtype: 'numberfield',
+							allowDecimals: true,
+							decimalPrecision: 9
+					    }
 					});
 				}
 			}
@@ -1764,7 +2237,7 @@ function main() {
 						});
 						sliders.push(slid);
 						
-						console.log(perc);
+						//console.log(perc);
 						
 
 						var t = Ext.create("Ext.form.field.Number", {
