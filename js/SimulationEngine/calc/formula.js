@@ -23,14 +23,28 @@ if(! sn){
 }
 
 var varBank = {};
-var functionBank = {};
-var primitiveBank = {};
+var functionBank = varBank;
 
+var functionLoaders = [];
 
-varBank["-parent"] = null;
-varBank["e"] = new Material(2.71828182845904523536);
-varBank["pi"] = new Material(3.14159265358979323846264338);
-varBank["phi"] = new Material(1.61803399);
+function bootCalc(){
+	varBank = {};
+	functionBank = varBank;
+	
+	varBank["-parent"] = null;
+	varBank["e"] = new Material(2.71828182845904523536);
+	varBank["pi"] = new Material(3.14159265358979323846264338);
+	varBank["phi"] = new Material(1.61803399);
+	for(var i=0; i< functionLoaders.length; i++){
+		functionLoaders[i]();
+	}
+	
+	varBank["stringbase"] = StringBase;
+	varBank["vectorbase"] = VectorBase;
+	if(window.ObjectBase){
+		varBank["objectbase"] = ObjectBase;
+	}
+}
 
 
 if(! Agent){
@@ -65,8 +79,23 @@ String.prototype.toNum = function(){
 Number.prototype.toNum = function(){
 	return this.valueOf();
 }
+Function.prototype.toNum = function(){
+	return this([]);
+}
 
-var Vector = function(items, names){
+function UserFunction(){
+	
+}
+UserFunction.prototype.toNum = function(){
+	return this.fn([]);
+}
+
+var StringObject = {};
+var StringBase;
+var VectorObject = {};
+var VectorBase = {};
+var Vector = function(items, names, parent){
+	this.parent = isDefined(parent)?parent:VectorBase;
 	this.items = items;
 	this.names = names;
 	this.namesLC = names?names.map(function(x){return x?x.toLowerCase():undefined}):undefined;
@@ -75,11 +104,13 @@ Vector.prototype.toNum = function(){
 	if(this.isNum){
 		return this;
 	}
-	for(var i=0; i<this.items.length; i++){
-		this.items[i] = this.items[i].toNum();
+
+	var v = this.fullClone();
+	for(var i=0; i<v.items.length; i++){
+		v.items[i] = v.items[i].toNum();
 	}
-	this.isNum = true;
-	return this;
+	v.isNum = true;
+	return v;
 };
 Vector.prototype.toString = function(){
 	//console.log(this.names);
@@ -91,7 +122,7 @@ Vector.prototype.toString = function(){
 		}
 		items.push(str);
 	}
-	return '&laquo;'+items.join(", ")+'&raquo;';
+	return '{'+items.join(", ")+'}';
 };
 Vector.prototype.length = function(){
 	return this.items.length;
@@ -170,6 +201,63 @@ Vector.prototype.combine = function(other, operation, rhs, noswitch){
 	}
 	return this;
 };
+Vector.prototype.collapseDimensions = function(target){
+	if(target instanceof Vector){
+		if(this.depth() == target.depth()){
+			return this;
+		}else{
+			var selector = [];
+			var base = this;
+			var targetLevel = target;
+			for(var i=0; i<this.depth(); i++){
+				if(!(targetLevel instanceof Vector)){
+					selector.push(functionBank["sum"]);
+					base = base.items[0];
+				}else if(keysMatch(base.namesLC, targetLevel.namesLC)){
+					selector.push("*");
+					base = base.items[0];
+					targetLevel = targetLevel.items[0]
+				}else{
+					selector.push(functionBank["sum"]);
+					base = base.items[0];
+				}
+			}
+			if(targetLevel.items){
+				throw "MSG: Keys do not match for vector collapsing.";
+			}
+			return selectFromMatrix(this, selector);
+		}
+	}else{
+		return functionBank["sum"]([functionBank["flatten"]([this])]);
+	}
+};
+function keysMatch(thisNames, keys){
+	if(keys.indexOf("*") == -1){
+		for(var i = 0; i < thisNames.length; i++){
+			if(thisNames[i] != "*"){
+				if(isUndefined(thisNames[i])){
+					return false;
+				}
+				if(keys.indexOf(thisNames[i])==-1){
+					return false
+				}
+			}
+		}
+	}
+	if(thisNames.indexOf("*") == -1){
+		for(var i = 0; i < keys.length; i++){
+			if(keys[i] != "*"){
+				if(isUndefined(keys[i])){
+					return false;
+				}
+				if(thisNames.indexOf(keys[i])==-1){
+					return false
+				}
+			}
+		}
+	}
+	return true;
+}
 Vector.prototype.depth = function(){
 	if(this.items.length == 0 || !(this.items[0] instanceof Vector)){
 		return 1;
@@ -178,30 +266,7 @@ Vector.prototype.depth = function(){
 };
 Vector.prototype.keysMatch = function(keys){
 	if(this.names){
-		if(keys.indexOf("*") == -1){
-			for(var i = 0; i < this.names.length; i++){
-				if(this.names[i] != "*"){
-					if(isUndefined(this.names[i])){
-						return false;
-					}
-					if(keys.indexOf(this.namesLC[i])==-1){
-						return false
-					}
-				}
-			}
-		}
-		if(this.names.indexOf("*") == -1){
-			for(var i = 0; i < keys.length; i++){
-				if(keys[i] != "*"){
-					if(isUndefined(keys[i])){
-						return false;
-					}
-					if(this.namesLC.indexOf(keys[i])==-1){
-						return false
-					}
-				}
-			}
-		}
+		return keysMatch(this.namesLC, keys)
 	}else{
 		return false
 	}
@@ -216,6 +281,7 @@ Vector.prototype.apply = function(operation){
 	}
 	return this;
 };
+
 Vector.prototype.stackApply = function(operation){
 	//console.log("Stacking")
 	if(this.depth() == 1){
@@ -238,8 +304,10 @@ Vector.prototype.stack = function(selector){
 		selector[0] = i;
 		var alt = this.select(selector);
 		if((base instanceof Vector ) && (alt instanceof Vector)){
-			if((base.items.length != alt.items.length) || (base.names && (! alt.names)) || (alt.names && (! base.names))){
+			if((base.names && (! alt.names)) || (alt.names && (! base.names))){
 				throw "MSG: Mismatched keys for vector collapsing.";
+			}else if(base.items.length != alt.items.length){
+				throw "MSG: Vectors of unequal size.";
 			}
 		}else if(! ((base instanceof Vector ) || (alt instanceof Vector)) ){
 			throw "MSG: Mismatched keys for vector collapsing.";
@@ -263,7 +331,11 @@ Vector.prototype.stack = function(selector){
 				var newSelector = selector.slice();
 				newSelector[0] = j
 				
-				vecs.push(this.select(newSelector));
+				var item = this.select(newSelector);
+				if(item instanceof Vector){
+					throw("MSG: Number where vector expected in vector collapsing.")
+				}
+				vecs.push(item);
 			}
 			var v = new Vector(vecs);
 			v.terminateApply = true; 
@@ -280,8 +352,8 @@ Vector.prototype.select = function(selector){
 		if(! b.items){
 			throw "MSG: Number where vector expected in vector collapsing.";
 		}
-		if((typeof selector[s]) == "string"){
-			var ind = b.namesLC.indexOf(selector[s]);
+		if((selector[s] instanceof String) || (typeof selector[s] == "string")){
+			var ind = b.namesLC.indexOf(selector[s].valueOf());
 			if(ind == -1){
 				throw "MSG: Mismatched keys for vector collapsing.";
 			}
@@ -331,7 +403,7 @@ Vector.prototype.clone = function(){
 			newItems.push(this.items[i]);
 		}
 	}
-	return new Vector(newItems, this.names?this.names.slice():undefined);
+	return new Vector(newItems, this.names?this.names.slice():undefined, this.parent);
 };
 Vector.prototype.fullClone = function(){
 	var newItems = [];
@@ -342,7 +414,7 @@ Vector.prototype.fullClone = function(){
 			newItems.push(this.items[i]);
 		}
 	}
-	return new Vector(newItems, this.names?this.names.slice():undefined);
+	return new Vector(newItems, this.names?this.names.slice():undefined, this.parent);
 };
 
 Vector.prototype.equals = function(vec){
@@ -376,8 +448,6 @@ if(! Primitive){
 	Primitive.prototype.toString = function(){
 		return "Primitive Reference";
 	};
-	primitiveBank["test"] = new Primitive(new Material(3));
-	primitiveBank["test vector"] = new Primitive(new Vector([new Material(1), new Material(2), new Material(3)]));	
 }
 
 function strictEquals(a,b){
@@ -427,13 +497,20 @@ function evaluateTree(root, varBank){
 	}
 }
 
+var PB = {"test": new Primitive(new Material(3))};
+
+
 function evaluate(input) {
 	//console.log(input);
-	var root = trimTree(createTree(input), primitiveBank);
+	
+	PB["test vector"] = new Primitive(new Vector([new Material(1), new Material(2), new Material(3)],[], VectorBase));
+	
+	var root = trimTree(createTree(input), PB);
+	
 	//console.log(root);
 	var x;
 	try {
-		x = evaluateTree(root, varBank);
+		x = evaluateTree(root, varBank).toNum();
 		//console.log(root);
  	}catch(err){
 		 if(err=="PLOT"){
@@ -610,7 +687,7 @@ function neq(lhs, rhs){
 	if((typeof lhs == "boolean" && !(rhs instanceof Vector)) || (typeof rhs == "boolean" && !(lhs instanceof Vector))){
 		return trueValue(lhs)!=trueValue(rhs);
 	}
-	if((typeof lhs == "string" && !(rhs instanceof Vector)) || (typeof rhs == "string" && !(lhs instanceof Vector))){
+	if(( ((lhs instanceof String) || (typeof lhs == "string")) && !(rhs instanceof Vector)) || ( ((lhs instanceof String) || (typeof rhs == "string")) && !(lhs instanceof Vector))){
 		return (lhs.toLowerCase?lhs.toLowerCase():lhs) != (rhs.toLowerCase?rhs.toLowerCase():rhs);
 	}
 	
@@ -641,7 +718,7 @@ function eq(lhs, rhs){
 	if(((typeof lhs) == "boolean" && !(rhs instanceof Vector)) || ((typeof rhs) == "boolean" && !(lhs instanceof Vector))){
 		return trueValue(lhs)==trueValue(rhs);
 	}
-	if(((typeof lhs) == "string" && !(rhs instanceof Vector)) || ((typeof rhs) == "string" && !(lhs instanceof Vector))){
+	if(( ( (typeof lhs == "string") || (lhs instanceof String) ) && !(rhs instanceof Vector)) || (( (typeof rhs == "string") || (rhs instanceof String) ) && !(lhs instanceof Vector))){
 		return (lhs.toLowerCase?lhs.toLowerCase():lhs) == (rhs.toLowerCase?rhs.toLowerCase():rhs);
 	}
 	
@@ -780,8 +857,10 @@ function plus(lhs, rhs){
 	if((lhs instanceof Agent) || (rhs instanceof Agent)){
 		throw "MSG: Cannot convert Agents to Numbers.";
 	}
-	if((typeof lhs == 'string') || (typeof rhs == 'string')){
-		return lhs.toString()+rhs.toString();
+	if(((typeof lhs == 'string') || (lhs instanceof String)) || ((typeof rhs == 'string') || (rhs instanceof String)) ){
+		var s = new String(lhs.toString()+rhs.toString());
+		s.parent = StringBase;
+		return s;
 	}
 	
 	if (!unitsEqual(lhs.units, rhs.units)) {
@@ -907,6 +986,7 @@ funcEvalMap["POWER"] = function(node, scope) {
 	var rhs = evaluateNode(node.children[node.children.length - 1], scope).toNum();
 	
 	for(var j = node.children.length - 1; j > 0; j--){
+		
 		var lhs = evaluateNode(node.children[j - 1], scope).toNum();
 		if ((rhs instanceof Vector) || unitless(rhs.units)) {
 			rhs = power(lhs, rhs);
@@ -976,59 +1056,165 @@ funcEvalMap["IDENT"] = function(node, scope) {
 		if ( scope["-parent"] ) {
 			scope = scope["-parent"];
 		} else {
-			//Attempt to use the variable as a function call
-			if(varName in functionBank){
-				if ("fn" in functionBank[varName]) {
-					return functionBank[varName].fn([]) // user defined function
-				} else {
-					return functionBank[varName]([]); //built-in
-				}
-			}
-			if(varName == "x" && window.timeStep === undefined){
+			if(varName == "x" && window.isCalc){
 				throw "PLOT" ;
 			}else if(varName=="i"){//imaginary number
 				return new Material(sn("i"));
 			}else{
-				throw "MSG: The variable \"" + node.origText + "\" does not exist.";
+				throw "MSG: The variable or function \"" + node.origText + "\" does not exist.";
 			}
 		}
 	}
-	if(scope[varName].fullClone){
-		return scope[varName].fullClone();
+	
+	var v = scope[varName];
+	if(v.fullClone && !(v instanceof Vector)){
+		return v.fullClone();
 	}else{
-		return scope[varName];
+		return v;
 	}
 };
 
-funcEvalMap["INNER"] = function(node, scope) {
-	if(node.children.length == 1){
-		return evaluateNode(node.children[0], scope);
-	}else{
+funcEvalMap["NEW"] = function(node, scope) {
+	
+	var base = evaluateNode(node.children[0], scope);
+	if(base instanceof Vector){
+		var n = new Vector([],undefined, base);
+		var constructor;
+		var r;
+		try{
+			r = selectFromVector(base, "constructor");
+			constructor = r.data;
+		}catch(err){}
 		
-		return selectFromMatrix(evaluateNode(node.children[0], scope).toNum(), createMatrixSelector(node, scope, 1, true));
+		if(! constructor){
+			if(node.children.length==2 && node.children[1].children.length>0){
+				throw "MSG: No constructor available for '"+node.children[0].text+"'.";
+			}
+		}else{
+			if(node.children.length==2){
+				callFunction(constructor, node.children[1], scope, n, r.parent);
+			}else{
+				callFunction(constructor, {children:[]}, scope, n, r.parent);
+			}
+		}
+		return n;
+	}else{
+		throw "MSG: 'New' can only be use to create instances of Vectors.";
 	}
+}
+
+funcEvalMap["INNER"] = function(node, scope) {
+	
+	var base = evaluateNode(node.children[0], scope);
+	
+	if(node.children.length==2 & node.children[1].typeName=="FUNCALL"){
+		return callFunction(base, node.children[1], scope);
+	}
+	
+
+	var lastSelf; // for "self" binding
+	var lastBase; // for "self" binding
+
+	if(scope.self && node.children[0].text=="parent"){
+		lastSelf = scope.self;
+	}else if(!((base instanceof Function) || (base instanceof UserFunction))){
+		lastSelf = base;
+	}
+	
+	for(var i=1; i< node.children.length; i++){
+		//console.log(node.children[i].typeName)
+		if(base instanceof Primitive){
+			base = base.toNum();
+			
+			if(!((base instanceof Function) || (base instanceof UserFunction))){
+				lastSelf = base;
+				lastBase = base;
+			}
+		}
+		
+		
+		if(node.children[i].typeName == "SELECTOR" ){
+			try{
+				base = selectFromMatrix(base, createSelector(node.children[i], scope));
+			}catch(err){
+				if(base instanceof PrimitiveStore){
+					base = base.toNum();
+					i--;
+				}else{
+					throw(err);
+				}
+			}
+			if(!((base instanceof Function) || (base instanceof UserFunction))){
+				lastBase = base;
+			}
+		}else{//"FUNCALL"
+			base = callFunction(base, node.children[i], scope, lastSelf, lastBase);
+			
+			if(!((base instanceof Function) || (base instanceof UserFunction))){
+				lastSelf = base;
+				lastBase = base;
+			}
+		}
+	}
+	return base;
 };
+
+function callFunction(base, node, scope, lastSelf, lastBase){
+	if((typeof base != "function") && ! (base instanceof UserFunction)){
+		throw "MSG: Trying to call a non-function.";
+	}
+	if(! node.functionFingerprint){
+		node.functionFingerprint = "FINGERPRINT-" + Math.random();
+		
+		//if (base.fn) {
+		//	node.fn = base.fn; // user defined function
+		//} else {
+		//	node.delayEvalParams = base.delayEvalParams;
+		//	node.fn = base; //built-in
+		//}
+	}
+	var fn;
+	if (base.fn) {
+		 fn = base.fn; // user defined function
+	} else {
+		node.delayEvalParams = base.delayEvalParams;
+		fn = base; //built-in
+	}
+	var vals = [];
+
+	if(base.delayEvalParams){
+		//don't evaluate params right away. needed for IfThenElse and short circuiting
+		for (var j = 0; j < node.children.length; j++){
+			vals.push({node: node.children[j], scope: scope});
+		}
+	}else{
+		for (var j = 0; j < node.children.length; j++){
+			var item = evaluateNode(node.children[j], scope);
+			if(item.fullClone && ! (item instanceof Vector)){
+				item = item.fullClone();
+			}
+			vals.push(item);
+		}
+	}
+	
+	return fn(vals, node.functionFingerprint, lastSelf, lastBase);
+	
+}
 
 function createMatrixSelector(node, scope, offset, createFunctions){
 	var selector = [];
-	var lastComma = true;
 	offset = offset || 0;
 	for(var i=offset; i<node.children.length; i++){
 		var child = node.children[i];
-		if(child.typeName=="COMMA"){
-			if(lastComma){
-				selector.push("*")
-			}
-			if(i == node.children.length-1){
-				selector.push("*");
-			}
-			lastComma = true;
+		if(child.typeName=="MULT"){
+			selector.push("*");
 		}else{
-			lastComma = false;
-			if(createFunctions && node.children[i].typeName=="IDENT" && functionBank[node.children[i].text]){
-				var fn = functionBank[node.children[i].text];
-				if(fn.fn){
-					fn = fn.fn;
+			var x = evaluateNode(node.children[i], scope);
+			if((typeof x == "function") || (x instanceof UserFunction)){
+				if(typeof x == "function"){
+					var fn = x;
+				}else{
+					var fn = x.fn;
 				}
 				selector.push(function(x){
 					return x[0].stackApply(function(x){
@@ -1036,7 +1222,7 @@ function createMatrixSelector(node, scope, offset, createFunctions){
 					});
 				});
 			}else{
-				selector.push(evaluateNode(node.children[i], scope).toNum());
+				selector.push(x.toNum());
 			}
 		}
 	}
@@ -1046,7 +1232,15 @@ function createMatrixSelector(node, scope, offset, createFunctions){
 function selectFromMatrix(mat, items, fill){
 	//console.log("--")
 	//console.log(items)
-	var root = selectFromVector(mat, items.shift(), items.length==0?fill:undefined)
+
+	var m = mat;
+	if((! (m instanceof Vector)) && m.parent){
+		m = new Vector([],[], m.parent);
+	}
+	if(isUndefined(fill) && m.fullClone){
+		m = m.fullClone();
+	}
+	var root = selectFromVector(m, items.shift(), items.length==0?fill:undefined, isDefined(fill))
 	var children = [];
 	if(root.collapsed){
 	 	children = [root.data];
@@ -1063,7 +1257,7 @@ function selectFromMatrix(mat, items, fill){
 			//console.log("child")
 			//console.log(children[i])
 			if(! (children[i] instanceof Vector)){
-				throw "MSG: Invalid dimensions for vector selection.";
+				throw "MSG: No element available for: "+selector;
 			}
 			var vec = selectFromVector(children[i], selector, items.length==0?fill:undefined);
 
@@ -1099,7 +1293,7 @@ function doBreakouts(vec){
 		return vec;
 	}
 	if(vec.items.length==1 && vec.names && vec.names[0]=="!!BREAKOUT DATA"){
-		return vec.items[0]
+		return doBreakouts(vec.items[0]);
 	}
 	for(var i=0; i < vec.items.length; i++){
 		vec.items[i] = doBreakouts(vec.items[i])
@@ -1107,70 +1301,118 @@ function doBreakouts(vec){
 	return vec;
 }
 
-function selectFromVector(vec, items, fill){
+function selectFromVector(vec, items, fill, doNotClone){
 
 	if(items=="*"){
 		return {data: vec};
-	}else if(items instanceof Function){
+	}else if(typeof items == "function"){
 		return {data: items([vec]), collapsed: true};
-	}
-	
-	var handleIndex = function(index){
-		if(index<0 || index>=vec.items.length){
-			throw "MSG: Index not in vector.";
-		}
-		if(isUndefined(index)){
-			throw "MSG: Key not in vector";
-		}
-		if(fill){
-			vec.items[index] = fill;
-		}
-		res.push(vec.items[index]);
-		if(names){
-			names.push(vec.names[index]);
+	}else if(items=="parent"){
+		if(vec.parent){
+			return {data: doNotClone?vec.parent:vec.parent.fullClone(), collapsed:true};
+		}else{
+			throw "MSG: Vector does not have a parent.";
 		}
 	}
-	
-	var res = [];
-	var names = vec.names?[]:undefined;
+
 	if(items instanceof Vector){
+		var res = [];
+		var names = vec.names?[]:undefined;
 		for(var i=0; i < items.items.length; i++){
-			if(typeof items.items[i] == "string"){
-				if(!vec.names){
-					throw "MSG: Key '"+items.items[i]+"' not in vector."
+			var v = items.items[i];
+			var shouldSelect = true;
+			if(typeof v == "boolean"){
+				if(v){
+					v = new Material(i+1);
+				}else{
+					shouldSelect = false;
 				}
-				var index = vec.namesLC.indexOf(items.items[i].toLowerCase());
+			}
+			if(shouldSelect){
+				var r = selectElementFromVector(vec, v, fill)
+				res.push(r.value);
+				if(names){
+					names.push(r.name);
+				}
+			}
+		}
+		return {collapsed: false, parent: vec, data: new Vector(res, names)};
+	}else{
+		return {collapsed: true, parent: vec, data: selectElementFromVector(vec, items, fill).value};
+	}
+}
+
+
+function selectElementFromVector(vec, item, fill){
+	var name = undefined;
+	var value = undefined;
+	
+	var index;
+	
+	if( (item instanceof String) || (typeof item == "string")){
+		try{
+			if(isUndefined(fill)){
+				if(!vec.names){
+					throw "MSG: Key '"+item+"' not in vector."
+				}
+			}
+			if(vec.names){
+				index = vec.namesLC.indexOf(item.toLowerCase());
 				if(index<0 || isUndefined(index)){
 					index = vec.names.indexOf("*");
 				}
-				handleIndex(index);
-			}else if(typeof items.items[i] == "boolean"){
-				if(items.items[i]){
-					handleIndex(i);
-				}
-			}else{
-				handleIndex(minus(items.items[i].toNum(), new Material(sn("#e"+1))));
 			}
-		}
-	}else{
-		if( typeof items == "string"){
-			if(!vec.names){
-				throw "MSG: Key '"+items+"' not in vector."
-			}
-			var index = vec.namesLC.indexOf(items.toLowerCase());
 			if(index<0 || isUndefined(index)){
-				index = vec.names.indexOf("*");
-			}
-			handleIndex(index);
-			
-		}else{
-			handleIndex(minus(items.toNum(), new Material(sn("#e"+1))));
-		}
+				if(isUndefined(fill)){
+					throw "MSG: Key '"+item+"' not in vector.";
+				}else{
+					index = item;
+				}
 		
-		return {collapsed: true, parent: vec, data: res[0]};
+			}
+		}catch(err){
+			if(vec.parent){
+				return selectElementFromVector(vec.parent, item, fill);
+			}else{
+				throw err;
+			}
+		}
+	
+	}else{
+		index = minus(item.toNum(), new Material(sn("#e"+1)));
 	}
-	return {collapsed: false, parent: vec, data: new Vector(res, names)};
+	
+	if((index instanceof String) || (typeof index == "string")){
+		if(! vec.names){
+			vec.names = [];
+			vec.namesLC = [];
+			for(var i=0; i<vec.items.length; i++){
+				vec.names.push(undefined);
+				vec.namesLC.push(undefined);
+			}
+		}
+		vec.items.push(fill);
+		vec.names.push(index.valueOf());
+		vec.namesLC.push(index.toLowerCase());
+		value = fill;
+		name = index;
+		
+	}else{
+		if(index<0 || index>=vec.items.length){
+			throw "MSG: Index not in vector.";
+		}
+		if(!isUndefined(fill)){
+			vec.items[index] = fill;
+		}
+		value = vec.items[index];
+		if(vec.names){
+			name = vec.names[index];
+		}
+	}
+
+	return {name: name, value: value};
 }
+
 
 
 funcEvalMap["ARRAY"] = function(node, scope) {
@@ -1180,7 +1422,11 @@ funcEvalMap["ARRAY"] = function(node, scope) {
 	for (var i = 0; i < node.children.length; i++){
 		vals.push(evaluateNode(node.children[i].children[0], scope));
 		if(node.children[i].children.length>1){
-			names.push(node.children[i].children[1]);
+			if(node.children[i].children[1].text){
+				names.push(node.children[i].children[1].origText);
+			}else{
+				names.push(node.children[i].children[1].valueOf());
+			}
 			hasName = true;
 		}else{
 			names.push(undefined);
@@ -1189,13 +1435,13 @@ funcEvalMap["ARRAY"] = function(node, scope) {
 	return new Vector(vals, hasName?names:undefined);
 };
 
-funcEvalMap["MINARRAY"] = function(node, scope) {
+funcEvalMap["RANGE"] = function(node, scope) {
 	if(node.children.length==1){
 		return evaluateNode(node.children[0], scope);
 	}
 	var vals = [];
 	var start = evaluateNode(node.children[0], scope).toNum();
-	var end = evaluateNode(node.children[1], scope).toNum();
+	var end = evaluateNode(node.children[node.children.length-1], scope).toNum();
 
 	vals.push(start.fullClone());
 	if (!unitsEqual(start.units, end.units)) {
@@ -1206,7 +1452,7 @@ funcEvalMap["MINARRAY"] = function(node, scope) {
 		}
 	}
 	//throw "modsa";
-	var step = new Material(1, start.units?start.units.clone():undefined);
+	var step = node.children.length==2?new Material(1, start.units?start.units.clone():undefined):evaluateNode(node.children[1], scope).toNum();
 	
 	if(eq(start,end)){
 		
@@ -1217,10 +1463,13 @@ funcEvalMap["MINARRAY"] = function(node, scope) {
 			it = plus(it, step);
 		}
 	}else if(greaterThan(start, end)){
-		var it = minus(start, step);
+		if(node.children.length==2){
+			step = negate(step);
+		}
+		var it = plus(start, step);
 		while(greaterThanEq(it, end)){
 			vals.push(it);
-			it = minus(it, step);
+			it = plus(it, step);
 		}
 	}
 	//console.log(vals)
@@ -1228,51 +1477,19 @@ funcEvalMap["MINARRAY"] = function(node, scope) {
 	return new Vector(vals);
 };
 
-funcEvalMap["FUNCALL"] = function(node, scope) {
-	if(! node.functionFingerprint){
-		node.functionFingerprint = "FINGERPRINT-" + Math.random();
-		
-		var fnName = node.children[0].text;
-		if (functionBank[fnName]) {
-			if (functionBank[fnName].fn) {
-				node.fn = functionBank[fnName].fn; // user defined function
-			} else {
-				node.delayEvalParams = functionBank[fnName].delayEvalParams;
-				node.fn = functionBank[fnName]; //built-in
-			}
-		}else{
-			throw "MSG: The function \"" + node.children[0].origText + "\" does not exist.";
-		}
-	}
-	var vals = [];
-	
-	if(node.delayEvalParams){
-		//don't evaluate params right away. needed for IfThenElse and short circuiting
-		for (var i = 1; i < node.children.length; i++){
-			vals.push({node: node.children[i], scope: scope});
-		}
-	}else{
-		for (var i = 1; i < node.children.length; i++){
-			vals.push(evaluateNode(node.children[i], scope));
-		}
-	}
-	return node.fn(vals, node.functionFingerprint);
-	
-};
+function makeFunctionCall(varName, varNames, varDefaults, node, scope) {
 
-function makeFunctionCall(varName, varNames, varDefaults, node) {
-
-	var fn = new Object();
+	var fn = new UserFunction();
 
 	fn.localScope = new Object();
 	fn.localScope["nVars"] = varNames.length;
 	for (var i = 0; i < varNames.length; i++) {
 		fn.localScope[i += ""] = varNames[i];
 	}
-	fn.localScope["-parent"] = varBank;
+	fn.localScope["-parent"] = scope;
 	fn.defaults = varDefaults;
 	
-	fn.fn = function(x) {
+	fn.fn = function(x, fingerPrint, lastSelf, lastBase) {
 		if (fn.localScope["nVars"] - fn.defaults.length > x.length || x.length > fn.localScope["nVars"]) {
 			var names = [];
 			for (var i = 0; i < fn.localScope["nVars"]; i++) {
@@ -1285,17 +1502,36 @@ function makeFunctionCall(varName, varNames, varDefaults, node) {
 			
 			throw "MSG: Wrong number of parameters for " + varName + "("+names.join(", ")+").";
 		}
-		var localScope = {"-parent": varBank};
+		var localScope = {"-parent": scope};
 		
 		//console.log(fn.localScope);
 		for (var i = 0; i < x.length; i++) {
 			localScope[fn.localScope[i += ""]] = x[i];
 		}
 		for (var i = x.length; i < fn.localScope["nVars"]; i++) {
+			//console.log(fn.defaults[fn.defaults.length - (fn.localScope["nVars"]-i)]);
 			localScope[fn.localScope[i += ""]] = fn.defaults[fn.defaults.length - (fn.localScope["nVars"]-i)];
+			//if(localScope[fn.localScope[i += ""]].fullClone){
+			//	localScope[fn.localScope[i += ""]] = localScope[fn.localScope[i += ""]].fullClone();
+			//}
+		}
+		
+		
+		if(lastSelf){
+			if(! localScope.self){
+				localScope["self"] = lastSelf;
+			}
+			//if(! localScope.parent){
+		}
+		if(lastBase){	
+			if(lastBase.parent){
+				localScope["parent"] = lastBase.parent;
+			}
+				//}
 		}
 
 		try{
+			//console.log(localScope)
 			return evaluateNode(node, localScope);
 		}catch(err){
 			if(err.returnVal){
@@ -1371,9 +1607,13 @@ funcEvalMap["FOR"] = function(node, scope) {
 funcEvalMap["FUNCTION"] = function(node, scope) {
 	var id = node.children[0].children[0].text;
 	
-	functionGenerator(id, node.children[0], node.children[1], node.children[2])
+	functionGenerator(id, node.children[0], node.children[1], node.children[2], scope)
 			
 	return '"' + id + "\" defined"; 
+};
+
+funcEvalMap["ANONFUNCTION"] = function(node, scope) {
+	return functionGenerator(null, node.children[0], node.children[1], node.children[2], scope); 
 };
 
 funcEvalMap["ASSIGN"] = function(node, scope) {
@@ -1394,7 +1634,7 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 			//console.log(node);
 			var varName = node.children[i].children[0].text;
 			if(node.children[i].children.length > 1){
-				var selector = createMatrixSelector(node.children[i], scope, 1);
+				var selector = createSelector(node.children[i].children[1], scope);
 			}
 			//console.log(selector);
 			
@@ -1418,7 +1658,15 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 			if(node.children[i].children.length == 1){
 				scope[varName] = v;
 			}else{
-				selectFromMatrix(scope[varName], selector, v);
+				if(isDefined(scope[varName])){
+					//if( scope[varName] instanceof Vector){
+					selectFromMatrix(scope[varName], selector, v);
+					//}else{
+					//throw "MSG: The variable '"+node.children[i].children[0].origText+"' is not a vector.";
+					//}
+				}else{
+					throw "MSG: The variable '"+node.children[i].children[0].origText+"' does not exist.";
+				}
 			}
 		}
 	}
@@ -1429,6 +1677,22 @@ funcEvalMap["ASSIGN"] = function(node, scope) {
 	}
 };
 
+function createSelector(node, scope){
+	if(node.children[0].typeName == "DOTSELECTOR"){
+		var res = [];
+		for(var i=0; i<node.children[0].children.length; i++){
+			if(node.children[0].children[i].text){
+				res.push(node.children[0].children[i].text);
+			}else{
+				res.push(node.children[0].children[i].valueOf());
+			}
+		}
+		return res;
+	}else{
+		return createMatrixSelector(node, scope, 0, true)
+	}
+}
+
 funcEvalMap["MATERIAL"] = function(node, scope) {
 	var v =evaluateNode(node.children[0], scope).toNum();
 	if(! unitless(v.units)){
@@ -1437,18 +1701,21 @@ funcEvalMap["MATERIAL"] = function(node, scope) {
 	return new Material(v.value, node.children[1].clone());
 };
 
-function functionGenerator(varName, paramNames, paramDefaults, code){
+function functionGenerator(varName, paramNames, paramDefaults, code, scope){
 	var varNames = [];
 	var varDefaults = [];
-	for (var i = 1; i < paramNames.children.length ; i++) {
+	for (var i = ((varName===null)?0:1); i < paramNames.children.length ; i++) {
 		varNames.push(paramNames.children[i].text);
 	}
 		
 	for (var i = 0; i < paramDefaults.children.length ; i++) {
 		varDefaults.push(paramDefaults.children[i]);
 	}
-
-	functionBank[varName] = makeFunctionCall(varName, varNames, varDefaults, code);
+	if(varName===null){
+		return makeFunctionCall(varName===null?"Anonymous":varName, varNames, varDefaults, code, scope);
+	}else{
+		scope[varName] = makeFunctionCall(varName, varNames, varDefaults, code, scope);
+	}
 }
 
 var unitEvalMap = new Object();
@@ -1567,8 +1834,18 @@ trimEvalMap["POWER"] = function(node, primitives) {
 		return n;
 	}
 };
-trimEvalMap["INNER"] = trimEvalMap["POWER"];
-trimEvalMap["MINARRAY"] = trimEvalMap["POWER"];
+trimEvalMap["INNER"] = function(node, primitives) {
+	if(node.children.length == 1){
+		return trimNode(node.children[0], primitives);
+	}else{
+		var n = new TreeNode(node.origText, node.typeName, node.line);
+		for(var i = 0; i < node.children.length; i++){
+			n.children.push(trimNode(node.children[i], primitives));
+		}
+		return n;
+	}
+};;
+trimEvalMap["RANGE"] = trimEvalMap["POWER"];
 trimEvalMap["TRUE"] = function(node) {
 	return true;
 };
@@ -1576,7 +1853,17 @@ trimEvalMap["FALSE"] = function(node) {
 	return false;
 };
 trimEvalMap["STRING"] = function(node) {
-	return node.origText.substr(1, node.origText.length-2).replace(/\\n/g,"\n").replace(/\\r/g,"\r");
+	//console.log(node.origText);
+	var sub = node.origText.substr(1, node.origText.length-2);
+	var s;
+	if(node.origText[0]=="\""){
+		s = sub.replace(/\\\\/g,"\\\\TEMPTXT\\\\").replace(/\\"/g,"\"").replace(/\\'/g,"\'").replace(/\\t/g,"\t").replace(/\\b/g,"\b").replace(/\\f/g,"\f").replace(/\\n/g,"\n").replace(/\\r/g,"\r").replace(/\\\\TEMPTXT\\\\/g, "\\");
+	}else{
+		s = sub.replace(/\n/,"\\n");
+	}
+	s = new String(s);
+	s.parent = StringBase;
+	return s;
 };
 trimEvalMap["INTEGER"] = function(node) {
 	return new Material(sn("#e"+node.text));
@@ -1607,9 +1894,14 @@ trimEvalMap["MATERIAL"] = function(node, scope) {
 	}
 };
 trimEvalMap["MULT"] = function(node, scope) {
+
+	if(node.children.length==0){
+		return "*";
+	}
+	
 	var lhs = trimNode(node.children[0], scope);
 	var rhs = trimNode(node.children[1], scope);
-	if((lhs instanceof Material) && (rhs instanceof Material)){
+	if(isConst(lhs) && isConst(rhs)){
 		return mult(lhs, rhs);
 	}else{
 		var n = new TreeNode(node.origText, node.typeName, node.line);
@@ -1621,7 +1913,7 @@ trimEvalMap["MULT"] = function(node, scope) {
 trimEvalMap["DIV"] = function(node, scope) {
 	var lhs = trimNode(node.children[0], scope);
 	var rhs = trimNode(node.children[1], scope);
-	if((lhs instanceof Material) && (rhs instanceof Material)){
+	if(isConst(lhs) && isConst(rhs)){
 		return div(lhs, rhs);
 	}else{
 		var n = new TreeNode(node.origText, node.typeName, node.line);
@@ -1632,7 +1924,7 @@ trimEvalMap["DIV"] = function(node, scope) {
 trimEvalMap["PLUS"] = function(node, scope) {
 	var lhs = trimNode(node.children[0], scope);
 	var rhs = trimNode(node.children[1], scope);
-	if((lhs instanceof Material) && (rhs instanceof Material)){
+	if(isConst(lhs) && isConst(rhs)){
 		return plus(lhs, rhs);
 	}else{
 		var n = new TreeNode(node.origText,  node.typeName, node.line);
@@ -1643,7 +1935,7 @@ trimEvalMap["PLUS"] = function(node, scope) {
 trimEvalMap["MINUS"] = function(node, scope) {
 	var lhs = trimNode(node.children[0], scope);
 	var rhs = trimNode(node.children[1], scope);
-	if((lhs instanceof Material) && (rhs instanceof Material)){
+	if(isConst(lhs) && isConst(rhs)){
 		return minus(lhs, rhs);
 	}else{
 		var n = new TreeNode(node.origText, node.typeName, node.line);
@@ -1670,7 +1962,7 @@ trimEvalMap["NEGATE"] = function(node, scope) {
 		return new TreeNode(node.origText,  node.typeName, node.line);
 	}
 	var x = trimNode(node.children[0], scope);
-	if(x instanceof Material){
+	if(isConst(x)){
 		return negate(x)
 	}else{
 		var n = new TreeNode(node.origText, node.typeName, node.line);
@@ -1679,6 +1971,47 @@ trimEvalMap["NEGATE"] = function(node, scope) {
 	}
 };
 
+trimEvalMap["ARRAY"] = function(node, scope){
+	var n = new TreeNode(node.origText, node.typeName,node.line);
+	var vals = [];
+	var names = [];
+	var hasName = false;
+	for(var i = 0; i < node.children.length; i++){
+		n.children.push(trimNode(node.children[i], scope));
+		vals.push(n.children[i].children[0]);
+		if(n.children[i].children.length>1){
+			if(n.children[i].children[1].text){
+				names.push(n.children[i].children[1].origText);
+			}else{
+				names.push(n.children[i].children[1].valueOf());
+			}
+			hasName = true;
+		}else{
+			names.push(undefined);
+		}
+	}
+	
+	var allConst = true;
+	for(var i=0; i<vals.length; i++){
+		if(! isConst(vals[i]) ){
+			allConst = false;
+			break;
+		}
+	}
+	
+	if(allConst){
+		return (new Vector(vals, hasName?names:undefined));
+	}else{
+		return n;
+	}
+}
+
+function isConst(x){
+	if( (x instanceof Material) || (typeof x == "string") || (x instanceof String) || (typeof x == "boolean") || (x instanceof Vector) ){
+		return true;
+	}
+	return false
+}
 
 function trimNode(node, primitives) {
 	if(trimEvalMap.hasOwnProperty(node.typeName)){

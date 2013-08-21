@@ -48,17 +48,17 @@ function showFindAndReplace(){
 	                inputValue: '1',
 	                name: 'frSearchNames',
 	                id: 'frSearchNames',
-					value:'1',checked:true
+					value:'1',checked:true, width: 90
 	            },
 				{boxLabel: getText('Notes'),
 	                inputValue: '1',
 	                name: 'frSearchNotes',
-	                id: 'frSearchNotes'
+	                id: 'frSearchNotes',width:90
 	            },
 				{boxLabel: getText('Equations'),
 	                inputValue: '1',
 	                name: 'frSearchValues',
-	                id: 'frSearchValues'
+	                id: 'frSearchValues',width:90
 	            }]
       	  		}
 	            ,{

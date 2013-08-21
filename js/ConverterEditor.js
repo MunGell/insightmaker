@@ -390,7 +390,7 @@ Ext.ConverterWindow = function(args)
         height:  Math.min(Ext.getBody().getViewSize().height, 500),
         items: [chartPanel, gridPan],
         buttons: [{
-			disabled: ! is_editor,
+			disabled: ! viewConfig.allowEdits,
 			scale: "large",
 			text: getText('Units'),
 			iconCls: 'units-icon',
@@ -404,7 +404,7 @@ Ext.ConverterWindow = function(args)
 				unitsWindow.show();
 			}
 		},{
-			disabled: ! is_editor,
+			disabled: ! viewConfig.allowEdits,
 			scale: "large",
 			text: getText('Import Data'),
 			iconCls: 'import-icon',
@@ -427,7 +427,7 @@ Ext.ConverterWindow = function(args)
             }
         },
         {
-			disabled: ! is_editor,
+			disabled: ! viewConfig.allowEdits,
             scale: "large",
             iconCls: "apply-icon",
             text: getText('Apply'),

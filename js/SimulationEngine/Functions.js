@@ -8,6 +8,11 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
 
+var distanceCache = {};
+
+functionLoaders.push(function(){
+	
+distanceCache = {};
 
 defineFunction("Stop", {params:[]}, function(x) {
 	throw {
@@ -152,15 +157,15 @@ defineFunction("PastStdDev", {params:[{name: "[Primitive]",  noVector: true, nee
 	}
 });
 
-defineFunction("PastCorrelation", {params:[{name: "[Primitive]",  noVector: true, needPrimitive:true}, {name: "Past Range", needPrimitive: true, noVector: true}]}, function(x) {
+defineFunction("PastCorrelation", {params:[{name: "[Primitive]",  noVector: true, needPrimitive:true}, {name: "[Primitive]",  noVector: true, needPrimitive:true}, {name: "Past Range", noVector: true, defaultVal: "All Time"}]}, function(x) {
 	var items1;
 	var items2;
-	if (x.length == 2) {
+	if (x[2] != "All Time") {
 		items1 = x[0].getPastValues();
 		items2 = x[1].getPastValues();
 	} else {
-		items1 = x[0].getPastValues(x[3].toNum());
-		items2 = x[1].getPastValues(x[3].toNum());
+		items1 = x[0].getPastValues(x[2].toNum());
+		items2 = x[1].getPastValues(x[2].toNum());
 	}
 
 	if (items1.length > 1) {
@@ -360,19 +365,6 @@ functionBank["fix"] = function(x, id) {
 };
 functionBank["fix"].delayEvalParams = true;
 
-function getPopulation(item){
-	if(item.items){
-		return item;
-	}
-	var res = [];
-	if(item instanceof Agents){
-		return new Vector(item.agents.slice());
-	}else if(item.toNum() instanceof Vector){
-		return item.toNum();
-	}else{
-		return new Vector([agent(item)]);
-	}
-}
 
 functionBank["populationsize"] = function(x) {
 	testArgumentsSize(x, "PopulationSize", 1, 1);
@@ -384,7 +376,7 @@ functionBank["populationsize"] = function(x) {
 
 defineFunction("Remove", {params: [{needAgent: true, name: "[Agent]"}]}, function(x) {	
 	//console.log(x[0]);
-	x[0].parent.nextDie.push(x[0]);
+	x[0].container.nextDie.push(x[0]);
 	simulate.agentsChanged = true;
 	
 	return new Material(1);
@@ -392,8 +384,8 @@ defineFunction("Remove", {params: [{needAgent: true, name: "[Agent]"}]}, functio
 
 defineFunction("Add", {params: [{name: "[Agent Population]"}, {needAgent: true, name: "[Base]", defaultVal: "Agent Base"}]}, function(x) {	
 	
-	while((! (x[0] instanceof Agents)) && x[0].parent != null){
-		x[0] = x[0].parent;
+	while((! (x[0] instanceof Agents)) && x[0].container != null){
+		x[0] = x[0].container;
 	}
 	if(! (x[0] instanceof Agents)){
 		throw "MSG: You must pass an agent population as the first argument to Create().";
@@ -673,27 +665,6 @@ defineFunction("FindFurthest", {params: [{needPopulation: true, name: "[Agent Po
 });
 
 
-
-function agent(obj, fnName, pName){
-	if(obj instanceof Agent){
-		return obj;
-	}else if(obj instanceof Primitive){
-		return agent(obj.parent, fnName, pName);
-	}else{
-		throw "MSG: An agent is required for '"+pName+"' in the function "+fnName+".";
-	}
-}
-
-function agents(obj){
-	if(obj instanceof Agents){
-		return obj;
-	}else if((obj instanceof Primitive) || (obj instanceof Agent)){
-		return agents(obj.parent);
-	}else{
-		throw "MSG: An agent population is required for '"+pName+"' in the function "+fnName+".";
-	}
-}
-
 defineFunction("Index", {params: [{noVector: true, needAgent: true, name: "[Agent]"}]}, function(x) {
 	return new Material(sn("#e"+(x[0].index+1)));
 });
@@ -759,7 +730,59 @@ defineFunction("Distance", {params: [{name: "[Agent 1]"}, {name: "[Agent 2]"}]},
 	return distance(x[0], x[1]);
 });
 
-var distanceCache = {};
+
+
+defineFunction("Location", {params: [{needAgent: true, name: "[Primitive]"}]}, function(x) {
+	return x[0].location;
+});
+
+
+defineFunction("Move", {params: [{needAgent: true, name: "[Mover]"}, {needVector: true, name: "Direction"}]}, function(x) {
+	
+	var v = x[1].toNum();
+	shiftLocation(x[0], plus(x[0].location, v));
+	return new Material(0);
+});
+
+defineFunction("MoveTowards", {params: [{needAgent: true, name: "[Mover]"}, {name: "[Target]"}, {name: "Distance", noVector: true}]}, function(x) {
+	var a = x[0];
+	var l1 = (x[1] instanceof Vector)?x[1]:agent(x[1]).location;
+	var l2 = a.location;
+	
+	var distx = minus(l1.items[0], l2.items[0]);
+	var disty = minus(l1.items[1], l2.items[1]);
+	
+	if(distx.value==0 && disty.value==0){
+		return new Material(1);
+	}
+	
+	
+	if(a.container.geoWrap){
+		
+		if(greaterThan(distx, a.container.halfWidth)){
+			distx = minus(a.container.geoWidth, distx)
+		}else if(lessThan(distx, negate(a.container.halfWidth))){
+			distx = minus(distx, negate(a.container.geoWidth))
+		}
+		if(greaterThan(disty, a.container.halfHeight)){
+			disty = minus(a.container.geoHeight, disty)
+		}else if(lessThan(disty, negate(a.container.halfHeight))){
+			disty = minus(disty, negate(a.container.geoHeight))
+		}
+	}
+	
+	var dir = new Vector([distx, disty], ["x","y"])
+	
+	//var dir = minus(agent(x[1]).location, agent(x[0]).location);
+
+	shiftLocation(x[0], plus(x[0].location, mult(dir, div(x[2],distance(x[0], (x[1] instanceof Vector)?x[1]:agent(x[1]))))));
+	
+	return new Material(1);
+});
+
+});
+
+
 function distance(a,b){
 	var l1 = (a instanceof Vector)?a:a.location;
 	var l2 = (b instanceof Vector)?b:b.location;
@@ -777,9 +800,9 @@ function distance(a,b){
 	
 	var agents = null;
 	if(! (a instanceof Vector)){
-		agents = a.parent;
+		agents = a.container;
 	}else if(! (b instanceof Vector)){
-		agents = b.parent;
+		agents = b.container;
 	}
 	if(agents !== null && agents.geoWrap){
 		if(greaterThan(distx, agents.halfWidth)){
@@ -811,68 +834,54 @@ function distance(a,b){
 	//return dist;
 }
 
-defineFunction("Location", {params: [{needAgent: true, name: "[Primitive]"}]}, function(x) {
-	return x[0].location;
-});
-
-
-defineFunction("Move", {params: [{needAgent: true, name: "[Mover]"}, {needVector: true, name: "Direction"}]}, function(x) {
-	
-	var v = x[1].toNum();
-	shiftLocation(x[0], plus(x[0].location, v));
-	return new Material(0);
-});
-
-defineFunction("MoveTowards", {params: [{needAgent: true, name: "[Mover]"}, {name: "[Target]"}, {name: "Distance", noVector: true}]}, function(x) {
-	var a = x[0];
-	var l1 = (x[1] instanceof Vector)?x[1]:agent(x[1]).location;
-	var l2 = a.location;
-	
-	var distx = minus(l1.items[0], l2.items[0]);
-	var disty = minus(l1.items[1], l2.items[1]);
-	
-	if(distx.value==0 && disty.value==0){
-		return new Material(1);
+function agent(obj, fnName, pName){
+	if(obj instanceof Agent){
+		return obj;
+	}else if(obj instanceof Primitive){
+		return agent(obj.container, fnName, pName);
+	}else{
+		throw "MSG: An agent is required for '"+pName+"' in the function "+fnName+".";
 	}
-	
-	
-	if(a.parent.geoWrap){
-		
-		if(greaterThan(distx, a.parent.halfWidth)){
-			distx = minus(a.parent.geoWidth, distx)
-		}else if(lessThan(distx, negate(a.parent.halfWidth))){
-			distx = minus(distx, negate(a.parent.geoWidth))
-		}
-		if(greaterThan(disty, a.parent.halfHeight)){
-			disty = minus(a.parent.geoHeight, disty)
-		}else if(lessThan(disty, negate(a.parent.halfHeight))){
-			disty = minus(disty, negate(a.parent.geoHeight))
-		}
-	}
-	
-	var dir = new Vector([distx, disty], ["x","y"])
-	
-	//var dir = minus(agent(x[1]).location, agent(x[0]).location);
+}
 
-	shiftLocation(x[0], plus(x[0].location, mult(dir, div(x[2],distance(x[0], (x[1] instanceof Vector)?x[1]:agent(x[1]))))));
-	
-	return new Material(1);
-});
+function agents(obj){
+	if(obj instanceof Agents){
+		return obj;
+	}else if((obj instanceof Primitive) || (obj instanceof Agent)){
+		return agents(obj.container);
+	}else{
+		throw "MSG: An agent population is required for '"+pName+"' in the function "+fnName+".";
+	}
+}
+
+function getPopulation(item){
+	if(item.items){
+		return item;
+	}
+	var res = [];
+	if(item instanceof Agents){
+		return new Vector(item.agents.slice());
+	}else if(item.toNum() instanceof Vector){
+		return item.toNum();
+	}else{
+		return new Vector([agent(item)]);
+	}
+}
 
 function shiftLocation(agent, newLocation){
 	
-	if(agent.parent.geoWrap){
+	if(agent.container.geoWrap){
 		while(lessThan(newLocation.items[0], new Material(0))){
-			newLocation.items[0] = plus(newLocation.items[0], agent.parent.geoWidth);
+			newLocation.items[0] = plus(newLocation.items[0], agent.container.geoWidth);
 		}
-		while(greaterThan(newLocation.items[0], agent.parent.geoWidth)){
-			newLocation.items[0] = minus(newLocation.items[0], agent.parent.geoWidth);
+		while(greaterThan(newLocation.items[0], agent.container.geoWidth)){
+			newLocation.items[0] = minus(newLocation.items[0], agent.container.geoWidth);
 		}
 		while(lessThan(newLocation.items[1], new Material(0))){
-			newLocation.items[1] = plus(newLocation.items[1], agent.parent.geoHeight);
+			newLocation.items[1] = plus(newLocation.items[1], agent.container.geoHeight);
 		}
-		while(greaterThan(newLocation.items[1], agent.parent.geoHeight)){
-			newLocation.items[1] = minus(newLocation.items[1], agent.parent.geoHeight);
+		while(greaterThan(newLocation.items[1], agent.container.geoHeight)){
+			newLocation.items[1] = minus(newLocation.items[1], agent.container.geoHeight);
 		}
 	}
 	

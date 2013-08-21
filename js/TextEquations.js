@@ -23,7 +23,7 @@ function textEquations(){
 		for(var i = 0; i < items.length; i++){
 			inner = inner+"<li><b>"+items[i][0]+":</b> "+items[i][1]+"</li>";
 		}
-		return "<ul>"+inner+"</ul>"
+		return "<ul style='list-style-type: none;'>"+inner+"</ul>"
 	}
 	
 	function add(title, contents){

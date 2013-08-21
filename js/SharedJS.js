@@ -7,6 +7,74 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
 
+var viewConfig = {
+	showTopLinks: true,
+	sideBarWidth: 300,
+	referenceBarWidth: 200,
+	enableContextMenu: true,
+	focusDiagram: true,
+	allowEdits: is_editor && (! is_embed),
+	saveEnabled: true,
+	buttonGroups: true,
+	showLogo: true,
+	primitiveGroup: true,
+	connectionsGroup: true,
+	actionsGroup: true,
+	styleGroup: true,
+	toolsGroup: true,
+	exploreGroup: false,
+	fullScreenResults: false,
+	showResultsEdit: true
+};
+
+if(is_ebook){
+	viewConfig.showTopLinks = false;
+	viewConfig.sideBarWidth = 210;
+	viewConfig.referenceBarWidth = 150;
+	viewConfig.focusDiagram = false;
+	viewConfig.saveEnabled = false;
+	viewConfig.showLogo = false;
+	viewConfig.primitiveGroup = false;
+	viewConfig.actionsGroup = true;
+	viewConfig.styleGroup = false;
+	viewConfig.runFlush = true;
+	viewConfig.fullScreenResults = true;
+	viewConfig.showResultsEdit = false;
+	
+}
+
+if(is_embed){
+	viewConfig.sideBarWidth = 210;
+	viewConfig.enableContextMenu = false;
+	viewConfig.referenceBarWidth = 150;
+	viewConfig.focusDiagram = false;
+	viewConfig.saveEnabled = false;
+	viewConfig.buttonGroups = false;
+	viewConfig.primitiveGroup = false;
+	viewConfig.connectionsGroup = false;
+	viewConfig.actionsGroup = false;
+	viewConfig.styleGroup = false;
+	viewConfig.toolsGroup = false;
+	viewConfig.fullScreenResults = true;
+	viewConfig.showResultsEdit = false;
+	
+}
+
+if(! is_editor){
+	viewConfig.enableConextMenu = false;
+	viewConfig.saveEnabled = false;
+	viewConfig.primitiveGroup = false;
+	viewConfig.connectionsGroup = false;
+	viewConfig.actionsGroup = false;
+	viewConfig.styleGroup = false;
+	viewConfig.toolsGroup = false;
+	if(! is_embed){
+		viewConfig.exploreGroup = true;
+	}
+	viewConfig.showResultsEdit = false;
+}
+
+
 
 
 Ext.onReady(function() {
@@ -41,45 +109,47 @@ function replace_html(el, html) {
 };
 
 function setTopLinks() {
-    var links = "";
-	var arrow = "&uarr;";
-    var toolbar = ribbonPanel.getDockedItems()[0];
-    if (!toolbar.isVisible()) {
-		arrow = "&darr;"
-	}
-    if (drupal_node_ID == -1) {
-        links = '<div style="float:right;padding:0.2em;"><nobr><a href="'+base_path+'/help" target="_blank" >'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()"  id="toolbarToggle">'+arrow+'</a></nobr></div>';
-    } else {
-        if (is_editor) {
-            links = '<div style="float:left;padding:0.2em;">';
-            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a>';
-            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/access" target="_blank" id="editBut">'+getText("Insight Properties")+'</a>';
-            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/delete" id="deleteBut">'+getText("Delete Insight")+'</a>';
-			links = links + '</div></div>';
+	if(viewConfig.showTopLinks){
+	    var links = "";
+		var arrow = "&uarr;";
+	    var toolbar = ribbonPanel.getDockedItems()[0];
+	    if (!toolbar.isVisible()) {
+			arrow = "&darr;"
+		}
+	    if (drupal_node_ID == -1) {
+	        links = '<div style="float:right;padding:0.2em;"><nobr><a href="'+base_path+'/help" target="_blank" >'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()"  id="toolbarToggle">'+arrow+'</a></nobr></div>';
+	    } else {
+	        if (is_editor) {
+	            links = '<div style="float:left;padding:0.2em;">';
+	            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a>';
+	            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/access" target="_blank" id="editBut">'+getText("Insight Properties")+'</a>';
+	            links = links + ' | <a href="'+base_path+'/node/' + drupal_node_ID + '/delete" id="deleteBut">'+getText("Delete Insight")+'</a>';
+				links = links + '</div></div>';
       
-		} else {
-            links = links + '<div style="float:left;padding:0.2em;">';
-            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a></div>';
-        }
-        links = links + '<div style="float:right;padding:0.2em;"><nobr>';
-        if (is_embed) {
-            links = links + '<a target="_blank" href="'+base_path+'/insight/' + drupal_node_ID + '">'+getText("Full Screen Insight")+'</a> | ';
-        } else {
-            links = links + '<a target="_blank" href="'+base_path+'/insight/">'+getText("Make New Insight")+'</a> | ';
-            links = links + '<a target="_blank" href="'+base_path+'/node/' + drupal_node_ID + '/clone">'+getText("Clone Insight")+'</a> | ';
-        }
-        links = links + '<a href="'+base_path+'/help" target="_blank">'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()" id="toolbarToggle">'+arrow+'</a></nobr></div>';
-    }
+			} else {
+	            links = links + '<div style="float:left;padding:0.2em;">';
+	            links = links + '<a href="'+base_path+'/discussion/' + drupal_node_ID + '" target="_blank" id="commentBut">'+getText("Insight Discussion")+'</a></div>';
+	        }
+	        links = links + '<div style="float:right;padding:0.2em;"><nobr>';
+	        if (is_embed) {
+	            links = links + '<a target="_blank" href="'+base_path+'/insight/' + drupal_node_ID + '">'+getText("Full Screen Insight")+'</a> | ';
+	        } else {
+	            links = links + '<a target="_blank" href="'+base_path+'/insight/">'+getText("Make New Insight")+'</a> | ';
+	            links = links + '<a target="_blank" href="'+base_path+'/node/' + drupal_node_ID + '/clone">'+getText("Clone Insight")+'</a> | ';
+	        }
+	        links = links + '<a href="'+base_path+'/help" target="_blank">'+getText("Help")+'</a> | <a href="'+base_path+'/browse" target="_blank">'+getText("Find More Insights")+'</a> | <a href="javascript:toggleTopBar()" id="toolbarToggle">'+arrow+'</a></nobr></div>';
+	    }
 	
-    replace_html(document.getElementById("toplinks-holder"), links);
+	    replace_html(document.getElementById("toplinks-holder"), links);
 	
-	if($.fn.frameWarp){
-	     $('#commentBut').frameWarp({
-	        url : base_path+'/discussion/' + drupal_node_ID
-	     });
-	     $('#editBut').frameWarp({
-	        url : base_path+'/node/' + drupal_node_ID + "/access"
-	     });
- 	}
+		if($.fn.frameWarp){
+		     $('#commentBut').frameWarp({
+		        url : base_path+'/discussion/' + drupal_node_ID
+		     });
+		     $('#editBut').frameWarp({
+		        url : base_path+'/node/' + drupal_node_ID + "/access"
+		     });
+	 	}
+	}
 }
 

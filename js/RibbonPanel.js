@@ -87,25 +87,20 @@ var showMacros = function() {
 	};
 
 var scratchpadFn = function() {
-		if (scratchPadStatus == "shown") {
-			Ext.get("mainGraph").setDisplayed("none");
-			scratchPadStatus = "hidden";
-		} else if (scratchPadStatus == "hidden") {
-			Ext.get("mainGraph").setDisplayed("block");
-			scratchPadStatus = "shown";
-		} else {
-			Ext.get("mainGraph").setDisplayed("block");
-			Scratchpad($('#mainGraph'));
-			scratchPadStatus = "shown";
-		}
-	};
+	if (scratchPadStatus == "shown") {
+		Ext.get("mainGraph").setDisplayed("none");
+		scratchPadStatus = "hidden";
+	} else if (scratchPadStatus == "hidden") {
+		Ext.get("mainGraph").setDisplayed("block");
+		scratchPadStatus = "shown";
+	} else {
+		Ext.get("mainGraph").setDisplayed("block");
+		Scratchpad($('#mainGraph'));
+		scratchPadStatus = "shown";
+	}
+};
 
-var config_columns;
-if ((!is_editor) || is_embed) {
-	config_columns = 1;
-} else {
-	config_columns = 3;
-}
+
 var sizeCombo;
 var fontCombo;
 var RibbonPanel = function(graph, mainPanel, configPanel) {
@@ -509,7 +504,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			items: [
 
 			{
-				hidden: (!is_editor) || is_embed,
+				hidden: (! viewConfig.primitiveGroup),
 				xtype: 'buttongroup',
 				columns: 4,
 				height: 95,
@@ -601,7 +596,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 
 				]
 			}, {
-				hidden: (!is_editor) || is_embed,
+				hidden: (! viewConfig.connectionsGroup),
 				xtype: 'buttongroup',
 				columns: 1,
 				height: 95,
@@ -667,9 +662,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 
 				]
 			}, {
-				hidden: (!is_editor) || is_embed,
+				hidden: (! viewConfig.actionsGroup),
 				xtype: 'buttongroup',
-				columns: 2,
+				columns: is_ebook?1:2,
 				height: 95,
 				title: getText('Actions'),
 				id: 'actions',
@@ -694,6 +689,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					},
 					scope: this
 				}, {
+					hidden: is_ebook,
 					id: 'copy',
 					text: getText('Copy'),
 					iconCls: 'copy-icon',
@@ -704,6 +700,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					},
 					scope: this
 				}, {
+					hidden: is_ebook,
 					id: 'cut',
 					text: getText('Cut'),
 					iconCls: 'cut-icon',
@@ -716,6 +713,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					},
 					scope: this
 				}, {
+					hidden: is_ebook,
 					text: getText('Paste'),
 					iconCls: 'paste-icon',
 					tooltip: getText('Paste') + ' ' + cmd("V"),
@@ -738,7 +736,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}]
 			}, {
-				hidden: (!is_editor) || is_embed,
+				hidden: (! viewConfig.styleGroup),
 				xtype: 'buttongroup',
 				columns: 5,
 				height: 95,
@@ -1021,7 +1019,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					menu: zoomMenu
 				}]
 			}, {
-				hidden: (is_editor || is_embed),
+				hidden: (! viewConfig.exploreGroup),
 				id: 'control-no-edit',
 				xtype: 'buttongroup',
 				columns: 2,
@@ -1053,9 +1051,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				}]
 			}, {
 
-				hidden: (is_embed || (!is_editor)),
+				hidden: (! viewConfig.toolsGroup),
 				xtype: 'buttongroup',
-				columns: config_columns,
+				columns: ((!is_editor) || is_embed)?1:(is_ebook?2:3),
 				height: 95,
 				title: getText('Tools'),
 				id: "configgroup",
@@ -1082,7 +1080,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				},{
 					id: 'embed_but',
 					text: getText('Embed'),
-					hidden: (!is_editor) || is_embed,
+					hidden: (!is_editor) || is_embed || is_ebook,
 					iconCls: 'embed-icon',
 					tooltip: getText('Embed this Insight in another web page'),
 					handler: function() {
@@ -1117,7 +1115,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				},
 				{
-					hidden: (!is_editor) || is_embed,
+					hidden: (!is_editor) || is_embed || is_ebook,
 					text: getText('Add Story'),
 					iconCls: 'unfold-icon',
 					tooltip: getText('Display the model step-by-step to share a story'),
@@ -1182,9 +1180,9 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				id: 'zoomlargebutEmbed',
 				handler: function(menu) {},
 				menu: zoomMenu
-			}, '-',
+			}, viewConfig.runFlush?'->':'-',
 			{
-				hidden: ((!is_editor) || is_embed),
+				hidden: (! viewConfig.saveEnabled),
 				id: 'savegroup',
 				xtype: 'buttongroup',
 				columns: 1,
@@ -1192,7 +1190,6 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				width: 90,
 				title: 'Save',
 				items: [{
-					hidden: (!is_editor) || is_embed,
 					iconAlign: 'top',
 					scale: 'large',
 					cls: 'x-btn-as-arrow',
@@ -1207,7 +1204,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					scope: this
 				}]
 			}, {
-				hidden: (!is_embed),
+				hidden: viewConfig.buttonGroups,
 				iconAlign: 'top',
 				scale: 'large',
 				cls: 'button',
@@ -1221,7 +1218,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				},
 				scope: this
 			}, {
-				hidden: is_embed,
+				hidden: (! viewConfig.buttonGroups),
 				xtype: 'buttongroup',
 				columns: 1,
 				title: getText('Simulate'),
@@ -1240,8 +1237,8 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 					},
 					scope: this
 				}]
-			}, "->",
-			{
+			}, viewConfig.showLogo?"->":"",
+			{   hidden: (! viewConfig.showLogo),
 				xtype: 'box',
 				width: 154,
 				id: 'logo',

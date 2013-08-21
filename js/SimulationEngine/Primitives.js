@@ -18,7 +18,7 @@ function Primitive() {
 	
 	this.keys = null;
 
-	this.parent = null;
+	this.container = null;
 
 	this.dna = null;
 	
@@ -32,7 +32,7 @@ function Primitive() {
 Primitive.method("clone", function(){
 	var p = new this.constructorFunction();
 	p.dna = this.dna;
-	p.parent = this.parent;
+	p.container = this.container;
 	p.agentId = this.agentId;
 	p.index = this.index;
 	p.id = this.id;
@@ -221,8 +221,14 @@ Primitive.method("value", function() {
 		try{
 			var x = this.calculateValue().toNum();
 			if((x instanceof Material) && ! isFinite(x.value)){
-				//console.log(x)
-				throw("MSG: "+getText("The result of this calculation is not a number (are you dividing by 0?)."));
+				if(isLocal()){
+					console.log(x)
+				}
+				if(this instanceof Stock){
+					throw("MSG: "+getText("The stock has become infinite in size. Check the flows into it for rapid growth."));
+				}else{
+					throw("MSG: "+getText("The result of this calculation is not a number (are you dividing by 0?)."));
+				}
 			}
 		}catch(err){
 			if(! err.substr){
@@ -359,7 +365,7 @@ State.method("setValue", function(value) {
 	this.clearPastValues(1);
 	
 	if(this.agentId){
-		this.parent.updateStates();
+		this.container.updateStates();
 	}
 	
 });
@@ -371,7 +377,7 @@ State.method("restoreActive", function() {
 	this.active = this.oldActive;
 	this.arrivalTime = this.oldArrivalTime;
 	if(this.agentId){
-		this.parent.updateStates();
+		this.container.updateStates();
 	}
 });
 State.method("calculateValue", function() {
@@ -411,7 +417,7 @@ State.method("setInitialActive", function() {
 		this.arrivalTime = timeStart.fullClone();
 	}
 	if(this.agentId){
-		this.parent.updateStates();
+		this.container.updateStates();
 	}
 });
 State.method("getActive", function(){
@@ -516,7 +522,7 @@ Transition.method("doTransition", function() {
 		this.omega.arrivalTime = time.fullClone();
 	}
 	if(this.agentId){
-		this.parent.updateStates();
+		this.container.updateStates();
 	}
 });
 
@@ -638,13 +644,13 @@ Agents.method("add", function(base){
 		agent.setIndex(this.size-1);
 		agent.createAgentIds();
 		for(var i = 0; i < this.DNAs.length; i++){
-			agent.children[i].parent = agent;
+			agent.children[i].container = agent;
 			linkPrimitive(agent.children[i], this.DNAs[i]);
 		}
 	}else{
 		//console.log("-----");
 		var agent = new Agent();
-		agent.parent = this;
+		agent.container = this;
 		agent.children = [];
 		agent.childrenId = {};
 		agent.agentId = this.agentId;
@@ -733,7 +739,7 @@ Agent.method("agentClone", function(){
 
 	agent.location = this.location.clone();
 	agent.connected = this.connected.slice(0);
-	agent.parent = this.parent;
+	agent.container = this.container;
 	
 	return agent;
 });
@@ -754,9 +760,9 @@ Agent.method("die", function(){
 		this.unconnect(this.connected[0]);
 	}
 	
-	for(var i=0; i<this.parent.agents.length; i++){
-		if(this.parent.agents[i].fullId == this.fullId){
-			this.parent.agents.splice(i,1);
+	for(var i=0; i<this.container.agents.length; i++){
+		if(this.container.agents[i].fullId == this.fullId){
+			this.container.agents.splice(i,1);
 			break;
 		}
 	}
@@ -765,13 +771,22 @@ Agent.method("die", function(){
 	simulate.agentsChanged = true;
 });
 Agent.method("connect", function(x) {
+	//try{
 	if(x.instanceId != this.instanceId){
 		var i = indexOfID(this.connected, x.instanceId);
 		if(i == -1){
-			this.connected.push(x);
-			x.connected.push(this);
+			if(x instanceof Agent){
+				this.connected.push(x);
+				x.connected.push(this);
+			}else{
+				throw("MSG: Only agents may be connected.");
+			}
 		}
 	}
+	//}catch(err){
+		//console.log(x)
+		//debugger;
+		//}
 });
 Agent.method("unconnect", function(x) {
 	if(x.instanceId != this.instanceId){
@@ -1279,6 +1294,7 @@ Flow.method("apply", function() {
 		//console.log("--")
 		//console.log(rate.units.exponents[0])
 		rate = mult(rate, timeStep);
+		
 		//console.log(rate.units.exponents[0])
 
 		//console.log("Applying: "+rate.value);
@@ -1302,56 +1318,91 @@ Flow.method("apply", function() {
 				}
 			}
 		}
-	
-		if (this.omega !== null && this.omega.dna.nonNegative) {
-			var modifier = plus(this.omega.value().toNum(), rate);
-			if(modifier instanceof Vector){
-				modifier.recurseApply(function(x){
-					if (x.value < 0 ) {
-						return x;
-					}else{
-						return new Material(0, x.units?x.units.clone():undefined);
-					}
-				})
-				rate = minus(rate, modifier);
-			}else{
-				if (modifier.value < 0 ) {
-					rate = minus(rate, modifier);
-				}
-			}
-		}
-	
-		if (this.alpha !== null && this.alpha.dna.nonNegative) {
-			
-			var modifier = minus(this.alpha.value().toNum(), rate);
-			if(modifier instanceof Vector){
-				modifier.recurseApply(function(x){
-					if (x.value < 0 ) {
-						return x;
-					}else{
-						return new Material(0, x.units?x.units.clone():undefined);
-					}
-				})
-				rate = minus(rate, modifier);
-			}else{
-				if (modifier.value < 0 ) {
-					rate = plus(rate, modifier);
-				}
-			}
-		}
 		
-		if (this.omega !== null && this.omega.dna.nonNegative) {
-			if(rate instanceof Vector){
-				var vec = functionBank["flatten"]([plus(this.omega.value().toNum(), rate)]);
-				for(var i=0; i<vec.items.length; i++){
-					if (vec.items[i].value < 0 ) {
+		//console.log("a")
+		var in_rate = rate;
+		var out_rate = rate;
+		var collapsed = false;
+		
+		if(this.alpha !== null){
+			var v = this.alpha.value();
+			if((rate instanceof Vector) && ( (! (v instanceof Vector)) || v.depth() < rate.depth())){
+				in_rate = rate.fullClone().collapseDimensions(v);
+				collapsed = true;
+			}else if((v instanceof Vector) && ( (!(rate instanceof Vector)) || v.depth() > rate.depth()) ){
+				error(getText("The alpha of the flow is a vector with a higher order than the flow rate. There has to be at least one element in the flow rate for each element in the alpha."), this, true)
+			}
+		}
+		if(this.omega !== null){
+			//console.log("c")
+			var v = this.omega.value();
+			if((rate instanceof Vector) && ((! (v instanceof Vector)) || v.depth() < rate.depth())){
+				out_rate = rate.fullClone().collapseDimensions(v);
+				collapsed = true;
+			}else if((v instanceof Vector) && ( (!(rate instanceof Vector)) || v.depth() > rate.depth()) ){
+				error(getText("The omega of the flow is a vector with a higher order than the flow rate. There has to be at least one element in the flow rate for each element in the omega."), this, true)
+			}
+		}
+
+		if(! collapsed){
+			if (this.omega !== null && this.omega.dna.nonNegative) {
+				var modifier = plus(this.omega.value().toNum(), rate);
+				if(modifier instanceof Vector){
+					modifier.recurseApply(function(x){
+						if (x.value < 0 ) {
+							return x;
+						}else{
+							return new Material(0, x.units?x.units.clone():undefined);
+						}
+					})
+					rate = minus(rate, modifier);
+				}else{
+					if (modifier.value < 0 ) {
+						rate = minus(rate, modifier);
+					}
+				}
+			}
+	
+			if (this.alpha !== null && this.alpha.dna.nonNegative) {
+			
+				var modifier = minus(this.alpha.value().toNum(), rate);
+				if(modifier instanceof Vector){
+					modifier.recurseApply(function(x){
+						if (x.value < 0 ) {
+							return x;
+						}else{
+							return new Material(0, x.units?x.units.clone():undefined);
+						}
+					})
+					rate = minus(rate, modifier);
+					rate = minus(rate, modifier);
+				}else{
+					if (modifier.value < 0 ) {
+						rate = plus(rate, modifier);
+					}
+				}
+			}
+		
+			if (this.omega !== null && this.omega.dna.nonNegative) {
+				if(rate instanceof Vector){
+					var vec = functionBank["flatten"]([plus(this.omega.value().toNum(), rate)]);
+					for(var i=0; i<vec.items.length; i++){
+						if (vec.items[i].value < 0 ) {
+							error(getText("Inconsistent non-negative constraints for flow."), this, false);
+						}
+					}
+				}else{
+					if (plus(this.omega.value().toNum(), rate).value < 0) {
 						error(getText("Inconsistent non-negative constraints for flow."), this, false);
 					}
 				}
-			}else{
-				if (plus(this.omega.value().toNum(), rate).value < 0) {
-					error(getText("Inconsistent non-negative constraints for flow."), this, false);
-				}
+			}
+		}else{
+			if (this.alpha !== null && this.alpha.dna.nonNegative) {
+				error(getText("Cannot use non-negative stocks when the flow rate is a vector that needs to be collapsed."), this.alpha, false);
+			}
+			if (this.omega !== null && this.omega.dna.nonNegative) {
+				error(getText("Cannot use non-negative stocks when the flow rate is a vector that needs to be collapsed."), this.omega, false);
 			}
 		}
 
@@ -1359,11 +1410,20 @@ Flow.method("apply", function() {
 		try{
 			if (this.omega !== null) {
 				additionTest = 1;
-				this.omega.add(rate);
+				if(collapsed){
+					this.omega.add(out_rate);
+				}else{
+					this.omega.add(rate);
+				}
 			}
 			if (this.alpha !== null) {
 				additionTest = 2;
-				this.alpha.subtract(rate);
+
+				if(collapsed){
+					this.alpha.subtract(in_rate);
+				}else{
+					this.alpha.subtract(rate);
+				}
 			}
 		}catch(err){
 			//throw err;

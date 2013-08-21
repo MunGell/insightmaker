@@ -379,7 +379,7 @@ Ext.UnitsWindow = function(args) {
 				}
 			}
 		}, {
-			disabled: !is_editor,
+			disabled: ! viewConfig.allowEdits,
 			scale: "large",
 			iconCls: "apply-icon",
 			text: getText('Apply'),

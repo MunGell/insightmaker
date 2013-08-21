@@ -19,43 +19,50 @@ function runSimulation(config) {
 	try {
 		return innerRunSimulation(config);//have an inner function call to escape try-catch performance pathologies
 	} catch (err) {
-		if (isLocal()) {
-			console.log(err);
-		}
+		return checkErr(err, config);
+	}
+}
 
-		if (isDefined(simulatorProgress) && simulatorProgress != null) {
-			simulatorProgress.close()
-			threads--;
+function checkErr(err, config){
+	if (isLocal()) {
+		console.log(err);
+	}
+
+	if (isDefined(simulatorProgress) && simulatorProgress != null) {
+		simulatorProgress.close()
+		threads--;
+	};
+	
+	var errOut;
+	if (err.msg) {
+		errOut = {
+			error: err.msg,
+			errorPrimitive: isDefined(err.primitive)?findID(err.primitive.id):null
 		};
-		
-		var errOut;
-		if (err.msg) {
-			errOut = {
-				error: err.msg,
-				errorPrimitive: isDefined(err.primitive)?findID(err.primitive.id):null
-			};
-		} else {
-			errOut = {
-				error: getText("An unknown simulation error occurred"),
-				errorPrimitive: null
-			};
-			err.msg = errOut.msg;
-		}
-		
-		
-		if(config.onError){
-			config.onError(errOut)
-		}
-		if (! config.silent) {
-			handleErrorObject(err)
-		}else{
-			return errOut;
-		}
+	} else {
+		errOut = {
+			error: getText("An unknown simulation error occurred"),
+			errorPrimitive: null
+		};
+		err.msg = errOut.msg;
+	}
+	
+	
+	if(config.onError){
+		config.onError(errOut)
+	}
+	if (! config.silent) {
+		handleErrorObject(err)
+	}else{
+		return errOut;
 	}
 }
 
 var timeUnits = null;
 function innerRunSimulation(config) {
+	
+	bootCalc();
+	
 	if(getSetting().getAttribute("arrays")){
 		arrays = JSON.parse(getSetting().getAttribute("arrays"));
 		arrays.each(function(x){
@@ -181,7 +188,7 @@ function innerRunSimulation(config) {
 			if(submodel.id == "base"){
 				agent = submodel.agents[0];
 			}else{
-				agent.parent = submodel;
+				agent.container = submodel;
 				agent.index = j;
 				agent.children = [];
 				agent.childrenId = {};
@@ -491,7 +498,7 @@ function aggregateAgentSeries(res){
 	return ret;
 }
 
-function indexedSeries(res){
+function indexedSeries(res, cell){
 	var names = res.results[res.results.length-1].fullNames()
 	var series = {};
 	//console.log("---")
@@ -502,9 +509,23 @@ function indexedSeries(res){
 		series[key] = [];
 		for(var j=0; j<res.results.length; j++){
 			if(res.results[j] instanceof Vector){
-				series[key].push(selectFromMatrix(res.results[j].fullClone(), names[i].slice()));
+				try{
+					series[key].push(selectFromMatrix(res.results[j].fullClone(), names[i].slice()));
+				}catch(err){
+					throw ({
+						msg: getText("The key '"+names[i].join(", ")+"' not available within primitive across all time periods. Vector primitives must have the same keys cross all time periods."),
+						primitive: cell,
+						showEditor: true
+					});
+					
+				}
 			}else{
-				series[key].push(res.results[j]);
+				throw ({
+					msg: getText("Cannot switch primitives between vectorized and non-vectorized states."),
+					primitive: cell,
+					showEditor: true
+				});
+				//series[key].push(res.results[j]);
 			}
 		}
 	}
@@ -559,7 +580,7 @@ function finishSim(res, displayInformation, config) {
 				var names = res[id].results[res[id].results.length-1].fullNames();
 				var col = getLineColor(item);
 				//console.log(id);
-				indexedData[id.toString()] = indexedSeries(res[id]);
+				indexedData[id.toString()] = indexedSeries(res[id], item);
 				for(var n=0; n<names.length; n++){
 					ids.push(id);
 					headers.push(getName(item)+" ("+names[n].join(", ")+")");
@@ -856,7 +877,7 @@ function decodeDNA(dna, agent, keys){
 		x.id = dna.id;
 		x.index = agent.index;
 		x.agentId = agent.agentId;
-		x.parent = agent;
+		x.container = agent;
 		x.keys = keys;
 		x.createIds();
 		
@@ -989,14 +1010,14 @@ function buildPlacements(submodel, items){
 		});
 	}else if(submodel.placement == "Custom Function"){
 		 submodel.agents.forEach(function(s){
-			 var n = getPrimitiveNeighborhood(submodel, submodel.dna);
-			 n.self = s;
+			var n = getPrimitiveNeighborhood(submodel, submodel.dna);
+			n.self = s;
 		 	s.location = simpleUnitsTest(simpleEquation(submodel.placementFunction, varBank, n), submodel.geoDimUnitsObject);
 		 });
 	}else if(submodel.placement == "Grid"){
 		tree = trimTree(createTree("<<x*width(agent), y*height(agent)>>"), {});
 		var size = submodel.agents.length;
-		var ratio = simpleNum(simpleEquation("width(agent)/height(agent)", {"agent": submodel}, {}), submodel.geoDimUnitsObject);
+		var ratio = simpleNum(simpleEquation("width(agent)/height(agent)", {"agent": submodel, "-parent": varBank}, {}), submodel.geoDimUnitsObject);
 		//console.log(ratio)
 		hCount = Math.sqrt( size / ratio );
 		wCount = Math.floor(hCount * ratio);
@@ -1010,14 +1031,14 @@ function buildPlacements(submodel, items){
 		submodel.agents.forEach(function(s){
 			var xPos = ((j % wCount) + 0.5)/wCount;
 			var yPos = (Math.floor(j/wCount)+ 0.5)/hCount;
-			s.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": s, "x": new Material(xPos), "y":new Material(yPos)}, {}, tree), submodel.geoDimUnitsObject);
+			s.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": s, "x": new Material(xPos), "y":new Material(yPos), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
 			j++;
 		});
 	}else if(submodel.placement == "Ellipse"){
 		tree = trimTree(createTree("<<width(agent), height(agent)>>/2+<<sin(index(agent)/size*2*3.14159), cos(index(agent)/size*2*3.14159)>>*<<width(agent), height(agent)>>/2"), {});
 		var size = new Material(submodel.agents.length);
 		submodel.agents.forEach(function(s){
-			s.location = simpleUnitsTest(simpleEquation("<<width(agent), height(agent)>>/2+<<sin(index(agent)/size*2*3.14159), cos(index(agent)/size*2*3.14159)>>*<<width(agent), heigh(agent)>>/2", {"agent": s, "size": size }, {}, tree), submodel.geoDimUnitsObject);
+			s.location = simpleUnitsTest(simpleEquation("<<width(agent), height(agent)>>/2+<<sin(index(agent)/size*2*3.14159), cos(index(agent)/size*2*3.14159)>>*<<width(agent), heigh(agent)>>/2", {"agent": s, "size": size, "-parent": varBank }, {}, tree), submodel.geoDimUnitsObject);
 		});
 	}else if(submodel.placement == "Network"){
 		tree = trimTree(createTree("<<x*width(agent), y*height(agent)>>"), {});
@@ -1072,7 +1093,7 @@ function buildPlacements(submodel, items){
 		layout.eachNode(function(node, point) {
 			var p = scalePoint(point.p);
 			//console.log(scalePoint(p));
-			node.data.data.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": submodel, "x":new Material(p.x), "y":new Material(p.y)}, {}, tree), submodel.geoDimUnitsObject);
+			node.data.data.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": submodel, "x":new Material(p.x), "y":new Material(p.y), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
 		});
 		//console.log("done");
 						
@@ -1119,13 +1140,13 @@ function getPrimitiveNeighborhood(primitive, dna){
 			
 			//console.log(getName(item));
 			var found = false;
-			if(primitive.parent){
-				if(primitive.parent.childrenId[item.id]){
-					var hoodName = primitive.parent.childrenId[item.id].dna.name.toLowerCase();
+			if(primitive.container){
+				if(primitive.container.childrenId[item.id]){
+					var hoodName = primitive.container.childrenId[item.id].dna.name.toLowerCase();
 					//while(hood[hoodName]){
 						//hoodName += ".extra";
 						//}
-					hood[hoodName] = primitive.parent.childrenId[item.id];
+					hood[hoodName] = primitive.container.childrenId[item.id];
 					found = true;
 				}
 			}

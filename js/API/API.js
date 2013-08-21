@@ -556,6 +556,20 @@ function frontWindow(){
 	return Ext.WindowMgr.getActive();
 }
 
+/*
+Method: closeAllWindows
+
+Closes all open windows.
+
+*/
+
+function closeAllWindows(){
+	var w;
+	while(w = Ext.WindowMgr.getActive()){
+		w.close();
+	}
+}
+
 
 /*
 

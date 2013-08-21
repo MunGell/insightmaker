@@ -9,6 +9,8 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 */
 
 
+functionLoaders.push(function(){
+
 defineFunction("RandBoolean", {params: [{name:"Probability", defaultVal: 0.5, noUnits:true, noVector:true}]}, function(x){
 	var p;
 	if (x.length != 0) {
@@ -214,31 +216,57 @@ functionBank["ifthenelse"] = function(x) {
 functionBank["ifthenelse"].delayEvalParams = true;
 
 functionBank["map"] = function(x) {
+	//console.log(x);
 	testArgumentsSize(x, "Map", 2, 2);
-	var v = evaluateNode(x[0].node, x[0].scope);
+	var v;
+	if(x[0].node instanceof Vector){
+		v = x[0].node;
+	}else if(x[0] instanceof Vector){
+		v = x[0];
+	}else{
+		v = evaluateNode(x[0].node, x[1].scope);
+	}
+	
 	if(v instanceof Primitive){
 		v = v.toNum();
 	}
 	if(! (v instanceof Vector)){
 		throw "MSG: Map() requires a vector as its first argument.";
 	}
+	v = v.fullClone();
+	
+	var fn;
+	var scope = {x: null, "-parent": x[1].scope}
 	var node = x[1].node;
-	var scope = {x: null, "-parent": x[0].scope}
-	function f(input){
-		scope.x = input;
-		return evaluateNode(node, scope);
+	try{
+		fn = evaluateNode(node, scope)
+	}catch(err){
+		
+	};
+
+	var f;
+	if( (fn instanceof Function) || (fn instanceof UserFunction)){
+		if(fn.fn){
+			fn=fn.fn;
+		}
+		f = function(x){
+			return fn([x])
+		};
+	}else{
+		f = function(input){
+			scope.x = input;
+			return evaluateNode(node, scope);
+		}
 	}
+
 	return  v.apply(f);
 };
 functionBank["map"].delayEvalParams = true;
+VectorObject["map"] = functionBank["map"];
 
-functionBank["sample"] = function(x) {
-	testArgumentsSize(x, "Sample", 2, 3);
+defineFunction( "Sample", {object: VectorObject, functionBank: true, params:[{name: "Vector", needVector: true}, {name: "Sample Size"}, {name: "Repeat", noVector: true, allowBoolean: true, defaultVal: false}]}, function(x){
 	var v = x[0].toNum();
 	var count = x[1].toNum().value;
-	if(! (v instanceof Vector)){
-		throw "MSG: Sample() requires a vector as its first argument.";
-	}
 	if(count == 0){
 		return new Vector([]);
 	}
@@ -266,14 +294,15 @@ functionBank["sample"] = function(x) {
 	}
 	
 	return new Vector(res);
-};
+});
 
-defineFunction("IndexOf", {params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true}]}, function(x){
+defineFunction("IndexOf", {object: VectorObject, functionBank: true,  params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true}]}, function(x){
 
 	var v = x[1];
+	
 	if(v instanceof Vector){
 		var res = [];
-		for(var i=0; i<v.length(); i++){
+		for(var i = 0; i < v.items.length; i++){
 			res.push(findElement(v.items[i], x[0]));
 		}
 		return new Vector(res);
@@ -282,13 +311,18 @@ defineFunction("IndexOf", {params:[{name: "Haystack", needVector: true, noUnits:
 	}
 });
 
-defineFunction("Contains", {params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true, noVector:true}]}, function(x){
+defineFunction("Contains", {object: VectorObject, functionBank: true, params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true, noVector:true}]}, function(x){
 		
 	if(eq(new Material(0), functionBank["indexof"](x))){
 		return false;
 	}else{
 		return true;
 	}
+});
+
+defineFunction("Collapse", {params:[{name: "Source", needVector: true, noUnits: false}, {name: "Target",  noVector:false}]}, function(x){
+		
+	return x[0].toNum().collapseDimensions(x[1].toNum());
 });
 
 function findElement(needle, haystack){
@@ -302,17 +336,29 @@ function findElement(needle, haystack){
 
 functionBank["filter"] = function(x) {
 	testArgumentsSize(x, "Filter", 2, 2);
-	var v = evaluateNode(x[0].node, x[0].scope);
+	
+	var v;
+	if(x[0].node instanceof Vector){
+		v = x[0].node;
+	}else if(x[0] instanceof Vector){
+		v = x[0];
+	}else{
+		v = evaluateNode(x[0].node, x[0].scope);
+	}
+	
 	if(v instanceof Primitive){
 		v = v.toNum();
 	}
 	if(! (v instanceof Vector)){
 		throw "MSG: Filter() requires a vector as its first argument.";
 	}
+	v = v.fullClone();
+	
 	var t = functionBank["map"](x);
 	return  functionBank["select"]([v,t]);
 };
 functionBank["filter"].delayEvalParams = true;
+VectorObject["filter"] = functionBank["filter"];
 
 functionBank["join"] = function(x){
 	var res = [];
@@ -432,6 +478,9 @@ defineFunction("Reverse", {allowEmpty:true, params:{name: "Items..."}, prep: fun
 	}
 	return new Vector(res, names);
 });
+defineFunction("Reverse", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["reverse"](x);
+});
 
 defineFunction("Sort", {allowEmpty:true, params:{name: "Items..."}, prep: function(x){
 	return functionBank["join"](x).toNum();
@@ -467,6 +516,9 @@ defineFunction("Sort", {allowEmpty:true, params:{name: "Items..."}, prep: functi
 	});
 	return res;
 });
+defineFunction("Sort", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["sort"](x);
+});
 
 defineFunction("Unique", {allowEmpty:true, params:{name: "Items....", allowBoolean:true}, prep: function(x){
 	return functionBank["join"](x).toNum();
@@ -496,12 +548,15 @@ defineFunction("Unique", {allowEmpty:true, params:{name: "Items....", allowBoole
 	}
 	return new Vector(res, names);
 });
+defineFunction("Unique", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["unique"](x);
+});
 
-defineFunction("Union", {params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Union", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	return functionBank["unique"](functionBank["join"](x).items);
 });
 
-defineFunction("Intersection", {params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Intersection", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	var v1 = x[0];
 	var v2 = x[1];
 	
@@ -519,7 +574,7 @@ defineFunction("Intersection", {params:[{name: "Vector 1", needVector: true}, {n
 });
 
 
-defineFunction("Difference", {params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Difference", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	var v1 = x[0];
 	var v2 = x[1];
 	
@@ -557,7 +612,7 @@ defineFunction("Factorial", {params: [{name: "Number", noUnits: true}], recurse:
 	return new Material(factorial(x[0].toNum().value));
 });
 
-defineFunction("Max", {params: {name: "Items..."}, prep: function(x){return functionBank["join"](x).toNum()}}, function(x){
+defineFunction("Max", {params: {name: "Items..."}, prep: joinVector}, function(x){
 	
 	var res = x.stackApply(function(v){
 		//console.log(v);
@@ -573,8 +628,64 @@ defineFunction("Max", {params: {name: "Items..."}, prep: function(x){return func
 	
 	return res;
 });
+defineFunction("Max", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["max"](x);
+});
 
-defineFunction("Min", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+function joinVector(x, notToNum){
+	if(! notToNum){
+		for(var i=0; i<x.length; i++){
+			x[i] = x[i].toNum();
+		}
+	}
+	if(x.length == 1 && (x[0] instanceof Vector)){
+		return x[0];
+	}else{
+		return (new Vector(scalarsToVectors(x)));
+	}
+}
+function joinArray(x){
+	return joinVector(x).items;
+}
+function scalarsToVectors(x){
+	var needVector = false;
+	var vec;
+	
+	for(var i=0; i<x.length; i++){
+		if(x[i] instanceof Vector){
+			vec = x[i];
+			needVector = true;
+			break;
+		}
+	}
+	
+	if(needVector){
+		for(var i=0; i<x.length; i++){
+			if(!(x[i] instanceof Vector)){
+				x[i] = replicateVectorStructure(vec, x[i]);
+			}
+		}
+	}
+	
+	return x;
+}
+function replicateVectorStructure(vec, val){
+	var v = vec.fullClone();
+	for(var i=0; i<v.items.length; i++){
+		if(v.items[i] instanceof Vector){
+			v.items[i] = replicateVectorStructure(v.items[i], val);
+		}else{
+			v.items[i] = val;
+		}
+	}
+	return v;
+}
+
+defineFunction("Fill", {object: VectorObject, functionBank: true, params: [{name: "Vector", needVector: true}, {name: "Value", allowBoolean: true} ]}, function(x){
+	return replicateVectorStructure(x[0], x[1]);
+});
+
+defineFunction("Min", {params:{name: "Items..."}, prep: joinVector}, function(x){
 	var res = x.stackApply(function(v){
 		var x = v.items;
 		var min = x[0];
@@ -588,28 +699,40 @@ defineFunction("Min", {params:{name: "Items..."}, prep:function(x){return functi
 	
 	return res;
 });
-defineFunction("Mean", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
+defineFunction("Min", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["min"](x);
+});
+defineFunction("Mean", {params:{name: "Items..."}, prep: joinArray}, function(x){
 	var sum = x[0];
 	for (var i = 1; i < x.length; i++) {
 		sum = plus(sum, x[i]);
 	}
 	return div(sum, new Material(x.length));
 });
-defineFunction("Sum", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
+defineFunction("Mean", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["mean"](x);
+});
+defineFunction("Sum", {params:{name: "Items..."}, prep: joinArray}, function(x){
 	var sum = x[0];
 	for (var i = 1; i < x.length; i++) {
 		sum = plus(sum, x[i]);
 	}
 	return sum;
 });
-defineFunction("Product", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum().items}}, function(x){
+defineFunction("Sum", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["sum"](x);
+});
+defineFunction("Product", {params:{name: "Items..."}, prep: joinArray}, function(x){
 	var total = x[0];
 	for (var i = 1; i < x.length; i++) {
 		total = mult(total, x[i]);
 	}
 	return total;
 });
-defineFunction("Median", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+defineFunction("Product", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["product"](x);
+});
+defineFunction("Median", {params:{name: "Items..."}, prep: joinVector}, function(x){
 	var res = x.stackApply(function(v){
 		var x = functionBank["sort"]([v]).items;
 		if (Math.floor((x.length - 1) / 2) == (x.length - 1) / 2) {
@@ -620,7 +743,10 @@ defineFunction("Median", {params:{name: "Items..."}, prep:function(x){return fun
 	});
 	return res;
 });
-defineFunction("StdDev", {params:{name: "Items..."}, prep:function(x){return functionBank["join"](x).toNum()}}, function(x){
+defineFunction("Median", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["median"](x);
+});
+defineFunction("StdDev", {params:{name: "Items..."}, prep: joinVector}, function(x){
 	var res = x.stackApply(function(v){
 		var x = v.items;
 		if (x.length > 1) {
@@ -640,6 +766,9 @@ defineFunction("StdDev", {params:{name: "Items..."}, prep:function(x){return fun
 		}
 	});
 	return res;
+});
+defineFunction("StdDev", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["stddev"](x);
 });
 defineFunction("Correlation", {params:  [{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x) {
 	var v1 = x[0].toNum();
@@ -671,8 +800,15 @@ functionBank["count"] = function(x) {
 };
 functionBank["flatten"] = function(x) {
 	var res = flatten(functionBank["join"](x));
-	return new Vector(res.items, res.hasName?res.names:[]);
+	return new Vector(res.items, res.hasName?res.names:undefined);
 };
+
+defineFunction("Length", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return new Material(sn("#e"+x[0].items.length));
+});
+defineFunction("Flatten", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return functionBank["flatten"](x);
+});
 
 function flatten(x){
 	var res = [];
@@ -731,6 +867,82 @@ defineFunction("Confirm", {params:[{name:"Message", allowString: true, allowBool
 	return confirm(x[0]);
 });
 
+defineFunction("Parse", {object: StringObject, params:[{name:"String", allowString: true}]}, function(x) {
+	//if((typeof x[0] == "string") || (x[0] instanceof String)){
+		return new Material(parseFloat(x[0], 10));
+		//}else{
+		//return x[0];
+		//}
+});
+
+defineFunction("Split", {object: StringObject, params:[{name:"String", needString: true}, {name:"Splitter", needString: true}]}, function(x) {
+	return s(new Vector(x[0].split(x[1])));
+});
+
+defineFunction("Join", {object: VectorObject, params:[{name:"String", needVector: true}, {name:"Joiner", needString: true}]}, function(x) {
+	return s(x[0].items.join(x[1]));
+});
+
+defineFunction("Trim", {object: StringObject, params:[{name:"String", needString: true}], recurse: true}, function(x) {
+	return s(x[0].trim());
+});
+
+defineFunction("Range", {object: StringObject, params:[{name:"String", needString: true}, {name:"Indexes", noUnits: true, allowVector: true}]}, function(x) {
+	if(x[1] instanceof Vector){
+		var res = "";
+		for(var i=0; i < x[1].items.length; i++){
+			res += x[0].charAt(x[1].items[i].toNum().value-1);
+		}
+		return s(res);
+	}else{
+		return s(x[0].charAt(x[1].toNum().value-1));
+	}
+});	
+
+defineFunction("Length", {object: StringObject, params:[{name:"String", needString: true}]}, function(x) {
+	return new Material(x[0].length);
+});
+
+defineFunction("IndexOf", {object: StringObject, params:[{name:"Haystack", needString: true}, {name:"Needle", needString: true}]}, function(x) {
+	return new Material(x[0].indexOf(x[1])+1);
+});
+
+defineFunction("Contains", {object: StringObject, params:[{name:"Haystack", needString: true}, {name:"Needle", needString: true}]}, function(x) {
+	return ! eq(StringObject["indexof"](x), new Material(0));
+});
+
+defineFunction("Lowercase", {object: StringObject, params:[{name:"String", needString: true}]}, function(x) {
+	return s(x[0].toLowerCase());
+});
+
+defineFunction("Uppercase", {object: StringObject, params:[{name:"String", needString: true}]}, function(x) {
+	return s(x[0].toUpperCase());
+});
+
+StringBase = makeObjectBase(StringObject);
+VectorBase = makeObjectBase(VectorObject);
+
+});
+
+function s(x){
+	if(x instanceof Vector){
+		return x.recurseApply(s);
+	}
+	var res = new String(x);
+	res.parent= StringBase;
+	return res;
+}
+
+function makeObjectBase(x){
+	var names = Object.keys(x);
+	var items = [];
+	for(var i=0; i<names.length; i++){
+		items.push(objectizeFunction(x[names[i]]));
+	}
+	return new Vector(items, names);
+}
+
+
 function defineFunction(name, definition, fn){
 	var configs = definition.params;
 	var arr = $.isArray(configs);
@@ -744,16 +956,25 @@ function defineFunction(name, definition, fn){
 	}
 	
 	var fnName;
-	if(arr){	
-		 fnName = name + "(" + configs.map(function(x){return x.name+(x.hasOwnProperty("defaultVal")?"="+x.defaultVal.toString():"");}).join(", ")+")";
+	if(arr){
+		if(! definition.object){
+			fnName = name + "(" + configs.map(function(x){return x.name+(x.hasOwnProperty("defaultVal")?"="+x.defaultVal.toString():"");}).join(", ")+")";
+		}else{
+			fnName = name + "(" + configs.slice(1).map(function(x){return x.name+(x.hasOwnProperty("defaultVal")?"="+x.defaultVal.toString():"");}).join(", ")+")";
+		}
 	} else{
 		fnName = name + "(items...)";
 	}
 	
-	functionBank[name.toLowerCase()] = function(x, id){
+	var base = functionBank;
+	if(definition.object){
+		base = definition.object;
+	}
+	base[name.toLowerCase()] = function(x, id){
 		if(definition.prep){
 			x = definition.prep(x);
 		}
+		
 		if ( arr && (x.length > configs.length || x.length < requiredLength) ) {
 			throw "MSG: Wrong number of parameters for " + fnName + ".";
 		}else if((! arr) && x.length == 0 && (! definition.allowEmpty)){
@@ -780,13 +1001,18 @@ function defineFunction(name, definition, fn){
 				throw "MSG: " + fnName + " requires a primitive for the argument '"+config.name+"'.";
 			}
 			if ((! config.allowBoolean) && (typeof x[i] == "boolean")) {
-				throw "MSG: " + fnName + " does not accept boolean values.";
+				throw "MSG: " + fnName + " does not accept boolean values for the argument '"+config.name+"'.";
 			}
 			if (config.needAgent && (!  (x[i] instanceof Agent) )) {
 				x[i] = agent(x[i], fnName, config.name);
 			}
-			if ((! config.allowString) && (typeof x[i] == "string")) {
-				throw "MSG: " + fnName + " does not accept string values.";
+			if (config.needString) {
+				if(! ((typeof x[i] == "string") || (x[i] instanceof String))){
+					throw "MSG: " + fnName + " requires a string for the argument '"+config.name+"'.";
+				}
+			}
+			if (((! config.allowString) && (! config.needString)) && (typeof x[i] == "string")) {
+				throw "MSG: " + fnName + " does not accept string values for the argument '"+config.name+"'.";
 			}
 			if (config.needAgents && (!  (x[i] instanceof Agents) )) {
 				x[i] = agents(x[i], fnName, config.name);
@@ -794,16 +1020,32 @@ function defineFunction(name, definition, fn){
 			if (config.needPopulation && (!  (x[i] instanceof Vector) )) {
 				x[i] = getPopulation(x[i], fnName, config.name);
 			}
+			if (config.needFunction && (!  ((x[i] instanceof Function) || (x[i] instanceof UserFunction)) )) {
+				throw "MSG: " + fnName + " requires a function for the argument '"+config.name+"'.";
+			}
 		}
 		
 		if(definition.recurse && (x[0] instanceof Vector)){
-			return x[0].cloneApply(function(x){return functionBank[name.toLowerCase()]([x], id)});
+			return x[0].cloneApply(function(z){return base[name.toLowerCase()]([z].concat(x.slice(1)), id)});
 		}else{
 			return fn(x, id);
 		}
 	}
+	if(definition.functionBank){
+		functionBank[name.toLowerCase()] = base[name.toLowerCase()];
+	}
+	if(definition.recurse){
+		VectorObject[name.toLowerCase()] = base[name.toLowerCase()];
+	}
 }
 
+function objectizeFunction(fn){
+	var f = function(x, fingerprint, lastSelf){
+		return fn([lastSelf].concat(x), fingerprint, lastSelf)
+	}
+	f.delayEvalParams = fn.delayEvalParams;
+	return f;
+}
 
 function factorial(x) {
 	if (Math.round(x) != x) {

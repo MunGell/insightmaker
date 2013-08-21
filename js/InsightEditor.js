@@ -7,257 +7,6 @@ This file may distributed and/or modified under the
 terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
-mxSvgCanvas2D.prototype.text = function(x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation)
-{
-    if (this.textEnabled && str != null)
-    {
-        rotation = (rotation != null) ? rotation : 0;
-        
-        var s = this.state;
-        x += s.dx;
-        y += s.dy;
-        
-        if (this.foEnabled && format == 'html')
-        {
-            var style = 'vertical-align:top;';
-            
-            if (clip)
-            {
-                style += 'overflow:hidden;';
-                
-                if (h > 0)
-                {
-                    style += 'max-height:' + Math.round(h) + 'px;';
-                }
-                
-                if (w > 0)
-                {
-                    style += 'width:' + Math.round(w) + 'px;';
-                }
-            }
-            else if (overflow == 'fill')
-            {
-                style += 'width:' + Math.round(w) + 'px;';
-                style += 'height:' + Math.round(h) + 'px;';
-            }
-            else if (overflow == 'width')
-            {
-                style += 'width:' + Math.round(w) + 'px;';
-                
-                if (h > 0)
-                {
-                    style += 'max-height:' + Math.round(h) + 'px;';
-                }
-            }
-
-            if (wrap && w > 0)
-            {
-                if (!clip)
-                {
-                    style += 'width:' + Math.round(w) + 'px;';
-                }
-                
-                style += 'white-space:normal;';
-            }
-            else
-            {
-                style += 'white-space:nowrap;';
-            }
-            
-            // Uses outer group for opacity and transforms to
-            // fix rendering order in Chrome
-            var group = this.createElement('g');
-            
-            if (s.alpha < 1)
-            {
-                group.setAttribute('opacity', s.alpha);
-            }
-
-            var fo = this.createElement('foreignObject');
-            fo.setAttribute('pointer-events', 'all');
-            
-            var div = this.createDiv(str, align, valign, style, overflow);
-            
-            // Ignores invalid XHTML labels
-            if (div == null)
-            {
-                return;
-            }
-            
-            group.appendChild(fo);
-            this.root.appendChild(group);
-            
-            // Code that depends on the size which is computed after
-            // the element was added to the DOM.
-            var ow = 0;
-            var oh = 0;
-            
-            if (mxClient.IS_IE && !mxClient.IS_SVG)
-            {
-                // Handles non-standard namespace for getting size in IE
-                var clone = document.createElement('div');
-                
-                clone.style.cssText = div.getAttribute('style');
-                clone.style.display = (mxClient.IS_QUIRKS) ? 'inline' : 'inline-block';
-                clone.style.visibility = 'hidden';
-                clone.innerHTML = (mxUtils.isNode(str)) ? str.outerHTML : str;
-
-                document.body.appendChild(clone);
-                ow = clone.offsetWidth;
-                
-                // Handles words that are longer than the given wrapping width
-                if (!clip && div.scrollWidth > ow)
-                {
-                    ow = Math.max(ow, div.scrollWidth);
-                    div.style.width = ow + 'px';
-
-                }
-                
-                // Computes max-height in quirks
-                if (mxClient.IS_QUIRKS && h > 0 && clip)
-                {
-                    // +2 to show background and border are visible
-                    oh = Math.min(h, clone.offsetHeight + 2);
-                }
-                else
-                {
-                    oh = clone.offsetHeight;
-                }
-                
-                clone.parentNode.removeChild(clone);
-                fo.appendChild(div);
-            }
-            // Workaround for export and Firefox 3.x (Opera has same bug but it cannot
-            // be fixed for all cases using this workaround so foreignObject is disabled). 
-            else if (this.root.ownerDocument != document ||
-                navigator.userAgent.indexOf('Firefox/3.') >= 0)
-            {
-                // Getting size via local document for export
-                div.style.visibility = 'hidden';
-                document.body.appendChild(div);
-                
-                ow = div.offsetWidth;
-                oh = div.offsetHeight;
-                
-                // Handles words that are longer than the given wrapping width
-                if (!clip && div.scrollWidth > ow)
-                {
-                    ow = Math.max(ow, div.scrollWidth);
-                    div.style.width = ow + 'px';
-
-                }
-
-                fo.appendChild(div);
-                div.style.visibility = '';
-            }
-            else
-            {
-                fo.appendChild(div);
-                ow = div.offsetWidth;
-                oh = div.offsetHeight;
-                
-                // Handles words that are longer than the given wrapping width
-                if (!clip && div.scrollWidth > ow)
-                {
-                    ow = Math.max(ow, div.scrollWidth);
-                    div.style.width = ow + 'px';
-
-                }
-            }
-            
-            if (overflow == 'fill')
-            {
-                w = Math.max(w, ow);
-                h = Math.max(h, oh);
-            }
-            else if (overflow == 'width')
-            {
-                w = Math.max(w, ow);
-                h = oh;
-            }
-            else
-            {
-                w = ow;
-                h = oh;
-            }
-
-            if (s.alpha < 1)
-            {
-                group.setAttribute('opacity', s.alpha);
-            }
-            
-            var dx = 0;
-            var dy = 0;
-
-            if (align == mxConstants.ALIGN_CENTER)
-            {
-                dx -= w / 2;
-            }
-            else if (align == mxConstants.ALIGN_RIGHT)
-            {
-                dx -= w;
-            }
-            
-            x += dx;
-            
-            if (valign == mxConstants.ALIGN_MIDDLE)
-            {
-                dy -= h / 2;
-            }
-            else if (valign == mxConstants.ALIGN_BOTTOM)
-            {
-                dy -= h;
-            }
-            
-            y += dy;
-
-            var tr = (s.scale != 1) ? 'scale(' + s.scale + ')' : '';
-
-            if (s.rotation != 0 && this.rotateHtml)
-            {
-                tr += 'rotate(' + (s.rotation) + ',' + (w / 2) + ',' + (h / 2) + ')';
-                var pt = this.rotatePoint((x + w / 2) * s.scale, (y + h / 2) * s.scale,
-                    s.rotation, s.rotationCx, s.rotationCy);
-                x = pt.x - w * s.scale / 2;
-                y = pt.y - h * s.scale / 2;
-            }
-            else
-            {
-                x *= s.scale;
-                y *= s.scale;
-            }
-
-            if (rotation != 0)
-            {
-                tr += 'rotate(' + (rotation) + ',' + (-dx) + ',' + (-dy) + ')';
-            }
-
-            group.setAttribute('transform', 'translate(' + Math.round(x) + ',' + Math.round(y) + ')' + tr);
-            fo.setAttribute('width', Math.round(Math.max(1, w)));
-            fo.setAttribute('height', Math.round(Math.max(1, h)));
-            
-            // Adds alternate content if foreignObject not supported in viewer
-            if (this.root.ownerDocument != document)
-            {
-                var alt = this.createAlternateContent(fo, x, y, w, h, str, align, valign, wrap, format, overflow, clip, rotation);
-                
-                if (alt != null)
-                {
-                    fo.setAttribute('requiredFeatures', 'http://www.w3.org/TR/SVG11/feature#Extensibility');
-                    var sw = this.createElement('switch');
-                    sw.appendChild(fo);
-                    sw.appendChild(alt);
-                    group.appendChild(sw);
-                }
-            }
-        }
-        else
-        {
-            this.plainText(x, y, w, h, str, align, valign, wrap, overflow, clip, rotation);
-        }
-    }
-};
-
 
 
 Ext.onReady(function() {
@@ -398,9 +147,9 @@ function main() {
 	
 
 
-
-	mxVertexHandler.prototype.rotationEnabled = true;
-
+	if(viewConfig.allowEdits){
+		mxVertexHandler.prototype.rotationEnabled = true;
+	}
 	// Enables managing of sizers
 	mxVertexHandler.prototype.manageSizers = true;
 
@@ -433,6 +182,8 @@ function main() {
 			if (cell !== null && isValued(cell))
 			{
 				showEditor(cell)
+			}else{
+				showContextMenu(null, me);
 			}
 			
 			// Blocks further processing of the event
@@ -613,8 +364,6 @@ function main() {
 		
 	}
 	
-	//graph.isLabelClipped = function(cell){return false};
-	
 	mxEdgeHandler.prototype.addEnabled = true;
 	mxEdgeHandler.prototype.removeEnabled = true;
 
@@ -627,15 +376,14 @@ function main() {
 	graph.isWrapping = graph.isHtmlLabel;
 
 	graph.isCellLocked = function(cell) {
-		return (!is_editor);
+		return (! viewConfig.allowEdits);
 	}
-	graph.allowButtonSelect=false;
+	graph.allowButtonSelect = false;
 	graph.isCellSelectable = function(cell) {
 		return (cell.value.nodeName != "Setting" && cell.value.nodeName != "Display" && (graph.allowButtonSelect || cell.value.nodeName != "Button"));
-		//(is_editor && (cell.value.nodeName!="Setting"));
 	}
 	graph.isCellEditable = function(cell) {
-		if (!is_editor) {
+		if (! viewConfig.allowEdits) {
 			return false;
 		}
 		return (cell.value.nodeName != "Display" && cell.value.nodeName != "Setting" && cell.value.nodeName != "Ghost" && ( cell.value.nodeName != "Button" || graph.isCellSelected(cell)));
@@ -803,7 +551,7 @@ function main() {
 	primitiveBank.action.setAttribute('Note', '');
 	primitiveBank.action.setAttribute('Trigger', 'Condition');
 	primitiveBank.action.setAttribute('Value', 'true');
-	primitiveBank.action.setAttribute('Action', 'Move([Self], <<rand, rand>>)');
+	primitiveBank.action.setAttribute('Action', 'Move([Self], {Rand, Rand})');
 
 	primitiveBank.agents = doc.createElement('Agents');
 	primitiveBank.agents.setAttribute('name', getText('New Agent Population'));
@@ -814,9 +562,9 @@ function main() {
 	primitiveBank.agents.setAttribute('GeoWidth', 200);
 	primitiveBank.agents.setAttribute('GeoHeight', 100);
 	primitiveBank.agents.setAttribute('Placement', "Random");
-	primitiveBank.agents.setAttribute('PlacementFunction', "<<rand*width([Self]), rand*height([Self])>>");
+	primitiveBank.agents.setAttribute('PlacementFunction', "{Rand*Width([Self]), Rand*Height([Self])}");
 	primitiveBank.agents.setAttribute('Network', "None");
-	primitiveBank.agents.setAttribute('NetworkFunction', "randBoolean(0.02)");
+	primitiveBank.agents.setAttribute('NetworkFunction', "RandBoolean(0.02)");
 	primitiveBank.agents.setAttribute('Agent', '');
 	primitiveBank.agents.setAttribute('Image', 'None');
 	primitiveBank.agents.setAttribute('FlipHorizontal', false);
@@ -869,7 +617,7 @@ function main() {
 
 	primitiveBank.setting = doc.createElement('Setting');
 	primitiveBank.setting.setAttribute('Note', '');
-	primitiveBank.setting.setAttribute('Version', '28');
+	primitiveBank.setting.setAttribute('Version', '29');
 	primitiveBank.setting.setAttribute('Throttle', '1');
 	primitiveBank.setting.setAttribute('TimeLength', '100');
 	primitiveBank.setting.setAttribute('TimeStart', '0');
@@ -896,8 +644,22 @@ function main() {
 		region: 'center',
 		border: false,
 		layout:"fit",
-		dockedItems: [{
+		items: [mxPanel]
+	});
+	
+	mainPanel.on('resize', function() {
+		graph.sizeDidChange();
+	});
+
+	configPanel = Ext.create('Ext.Panel', ConfigPanel());
+	ribbonPanel = Ext.create('Ext.Panel', RibbonPanel(graph, mainPanel, configPanel));
+
+	var viewport = new Ext.Viewport({
+		layout: 'border',
+		padding: (viewConfig.showTopLinks?'19 5 5 5':'5 5 5 5'),
+		items: [ribbonPanel, {
 		    xtype: 'toolbar',
+			region: 'south',
 		    dock: 'bottom',
 			hidden: false,
 			id: 'unfoldToolbar',layout:{align:"bottom"},
@@ -926,6 +688,7 @@ function main() {
 					restartUnfolding();
 	            }
 			},{
+				hidden: is_ebook,
 				scale: "large",
 				iconAlign: 'top',
 				iconCls: 'cancel-icon',
@@ -956,24 +719,8 @@ function main() {
 					doUnfoldStep()
 	            }
 			}
-		]}],
-		items: [mxPanel]
+		]}]
 	});
-	
-	mainPanel.on('resize', function() {
-		graph.sizeDidChange();
-	});
-
-	configPanel = Ext.create('Ext.Panel', ConfigPanel());
-	ribbonPanel = Ext.create('Ext.Panel', RibbonPanel(graph, mainPanel, configPanel));
-
-	var viewport = new Ext.Viewport({
-		layout: 'border',
-		padding: '19 5 5 5',
-		items: [ribbonPanel]
-	});
-	
-	
 
 	var connectionChangeHandler = function(sender, evt) {
 			var item = evt.getProperty("edge");
@@ -1113,7 +860,7 @@ function main() {
 
 	// Initializes the graph as the DOM for the panel has now been created	
 	graph.init(mxPanel.el.dom);
-	graph.setConnectable(is_editor);
+	graph.setConnectable(viewConfig.allowEdits);
 	graph.setDropEnabled(true);
 	graph.setSplitEnabled(false);
 	graph.connectionHandler.connectImage = new mxImage(builder_path+'/images/connector.gif', 16, 16);
@@ -1145,7 +892,7 @@ function main() {
 
 	graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
 		if (!evt.shiftKey) {
-			if(is_editor && ! (is_embed)){
+			if(viewConfig.enableContextMenu){
 				showContextMenu(null, evt);
 			}
 		}
@@ -1514,9 +1261,44 @@ function main() {
 		}
 
 	}
+	
+	if (mySetting.getAttribute("Version") < 29) {
+
+		var obsolete = excludeType(findValue(/[A-Za-z0-9_]\s+\(/i), "Button");
+
+		if(viewConfig.allowEdits){
+			if (obsolete.length > 0) {
+
+				var msg = '<p>Insight Maker has received a significant update to its equation engine providing improved flexibility and power.</p>';
+				msg += '<br/><p>A side effect of this update is that function names must now immediately be followed by a parenthesis. Thus, for instance, "Max&nbsp;&nbsp(1,2)" is no longer valid and needs to be replaced with  "Max(1,2)." This also improves the clarity and readability of equations.</p> ';
+				msg += '<br/><p>The following of your primitives appear to use an unsupported format. Their equations will automatically be updated to use the correct format:</p>';
+				msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
+					return x.getAttribute("name")
+				}).join(", ") + '</b></p>';
+				
+				msg += '<br/><p>You can save your model to keep these updates.</p>'
+
+				Ext.Msg.show({
+					icon: Ext.MessageBox.WARNING,
+					title: 'Model Update Required',
+					msg: msg,
+					buttons: Ext.MessageBox.OK
+				});
+
+			}
+		}
+		
+		if(obsolete.length>0){
+			obsolete.map(function(x){
+				setValue(x, getValue(x).replace(/([A-Za-z0-9_])\s+\(/gi, "$1("));
+			});
+		}
+		
+		mySetting.setAttribute("Version", 29);
+	}
 	loadBackgroundColor();
 
-	if (is_editor) {
+	if (viewConfig.saveEnabled) {
 		var mgr = new mxAutoSaveManager(graph);
 		mgr.autoSaveThreshold = 0;
 		mgr.save = function() {
@@ -1782,7 +1564,7 @@ function main() {
 	undoHistory.addListener(mxEvent.UNDO, undoHandler);
 	undoHistory.addListener(mxEvent.REDO, undoHandler);
 
-	if(! is_embed){
+	if(viewConfig.focusDiagram){
 		//stealing focus in embedded frames scrolls the page to the frame
 		graph.container.focus();
 	}
@@ -1834,7 +1616,7 @@ function main() {
 
 	//bold
 	keyHandler.bindControlKey(66, function() {
-		if (is_editor) {
+		if (viewConfig.allowEdits) {
 			graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_BOLD, excludeType(graph.getSelectionCells(), "Ghost"));
 			setStyles();
 		}
@@ -1842,7 +1624,7 @@ function main() {
 
 	//italics
 	keyHandler.bindControlKey(73, function() {
-		if (is_editor) {
+		if (viewConfig.allowEdits) {
 			graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_ITALIC, excludeType(graph.getSelectionCells(), "Ghost"));
 			setStyles();
 		}
@@ -1850,7 +1632,7 @@ function main() {
 
 	//underline
 	keyHandler.bindControlKey(85, function() {
-		if (is_editor) {
+		if (viewConfig.allowEdits) {
 			graph.toggleCellStyleFlags(mxConstants.STYLE_FONTSTYLE, mxConstants.FONT_UNDERLINE, excludeType(graph.getSelectionCells(), "Ghost"));
 			setStyles();
 		}
@@ -1878,7 +1660,7 @@ function main() {
 		scratchpadFn();
 	});
 
-	if(is_editor && (! is_embed)){
+	if(viewConfig.allowEdits){
 		
 		keyHandler.bindKey(8, function() {
 				graph.removeCells(graph.getSelectionCells(), false);
@@ -1947,12 +1729,6 @@ function main() {
 	});
 
 	
-
-	/*keyHandler.bindControlKey(71, function() {
-		if (is_editor) {
-			graph.setSelectionCell(graph.groupCells(null, 20));
-		}
-	});*/
 
 	graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt) {
 		selectionChanged(false);
@@ -2048,7 +1824,7 @@ function main() {
 			}];
 
 
-			if (is_editor && cell.getAttribute("Image", -99) != -99) {
+			if (viewConfig.allowEdits && cell.getAttribute("Image", -99) != -99) {
 				properties.push({
 					'name': 'Image',
 					'text': getText('Image'),
@@ -2060,7 +1836,7 @@ function main() {
 			}
 
 			if (isValued(cell) && cell.value.nodeName != "State" && cell.value.nodeName != "Action") {
-				if (is_editor && cell.value.nodeName != "Converter") {
+				if (viewConfig.allowEdits && cell.value.nodeName != "Converter") {
 					properties.push({
 						'name': 'ShowSlider',
 						'text': getText('Show Value Slider'),
@@ -2117,7 +1893,7 @@ function main() {
 					});
 				}
 
-				if (is_editor) {
+				if (viewConfig.allowEdits) {
 					properties.push({
 						'name': 'MaxConstraintUsed',
 						'text': getText('Max Constraint'),
@@ -2172,13 +1948,17 @@ function main() {
 
 			//no primitive has been selected. Stick in empty text and sliders.
 			if (drupal_node_ID == -1 && slids.length == 0) {
-				topDesc = "<center><a href='"+builder_path+"/resources/QuickStart.pdf' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
+				if(is_ebook){
+					topDesc = "<br/><br/><big><center>Select a primitive to see its properties.</center></big>";
+				}else{
+					topDesc = "<center><a href='"+builder_path+"/resources/QuickStart.pdf' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
+				}
 			} else {
 
 				var topDesc = clean(graph_description);
 				var topTags = "";
 				if (topDesc == "") {
-					if (is_editor) {
+					if (viewConfig.saveEnabled) {
 						topDesc = "<span style='color: gray'>"+getText("You haven't entered a description for this Insight yet. Please enter one to help others understand it.")+"</span>";
 					}
 				}
@@ -2336,12 +2116,12 @@ function main() {
 			properties.push({
 				'name': 'Delay',
 				'text': getText('Delay'),
-				'value': cell.getAttribute("Delay").toString(),
+				'value': isDefined(cell.getAttribute("Delay"))?cell.getAttribute("Delay").toString():"",
 				'group': getText('Behavior')
 			});
 
 		} else if (cellType == "Variable") {
-			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><b>Examples of valid Values:</b><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><b>Examples of valid Values:</b><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds()^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'Equation',
 				'text': getText('Value/Equation')+' =',
@@ -2387,7 +2167,7 @@ function main() {
 			})
 
 		} else if (cell.value.nodeName == "Flow") {
-			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><b>Examples of valid Flow Rates:</b><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><b>Examples of valid Flow Rates:</b><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes()/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
 			properties.push({
 				'name': 'FlowRate',
 				'text': getText('Flow Rate')+' =',
@@ -2741,7 +2521,7 @@ function main() {
 	
 	handleUnfoldToolbar();
 
-	if ((!is_editor) && (is_embed) && (is_zoom == 1)) {
+	if (is_embed && (is_zoom == 1)) {
 		graph.getView().setScale(0.25);
 		graph.fit();
 		graph.fit();
@@ -3055,7 +2835,7 @@ function showContextMenu(node, e) {
 	// Adds a small offset to make sure the mouse released event
 	// is routed via the shape which was initially clicked. This
 	// is required to avoid a reset of the selection in Safari.
-	menu.showAt([e.clientX + 1, e.clientY + 1]);
+	menu.showAt([mxEvent.getClientX(e) + 1, mxEvent.getClientY(e) + 1]);
 }
 
 

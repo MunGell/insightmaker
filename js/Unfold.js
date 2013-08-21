@@ -153,9 +153,9 @@ var revealUnfoldButtons = function(showUnfold){
 	if(showUnfold){
 		Ext.getCmp('unfoldUnfoldBut').hide();
 		Ext.getCmp('reloadUnfoldBut').show();
-		//if((! is_embed) && is_editor){
-		Ext.getCmp('exitUnfoldBut').show();
-		//}
+		if(! is_ebook){
+			Ext.getCmp('exitUnfoldBut').show();
+		}
 		Ext.getCmp('messageUnfoldBut').show();
 		Ext.getCmp('nextUnfoldBut').show();
 	}else{
@@ -543,7 +543,7 @@ function showUnfoldingWin(){
 						enableFontSize: false,
 						id: "actionNote",
                 		hideLabel: true,
-						height: 200,
+						flex: 1,
 						listeners:
 						{
 							change: function(t, newvalue, oldvalue){
@@ -576,7 +576,7 @@ function showUnfoldingWin(){
 					{
 						xtype: 'textareafield',
 						id: "actionCode",
-						rows:16,
+						flex:1,
 						hideLabel:true,
 						listeners:
 						{

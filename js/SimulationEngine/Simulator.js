@@ -21,6 +21,13 @@ var timeLength;
 var timeIndex;
 var doFullSpeed = false;
 
+function simulateWithErrorCheck(){
+	try{
+		simulate(arguments);
+	}catch(err){
+		return checkErr(err, simulate.config);
+	}
+}
 //model: {primitives, timeStart, timeLength, timeStep, RKOrder}
 var simulate = function(model, config, callback){
 	var firstTime = false;
@@ -268,7 +275,7 @@ var simulate = function(model, config, callback){
 		 var timeTaken = new Date().getTime()-start;
 		if((! config.silent) && (! doFullSpeed) && ( ( (!firstTime) && timeTaken>600) || (simulate.timeCounter/simulate.timeLengthNumber<.12 && timeTaken>200) || timeTaken > 1000 ) ){
 			simulatorProgress.updateProgress(simulate.timeCounter/simulate.timeLengthNumber, "Current Time: "+round(Math.min(timeEnd.value,time.value).toString(),12)+" "+time.units.names[0]);
-			setTimeout(simulate,50);
+			setTimeout(simulateWithErrorCheck,50);
 			return;
 		}
 	}

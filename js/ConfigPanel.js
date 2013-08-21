@@ -259,12 +259,16 @@ function handleGridEnables(gstore, selectedPrimitive) {
     }
 
     if (is_editor && isValued(selectedPrimitive) && selectedPrimitive.value.nodeName != "State" && selectedPrimitive.value.nodeName != "Action") {
-        getGridRecord(store, 'MaxConstraint').set('disabled', !isTrue(selectedPrimitive.getAttribute("MaxConstraintUsed")));
-        getGridRecord(store, 'MinConstraint').set('disabled', !isTrue(selectedPrimitive.getAttribute("MinConstraintUsed")));
+		try{
+        	getGridRecord(store, 'MaxConstraint').set('disabled', !isTrue(selectedPrimitive.getAttribute("MaxConstraintUsed")));
+        	getGridRecord(store, 'MinConstraint').set('disabled', !isTrue(selectedPrimitive.getAttribute("MinConstraintUsed")));
+		}catch(err){}
         if (selectedPrimitive.value.nodeName != "Converter") {
-            getGridRecord(store, 'SliderMax').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
-            getGridRecord(store, 'SliderMin').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
-            getGridRecord(store, 'SliderStep').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
+			try{
+            	getGridRecord(store, 'SliderMax').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
+            	getGridRecord(store, 'SliderMin').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
+            	getGridRecord(store, 'SliderStep').set('disabled', !isTrue(selectedPrimitive.getAttribute("ShowSlider")));
+			}catch(err){}
         }
     }
 }
@@ -273,16 +277,13 @@ function handleGridEnables(gstore, selectedPrimitive) {
 
 var ConfigPanel = function()
  {
-	var panel_width = 300;
-    if (is_embed) {
-        panel_width = 210;
-    }
+	
 
     return (
     {
         id: 'configPanel',
         region: 'east',
-        width: panel_width,
+        width: viewConfig.sideBarWidth,
         split: true,
 		autoScroll: true,
 		listeners: {beforeexpand:function(p){setSelected([])}},

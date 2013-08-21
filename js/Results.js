@@ -1,4 +1,3 @@
-"use strict";
 /*
 
 Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
@@ -1365,20 +1364,22 @@ function createResultsWindow(displayInformation) {
 
 
 
-	var win = new Ext.Window({
+	var winConfig = {
 		title: getText('Simulation Results %s', analysisCount),
 		analysisCount: analysisCount,
 		scratchPadStatus: {},
 		closable: true,
 		displays: displays,
 		tabs: rendered,
-		maximized: is_embed,
+		renderTo: 'ribbonPanel',
+		constrain: true,
+		maximized: viewConfig.fullScreenResults,
 		expandedState: true,
 		displayInformation: displayInformation,
 		minWidth: 350,
 		minHeight: 300,
 		width: Math.min(Ext.getBody().getViewSize().width, 580),
-		height: Math.min(Ext.getBody().getViewSize().height, is_embed ? 400 : (is_editor ? 500 : 490)),
+		height: Math.min(Ext.getBody().getViewSize().height, (! viewConfig.showResultsEdit) ? 460 : 500),
 		resizable: true,
 		maximizable: true,
 		minimizable: true,
@@ -1400,7 +1401,7 @@ function createResultsWindow(displayInformation) {
 			xtype: 'toolbar',
 			enableOverflow: true,
 			dock: 'top',
-			hidden: (!is_editor),
+			hidden: (! viewConfig.showResultsEdit),
 			items: [{
 				iconCls: "add-icon",
 				scale: "large",
@@ -1554,7 +1555,26 @@ function createResultsWindow(displayInformation) {
 
 			]
 		}]
-	});
+	};
+	
+    if(is_ebook){
+		winConfig.maximizable = false;
+		winConfig.closable = false;
+		winConfig.resizable = false;
+		winConfig.minimizable = false;
+		
+		 winConfig.tools = [
+	      {
+	         type: 'close-large',
+			 width:32,
+			 height:32,
+	         handler: function() {
+				 win.close();
+	         }
+	      }]
+	 }
+	
+	var win = new Ext.Window(winConfig);
 	win.on('minimize', function(w) {
 		if (w.expandedState) {
 			w.expandedState = false;
