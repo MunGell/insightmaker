@@ -17,18 +17,6 @@ Ext.onReady(function() {
     });
 })
 
- var converterStore = Ext.create('Ext.data.Store', {
-    fields: [{
-        type: 'string',
-        name: 'myId'
-    },
-    {
-        type: 'string',
-        name: 'displayText'
-    }],
-    data: []
-});
-
 var grid;
 
 function getRenderer(item) {
@@ -152,7 +140,13 @@ function createGrid(properties, topItems, bottomItems, selectedPrimitive) {
                     return (record.data['disabled'] == true) ? "x-item-disabled": "";
                 }
             },
-			listeners: (is_editor?{}:{'beforeedit':{fn:function(){return false;}}})
+			listeners: {
+				beforeedit: (viewConfig.allowEdits)?function(grid, e){
+					if(e.record.data.name == "Solver"){
+						return false;
+					}
+				}:function(){return false;}
+			}
         });
 
         configPanel.add(grid);
@@ -168,12 +162,16 @@ function createGrid(properties, topItems, bottomItems, selectedPrimitive) {
                 try
                 {
                     if ( itemId != "name" ||  (! isPrimitive(selectedPrimitive) ) || (validPrimitiveName(String(e.value), selectedPrimitive))) {
+						if(itemId == "name"){
+							var oldName = getName(selectedPrimitive)
+						}
                         var edit = new mxCellAttributeChange(
                         selectedPrimitive, itemId,
                         String(e.value));
                         graph.getModel().execute(edit);
 						if(itemId=="name"){
 							propogateGhosts(selectedPrimitive);
+							propogateName(selectedPrimitive, oldName);
 						}
                     }
 

@@ -20,11 +20,6 @@ RandList.prototype.get = function(i) {
   return this.vals[i];
 }
 
-var PreviousRandLists = [];
-var RandLoc = -1;
-var lastRandPos = -1;
-var RKOrder = 1;
-
 function getRandPos() {
     if(window.timeStep === undefined){
     	return 0; //HeroCalc
@@ -37,19 +32,19 @@ function Rand(minVal, maxVal) {
   if (minVal != null) {
     return Rand() * (maxVal - minVal) + (0+minVal);
   }
-  if(RKOrder == 1){
+  if(isUndefined(window.simulate) || simulate.RKOrder == 1){
   	return Math.random();
   }
   var RandPos = getRandPos();
-  if (RandPos != lastRandPos) {
-    RandLoc = (-1);
-    lastRandPos = RandPos;
+  if (RandPos != simulate.lastRandPos) {
+    simulate.randLoc = (-1);
+    simulate.lastRandPos = RandPos;
   }
-  while (PreviousRandLists.length <= RandPos) {
-    PreviousRandLists.push(new RandList());
+  while (simulate.previousRandLists.length <= RandPos) {
+    simulate.previousRandLists.push(new RandList());
   }
-  RandLoc = RandLoc + 1;
-  return PreviousRandLists[RandPos].get(RandLoc);
+  simulate.randLoc = simulate.randLoc + 1;
+  return simulate.previousRandLists[RandPos].get(simulate.randLoc);
 }
 
 function RandNormal(mu, sigma) {
@@ -116,12 +111,18 @@ function RandGamma(alpha, beta) {
   return -beta * Math.log(temp);
 }
 function RandTriangular(minimum, maximum, peak) {
-	if(minimum == maximum){
-		throw "MSG: Maximum can't equal the minimum for the triangular distribution.";
-	}
+	
 	var a = (0+minimum);
 	var b = (0+maximum);
 	var c = (0+peak);
+	
+	if(a == b){
+		throw "MSG: Maximum can't equal the minimum for the triangular distribution.";
+	}
+	
+	if(c<a || c>b){
+		throw "MSG: The peak must be within the maximum and minimum for the triangular distribution.";
+	}
 	
 	var fc = (c-a)/(b-a);
 	

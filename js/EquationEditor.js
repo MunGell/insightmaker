@@ -10,27 +10,6 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 var codeEditor;
 
-Ext.form.customFields = {
-	'code': Ext.extend(Ext.form.TriggerField, {
-		enableKeyEvents: false,
-		selectOnFocus: true
-	}),
-	'converter': Ext.extend(Ext.form.TriggerField, {
-		enableKeyEvents: false,
-		selectOnFocus: true,
-		stripCharsRe: /[^0-9\;\,\. \-]/g
-	}),
-	'units': Ext.extend(Ext.form.TriggerField, {
-		enableKeyEvents: false,
-		selectOnFocus: true,
-		stripCharsRe: /[^A-Za-z 0-9\.\/\(\)\*\^]/g
-	}),
-	'richText': Ext.extend(Ext.form.TriggerField, {
-		enableKeyEvents: false,
-		selectOnFocus: true
-	})
-};
-
 Ext.form.customFields['code'] = Ext.extend(Ext.form.customFields['code'], {
 	onTriggerClick: function() {
 
@@ -217,32 +196,32 @@ Ext.EquationWindow = function(args) {
 	]],
 	["Agents",
 	[
-	["Find All", "FindAll(##[Agent Population]$$)", "Returns a vector of all the agents in the agent population."],
-	["Find State", "FindState(##[Agent Population]$$, ##[State]$$)", "Returns a vector of agents in the specified state.", ["FindState([University], [Smoker])", "All smokers in the University population"]],
-	["Find Not State", "FindNotState(##[Agent Population]$$, ##[State]$$)", "Returns a vector of agents not in the specified state.", ["FindNotState([University], [Smoker])", "All non-smokers in the University population"]],
-	["Find Index", "FindIndex(##[Agent Population]$$, ##Index$$)", "Returns an agent with the specified index. Agent indexes start at 1.", ["FindIndex([Population], 1)", "The first agent created"]],
-	["Find Nearby", "FindNearby(##[Agent Population]$$, ##[Target]$$, ##Distance$$)", "Returns a vector of agents that are within the specified distance of a target agent.", ["FindNearby(FindState([Population], [Infected]), [Self], 25)", "All infected people who are near the agent"]],
-	["Find Nearest", "FindNearest(##[Agent Population]$$, ##[Target]$$, ##Count=1$$)", "Returns the nearest agents to the target agent. The number of agents returned is specified by the optional Count.", ["FindNearest([Population], [Target])", "The nearest agent to the target"]],
-	["Find Furthest", "FindFurthest(##[Agent Population]$$, ##[Target]$$, ##Count=1$$)", "Returns the agent farthest from the target agent. The number of agents returned is specified by the optional Count.", ["FindFurthest([Population], [Target], 4)", "The four furthest agents from the target"]],
-	["Value", "Value(##[Agent Population]$$, ##[Primitive]$$)", "Returns the values of the specified primitive for each agent in the population as a vector.", ["Value([University], [GPA]).Mean()", "The average GPA of all students in the University population"]],
-	["Set Value", "SetValue(##[Agent Population]$$, ##[Primitive]$$, ##Value$$)", "Sets the value of the specified primitive for each agent in the population to the given value.", ["SetValue([University], [Smoker], false)", "Make all the smokers quit smoking"]],
-	["Location", "Location(##[Agent]$$)", "Returns the location of an agent as the vector {x, y}.", ["Location([Self]).x", "The x-coordinate of the agent"]],
+	["Find All", "##[Agent Population]$$.FindAll()", "Returns a vector of all the agents in the agent population."],
+	["Find State", "##[Agent Population]$$.FindState(##[State]$$)", "Returns a vector of agents in the specified state.", ["[University].FindState([Smoker])", "All smokers in the University population"]],
+	["Find Not State", "##[Agent Population]$$.FindNotState(##[State]$$)", "Returns a vector of agents not in the specified state.", ["[University].FindNotState([Smoker])", "All non-smokers in the University population"]],
+	["Find Index", "##[Agent Population]$$.FindIndex(##Index$$)", "Returns an agent with the specified index. Agent indexes start at 1.", ["[Population].FindIndex(1)", "The first agent created"]],
+	["Find Nearby", "##[Agent Population]$$.FindNearby(##[Target]$$, ##Distance$$)", "Returns a vector of agents that are within the specified distance of a target agent.", ["[Population].FindState([Infected]).FindNearby([Self], 25)", "All infected people who are near the agent"]],
+	["Find Nearest", "##[Agent Population]$$.FindNearest(##[Target]$$, ##Count=1$$)", "Returns the nearest agents to the target agent. The number of agents returned is specified by the optional Count.", ["[Population].FindNearest([Target])", "The nearest agent to the target"]],
+	["Find Furthest", "##[Agent Population]$$.FindFurthest(##[Target]$$, ##Count=1$$)", "Returns the agent farthest from the target agent. The number of agents returned is specified by the optional Count.", ["[Population].FindFurthest([Target], 4)", "The four furthest agents from the target"]],
+	["Value", "##[Agent Population]$$.Value(##[Primitive]$$)", "Returns the values of the specified primitive for each agent in the population as a vector.", ["[University].Value([GPA]).Mean()", "The average GPA of all students in the University population"]],
+	["Set Value", "##[Agent Population]$$.SetValue(##[Primitive]$$, ##Value$$)", "Sets the value of the specified primitive for each agent in the population to the given value.", ["[University].SetValue([Smoker], false)", "Make all the smokers quit smoking"]],
+	["Location", "##[Agent]$$.Location()", "Returns the location of an agent as the vector {x, y}.", ["[Self].Location().x", "The x-coordinate of the agent"]],
 	["Distance", "Distance(##[Agent 1]$$, ##[Agent 2]$$)", "Returns the distance between two agents."],
-	["Move", "Move(##[Agent]$$, ##{x, y}$$)", "Moves an agent the amount specified.", ["Move([Self], {Rand(), Rand()})", "Take a random walk"]],
-	["MoveTowards", "MoveTowards(##[Agent]$$, ##[Target]$$, ##Distance$$)", "Moves an agent towards a target agent the distance specified.", ["MoveTowards([Self], [Prey], 10)", "Chase after the prey"]],
-	["Connected", "Connected(##[Agent]$$)", "Returns the agents connected to an agent in the network.", ["Connected([Self]).Count()", "The number of connections an agent has"]],
-	["Connect", "Connect(##[Agent 1]$$, ##[Agent 2]$$)", "Connects two agents in the network. The second parameter can also be a vector of agents.", ["Connect([Self], FindNearest([Population], [Self]))", "Connects an agent to the nearest agent to it in the population"]],
-	["Unconnect", "Unconnect(##[Agent 1]$$, ##[Agent 2]$$)", "Unconnects two agents in the network. The second parameter can also be a vector of agents.", ["Unconnect([Self], Connected([Self]))", "Removes an agent's connections"]],
-	["PopulationSize", "PopulationSize(##[Agent Population]$$)", "The total number of agents in a population."],
-	["Add", "Add(##[Agent Population]$$, ##[Base]=Initial Agent$$)", "Adds a new agent to the population. If [Base] is set, the new agent will be a clone of [Base]. Otherwise the agent will be like a newly created agent at the start of the simulation.", ["Repeat(Add([University]), 200)", "Enroll 200 new students in the University"]],
-	["Remove", "Remove(##[Agent]$$)", "Removes an agent from the population. The agent will no longer be simulated. Can be used to \"Kill\" an agent.", ["Map(FindState([University], [Smoker]), Remove(x))", "Expel all the smokers from the University"]],
+	["Move", "##[Agent]$$.Move(##{x, y}$$)", "Moves an agent the amount specified.", ["[Self].Move({Rand(), Rand()})", "Take a random walk"]],
+	["MoveTowards", "##[Agent]$$.MoveTowards(##[Target]$$, ##Distance$$)", "Moves an agent towards a target agent the distance specified.", ["[Self].MoveTowards([Prey], 10)", "Chase after the prey"]],
+	["Connected", "##[Agent]$$.Connected()", "Returns the agents connected to an agent in the network.", ["[Self].Connected().Length()", "The number of connections an agent has"]],
+	["Connect", "##[Agent 1]$$.Connect(##[Agent 2]$$)", "Connects two agents in the network. The second agent can also be a vector of agents.", ["[Self].Connect([Population].FindNearest([Self]))", "Connects an agent to the nearest agent to it in the population"]],
+	["Unconnect", "##[Agent 1]$$.Unconnect(##[Agent 2]$$)", "Unconnects two agents in the network. The second agent can also be a vector of agents.", ["[Self].Unconnect([Self].Connected())", "Removes an agent's connections"]],
+	["PopulationSize", "##[Agent Population]$$.PopulationSize()", "The total number of agents in a population."],
+	["Add", "##[Agent Population]$$.Add(##[Base]=Initial Agent$$)", "Adds a new agent to the population. If [Base] is set, the new agent will be a clone of [Base]. Otherwise the agent will be like a newly created agent at the start of the simulation.", ["Repeat([University].Add(), 200)", "Enroll 200 new students in the University"]],
+	["Remove", "##[Agent]$$.Remove()", "Removes an agent from the population. The agent will no longer be simulated. Can be used to \"Kill\" an agent.", ["[University].FindState([Smoker]).Map(x.Remove())", "Expel all the smokers from the University"]],
 	["Width", "Width(##[Agent]$$)", "The width of the geographic region an agent is within."],
 	["Height", "Height(##[Agent]$$)", "The height of the geographic region and agent is within."]
 	]],
 	["Vectors",
 	[
 	["Range", "##Start$$:##End$$", "Creates a vector with a range of sequential values going from start to end. To use step sizes other than 1, place the step size between the start and the end, for example \"0:0.5:10\".", ["1:5", "{1, 2, 3, 4, 5}"]],
-	["Length", "##Vector$$.Length()", "The number of elements in a vector.", ["{1, 1, 2, 3}.Length()", "4"]],
+	["Length", "##Vector$$.Length()", "The number of elements in a vector. Count() is a synonym for length.", ["{1, 1, 2, 3}.Length()", "4"]],
 	["Select", "##Vector$${##Selector$$}", "Selects one or more elements from a vector. The selector can be an integer or vector of integers, a string or vector of strings (for named vectors), or a vector of booleans.", ["{1,3,7}{2}", "3"]],
 	["Join", "Join(##Item 1$$, ##Item 2$$, ##Item N$$)", "Merges items together into a single vector.", ["Join(0, {1, 1, 2})", "{0, 1, 1, 2}"]],
 	["Flatten", "##Vector$$.Flatten()", "Flattens a vector removing and expanding all nested vectors.", ["{ {0}, {1, 1, 2} }.Flatten()", "{0, 1, 1, 2}"]],

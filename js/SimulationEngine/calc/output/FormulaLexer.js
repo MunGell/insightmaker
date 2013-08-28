@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2013-07-30 20:45:33
+// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2013-08-20 07:58:50
 
 var FormulaLexer = function(input, state) {
 // alternate constructor @todo
@@ -1699,7 +1699,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
         try {
             var _type = this.PRIMITIVE;
             var _channel = org.antlr.runtime.BaseRecognizer.DEFAULT_TOKEN_CHANNEL;
-            // /Library/WebServer/Documents/calc/Formula.g:387:2: ( LBRACKET ~ LBRACKET ( . )* RBRACKET | LBRACKET LBRACKET ( . )* RBRACKET RBRACKET )
+            // /Library/WebServer/Documents/calc/Formula.g:387:2: ( LBRACKET (~ '[' ) ( . )* RBRACKET | LBRACKET LBRACKET ( . )* RBRACKET RBRACKET )
             var alt22=2;
             var LA22_0 = this.input.LA(1);
 
@@ -1727,9 +1727,11 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
             }
             switch (alt22) {
                 case 1 :
-                    // /Library/WebServer/Documents/calc/Formula.g:387:4: LBRACKET ~ LBRACKET ( . )* RBRACKET
+                    // /Library/WebServer/Documents/calc/Formula.g:387:4: LBRACKET (~ '[' ) ( . )* RBRACKET
                     this.mLBRACKET(); 
-                    if ( (this.input.LA(1)>='\u0000' && this.input.LA(1)<='a')||(this.input.LA(1)>='c' && this.input.LA(1)<='\uFFFF') ) {
+                    // /Library/WebServer/Documents/calc/Formula.g:387:13: (~ '[' )
+                    // /Library/WebServer/Documents/calc/Formula.g:387:14: ~ '['
+                    if ( (this.input.LA(1)>='\u0000' && this.input.LA(1)<='Z')||(this.input.LA(1)>='\\' && this.input.LA(1)<='\uFFFF') ) {
                         this.input.consume();
 
                     }
@@ -1738,7 +1740,10 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
                         this.recover(mse);
                         throw mse;}
 
-                    // /Library/WebServer/Documents/calc/Formula.g:387:24: ( . )*
+
+
+
+                    // /Library/WebServer/Documents/calc/Formula.g:387:20: ( . )*
                     loop20:
                     do {
                         var alt20=2;
@@ -1754,7 +1759,7 @@ org.antlr.lang.augmentObject(FormulaLexer.prototype, {
 
                         switch (alt20) {
                         case 1 :
-                            // /Library/WebServer/Documents/calc/Formula.g:387:24: .
+                            // /Library/WebServer/Documents/calc/Formula.g:387:20: .
                             this.matchAny(); 
 
 

@@ -1,4 +1,4 @@
-// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2013-07-30 20:45:24
+// $ANTLR 3.3 Nov 30, 2010 12:45:30 /Library/WebServer/Documents/calc/Formula.g 2013-08-20 07:58:49
 
 var FormulaParser = function(input, state) {
     if (!state) {
@@ -957,7 +957,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: logicalExpression, innerBlock
+            // elements: innerBlock, logicalExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1157,7 +1157,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: innerBlock, IDENT, logicalExpression
+            // elements: innerBlock, logicalExpression, IDENT
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1329,7 +1329,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: innerBlock, IDENT, logicalExpression
+            // elements: IDENT, innerBlock, logicalExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1980,7 +1980,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: innerBlock, IDENT, defaultValue
+            // elements: defaultValue, innerBlock, IDENT
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2358,7 +2358,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: innerBlock, expression, defaultValue, IDENT
+            // elements: expression, IDENT, defaultValue, innerBlock
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -2706,7 +2706,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: defaultValue, logicalExpression, IDENT
+                    // elements: logicalExpression, IDENT, defaultValue
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2881,7 +2881,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: PRIMITIVE, assigned, logicalExpression
+                    // elements: assigned, logicalExpression, PRIMITIVE
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3414,7 +3414,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                 switch (alt40) {
                 case 1 :
                     // /Library/WebServer/Documents/calc/Formula.g:181:26: ( EQUALS | NOTEQUALS ) relationalExpression
-                   
+                    
                     set127=this.input.LT(1);
                     if ( this.input.LA(1)==EQUALS||this.input.LA(1)==NOTEQUALS ) {
                         this.input.consume();
@@ -3741,7 +3741,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
                 switch (alt43) {
                 case 1 :
                     // /Library/WebServer/Documents/calc/Formula.g:208:22: ( MULT | DIV | MOD ) arrayExpression
-                    
+                   
                     set136=this.input.LT(1);
                     if ( (this.input.LA(1)>=MULT && this.input.LA(1)<=MOD) ) {
                         this.input.consume();
@@ -4163,7 +4163,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: unaryExpression, unaryOrNegate
+            // elements: unaryOrNegate, unaryExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7072,7 +7072,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
             // AST REWRITE
-            // elements: additiveExpression, unitMultiplicativeExpression
+            // elements: unitMultiplicativeExpression, additiveExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -7438,7 +7438,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: CUBED, SQUARED, unitPowerExpression
+                    // elements: SQUARED, CUBED, unitPowerExpression
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7527,7 +7527,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
 
 
                     // AST REWRITE
-                    // elements: SQUARED, CUBED, unitPowerExpression
+                    // elements: CUBED, unitPowerExpression, SQUARED
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7989,7 +7989,7 @@ org.antlr.lang.augmentObject(FormulaParser.prototype, {
             // /Library/WebServer/Documents/calc/Formula.g:443:7: STRING
             root_0 = this.adaptor.nil();
 
-            STRING261=this.match(this.input,STRING,FormulaParser.FOLLOW_STRING_in_string3065); if (this.state.failed) return retval;
+            STRING261=this.match(this.input,STRING,FormulaParser.FOLLOW_STRING_in_string3066); if (this.state.failed) return retval;
             if ( this.state.backtracking===0 ) {
             STRING261_tree = this.adaptor.create(STRING261);
             root_0 = this.adaptor.becomeRoot(STRING261_tree, root_0);
@@ -9848,7 +9848,7 @@ org.antlr.lang.augmentObject(FormulaParser, {
     FOLLOW_unitMultiplicativeExpression_in_unit2526: new org.antlr.runtime.BitSet([0x00000000, 0x00000000,0x00000000, 0x00002000]),
     FOLLOW_109_in_unit2528: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_PRIMITIVE_in_primitive2597: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
-    FOLLOW_STRING_in_string3065: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
+    FOLLOW_STRING_in_string3066: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_assignment_in_synpred5_Formula448: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_logicalExpression_in_synpred6_Formula454: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),
     FOLLOW_forLoop_in_synpred8_Formula466: new org.antlr.runtime.BitSet([0x00000002, 0x00000000]),

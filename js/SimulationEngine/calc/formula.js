@@ -87,7 +87,11 @@ function UserFunction(){
 	
 }
 UserFunction.prototype.toNum = function(){
-	return this.fn([]);
+	if(!this.fn){
+		return this([]);
+	}else{
+		return this.fn([]);
+	}
 }
 
 var StringObject = {};
@@ -211,14 +215,15 @@ Vector.prototype.collapseDimensions = function(target){
 			var targetLevel = target;
 			for(var i=0; i<this.depth(); i++){
 				if(!(targetLevel instanceof Vector)){
-					selector.push(functionBank["sum"]);
+					selector.push(function(x){return functionBank["sum"](x[0].items)});
 					base = base.items[0];
 				}else if(keysMatch(base.namesLC, targetLevel.namesLC)){
 					selector.push("*");
 					base = base.items[0];
 					targetLevel = targetLevel.items[0]
 				}else{
-					selector.push(functionBank["sum"]);
+					selector.push(function(x){return functionBank["sum"](x[0].items)});
+					
 					base = base.items[0];
 				}
 			}
@@ -434,6 +439,7 @@ Vector.prototype.equals = function(vec){
 if(! Primitive){
 	var Primitive = function(n){
 		this.v = n;
+		this.vector = new Vector([],[], VectorBase);
 	}
 	Primitive.prototype.value = function(){
 		return this.v.fullClone();
@@ -448,6 +454,8 @@ if(! Primitive){
 	Primitive.prototype.toString = function(){
 		return "Primitive Reference";
 	};
+	
+	
 }
 
 function strictEquals(a,b){
@@ -497,10 +505,10 @@ function evaluateTree(root, varBank){
 	}
 }
 
-var PB = {"test": new Primitive(new Material(3))};
+var PB = {"test": new Primitive(new Material(3)),"a": new Primitive(new Material(1)),"b": new Primitive(new Material(2)),"c": new Primitive(new Material(3))};
 
 
-function evaluate(input) {
+function evaluate(input, dontToNum) {
 	//console.log(input);
 	
 	PB["test vector"] = new Primitive(new Vector([new Material(1), new Material(2), new Material(3)],[], VectorBase));
@@ -510,8 +518,16 @@ function evaluate(input) {
 	//console.log(root);
 	var x;
 	try {
-		x = evaluateTree(root, varBank).toNum();
-		//console.log(root);
+		
+		
+		x = evaluateTree(root, varBank)
+		
+		if(! dontToNum){
+			x = x.toNum();
+		}
+
+	
+		
  	}catch(err){
 		 if(err=="PLOT"){
 			var res = {isPlot: true};
@@ -1123,30 +1139,65 @@ funcEvalMap["INNER"] = function(node, scope) {
 	
 	for(var i=1; i< node.children.length; i++){
 		//console.log(node.children[i].typeName)
-		if(base instanceof Primitive){
-			base = base.toNum();
-			
-			if(!((base instanceof Function) || (base instanceof UserFunction))){
-				lastSelf = base;
-				lastBase = base;
-			}
-		}
 		
 		
 		if(node.children[i].typeName == "SELECTOR" ){
-			try{
-				base = selectFromMatrix(base, createSelector(node.children[i], scope));
-			}catch(err){
-				if(base instanceof PrimitiveStore){
+			if(node.children[i].children[0].typeName == "DOTSELECTOR"){
+				
+				for(var j=0; j<node.children[i].children[0].children.length; j++){
+					var res = [];
+					if(node.children[i].children[0].children[j].text){
+						res.push(node.children[i].children[0].children[j].text);
+					}else{
+						res.push(node.children[i].children[0].children[j].valueOf());
+					}
+					try{
+						base = selectFromMatrix(base, res);
+					}catch(err){
+						if(base instanceof Primitive && !(base instanceof Agent)){
+							base = base.toNum();
+							j--;
+						}else{
+							throw(err);
+						}
+					}
+					
+					if(!((base instanceof Function) || (base instanceof UserFunction))){
+						lastSelf = base;
+						lastBase = base;
+					}
+				}
+				
+			}else{
+			
+				if(base instanceof Primitive){
 					base = base.toNum();
-					i--;
-				}else{
-					throw(err);
+			
+					if(!((base instanceof Function) || (base instanceof UserFunction))){
+						lastSelf = base;
+						lastBase = base;
+					}
+				}
+		
+		
+				try{
+					base = selectFromMatrix(base, createMatrixSelector(node.children[i], scope, 0, true));
+				}catch(err){
+					if(base instanceof Primitive ){
+						base = base.toNum();
+						i--;
+					}else{
+						throw(err);
+					}
+				}
+				
+				if(!((base instanceof Function) || (base instanceof UserFunction))){
+					lastSelf = base;
+					lastBase = base;
 				}
 			}
-			if(!((base instanceof Function) || (base instanceof UserFunction))){
-				lastBase = base;
-			}
+			
+			
 		}else{//"FUNCALL"
 			base = callFunction(base, node.children[i], scope, lastSelf, lastBase);
 			
@@ -1161,18 +1212,38 @@ funcEvalMap["INNER"] = function(node, scope) {
 
 function callFunction(base, node, scope, lastSelf, lastBase){
 	if((typeof base != "function") && ! (base instanceof UserFunction)){
+		//if(isLocal()){
+		//	console.log(base);
+		//}
 		throw "MSG: Trying to call a non-function.";
 	}
-	if(! node.functionFingerprint){
-		node.functionFingerprint = "FINGERPRINT-" + Math.random();
-		
-		//if (base.fn) {
-		//	node.fn = base.fn; // user defined function
-		//} else {
-		//	node.delayEvalParams = base.delayEvalParams;
-		//	node.fn = base; //built-in
-		//}
+	
+	var vals = [];
+	var fingerprint = "";
+	if(node instanceof Array){
+		vals = node;
+	}else{
+		if(! node.functionFingerprint){
+			node.functionFingerprint = "FINGERPRINT-" + Math.random();
+		}
+		fingerprint = node.functionFingerprint;
+
+		if(base.delayEvalParams){
+			//don't evaluate params right away. needed for IfThenElse and short circuiting
+			for (var j = 0; j < node.children.length; j++){
+				vals.push({node: node.children[j], scope: scope});
+			}
+		}else{
+			for (var j = 0; j < node.children.length; j++){
+				var item = evaluateNode(node.children[j], scope);
+				if(item.fullClone && ! (item instanceof Vector)){
+					item = item.fullClone();
+				}
+				vals.push(item);
+			}
+		}
 	}
+	
 	var fn;
 	if (base.fn) {
 		 fn = base.fn; // user defined function
@@ -1180,24 +1251,8 @@ function callFunction(base, node, scope, lastSelf, lastBase){
 		node.delayEvalParams = base.delayEvalParams;
 		fn = base; //built-in
 	}
-	var vals = [];
-
-	if(base.delayEvalParams){
-		//don't evaluate params right away. needed for IfThenElse and short circuiting
-		for (var j = 0; j < node.children.length; j++){
-			vals.push({node: node.children[j], scope: scope});
-		}
-	}else{
-		for (var j = 0; j < node.children.length; j++){
-			var item = evaluateNode(node.children[j], scope);
-			if(item.fullClone && ! (item instanceof Vector)){
-				item = item.fullClone();
-			}
-			vals.push(item);
-		}
-	}
 	
-	return fn(vals, node.functionFingerprint, lastSelf, lastBase);
+	return fn(vals, fingerprint, lastSelf, lastBase);
 	
 }
 
@@ -1216,11 +1271,13 @@ function createMatrixSelector(node, scope, offset, createFunctions){
 				}else{
 					var fn = x.fn;
 				}
+				(function(f){
 				selector.push(function(x){
 					return x[0].stackApply(function(x){
-						return fn([x]);	
+						return f([x]);	
 					});
-				});
+				})
+				})(fn);
 			}else{
 				selector.push(x.toNum());
 			}
@@ -1234,12 +1291,18 @@ function selectFromMatrix(mat, items, fill){
 	//console.log(items)
 
 	var m = mat;
-	if((! (m instanceof Vector)) && m.parent){
-		m = new Vector([],[], m.parent);
+	if(! (m instanceof Vector)){
+		if(m.vector){
+			m = m.vector;
+		}else if(m.parent){
+			m = new Vector([],[], m.parent);
+		}
 	}
 	if(isUndefined(fill) && m.fullClone){
 		m = m.fullClone();
 	}
+	//console.log("--")
+	//console.log(items.map(function(x){return x([ new Vector([new Material(1), new Material(2), new Material(3)]) ]).value+""}));
 	var root = selectFromVector(m, items.shift(), items.length==0?fill:undefined, isDefined(fill))
 	var children = [];
 	if(root.collapsed){
@@ -1247,26 +1310,38 @@ function selectFromMatrix(mat, items, fill){
 	}else{
 		children = root.data.items;
 	}
+	
+	//console.log(children.map(function(x){return x}))
 	//console.log(children);
+	//console.log(children.map(function(x){return x.items.map(function(x){return x})})+0);
 	while(items.length > 0){
 		//console.log("iteration");
 		//console.log(children);
 		var newChildren = [];
 		var selector = items.shift();
+		//console.log(selector)
 		for(var i = 0; i < children.length; i++){
 			//console.log("child")
 			//console.log(children[i])
 			if(! (children[i] instanceof Vector)){
-				throw "MSG: No element available for: "+selector;
+			//	if(children[i].parent instanceof Vector){
+			//		children[i] = children[i].parent.fullClone();
+			//	}else if(children[i].vector instanceof Vector){
+			//		children[i] = children[i].vector.fullClone();
+			//	}else{
+					throw "MSG: No element available for: "+selector;
+			//	}
 			}
+			//console.log(children[i])
 			var vec = selectFromVector(children[i], selector, items.length==0?fill:undefined);
-
+			//console.log(vec);
 			
 			if(vec.collapsed){
 
 				if(! fill){
 					children[i].items = [vec.data];
 					children[i].names = ["!!BREAKOUT DATA"]; 
+					children[i].namesLC = ["!!BREAKOUT DATA"]; 
 				}
 			
 				newChildren=newChildren.concat(vec.data)
@@ -1276,15 +1351,17 @@ function selectFromMatrix(mat, items, fill){
 				if(! fill){
 					children[i].items = vec.data.items;
 					children[i].names = vec.data.names;
+					children[i].namesLC = vec.data.names?vec.data.names.map(function(x){if(x){return x.toLowerCase()}else{return x}}):undefined;
 				}
 			}
 		}
 		children = newChildren;
+		//console.log(children.map(function(x){return x.items.map(function(x){return x})}));
 	}
 	
 	//console.log("done:")
 	//console.log(root.data)
-
+	//console.log(root);
 	return doBreakouts(root.data);
 }
 
@@ -1302,6 +1379,8 @@ function doBreakouts(vec){
 }
 
 function selectFromVector(vec, items, fill, doNotClone){
+	
+	
 
 	if(items=="*"){
 		return {data: vec};
@@ -1336,7 +1415,7 @@ function selectFromVector(vec, items, fill, doNotClone){
 				}
 			}
 		}
-		return {collapsed: false, parent: vec, data: new Vector(res, names)};
+		return {collapsed: false, parent: vec, data: new Vector(res, names, vec.parent)};
 	}else{
 		return {collapsed: true, parent: vec, data: selectElementFromVector(vec, items, fill).value};
 	}
@@ -1344,6 +1423,17 @@ function selectFromVector(vec, items, fill, doNotClone){
 
 
 function selectElementFromVector(vec, item, fill){
+	
+	/*if(! (vec instanceof Vector)){
+		if(vec.vector){
+			vec = vec.vector;
+		}else if(vec.parent){
+			vec = vec.parent;
+		}else{
+			throw "MSG: Upping failed."
+		}
+	}*/
+	
 	var name = undefined;
 	var value = undefined;
 	
@@ -1362,7 +1452,7 @@ function selectElementFromVector(vec, item, fill){
 					index = vec.names.indexOf("*");
 				}
 			}
-			if(index<0 || isUndefined(index)){
+			if(index < 0 || isUndefined(index)){
 				if(isUndefined(fill)){
 					throw "MSG: Key '"+item+"' not in vector.";
 				}else{
@@ -1379,7 +1469,7 @@ function selectElementFromVector(vec, item, fill){
 		}
 	
 	}else{
-		index = minus(item.toNum(), new Material(sn("#e"+1)));
+		index = parseFloat(item.toNum())-1;
 	}
 	
 	if((index instanceof String) || (typeof index == "string")){
@@ -1398,8 +1488,8 @@ function selectElementFromVector(vec, item, fill){
 		name = index;
 		
 	}else{
-		if(index<0 || index>=vec.items.length){
-			throw "MSG: Index not in vector.";
+		if(index < 0 || index >= vec.items.length || index % 1 != 0 ){
+			throw "MSG: Index "+(1+index)+" is not in the vector.";
 		}
 		if(!isUndefined(fill)){
 			vec.items[index] = fill;
@@ -1490,7 +1580,13 @@ function makeFunctionCall(varName, varNames, varDefaults, node, scope) {
 	fn.defaults = varDefaults;
 	
 	fn.fn = function(x, fingerPrint, lastSelf, lastBase) {
-		if (fn.localScope["nVars"] - fn.defaults.length > x.length || x.length > fn.localScope["nVars"]) {
+		var minLength = x.length;
+		for(var i=0;i<x.length; i++){
+			if(x[i].optional){
+				minLength--;
+			}
+		}
+		if (fn.localScope["nVars"] - fn.defaults.length > x.length || minLength > fn.localScope["nVars"]) {
 			var names = [];
 			for (var i = 0; i < fn.localScope["nVars"]; i++) {
 				if(fn.defaults.length - (fn.localScope["nVars"]-i)>-1){
@@ -1712,7 +1808,7 @@ function functionGenerator(varName, paramNames, paramDefaults, code, scope){
 		varDefaults.push(paramDefaults.children[i]);
 	}
 	if(varName===null){
-		return makeFunctionCall(varName===null?"Anonymous":varName, varNames, varDefaults, code, scope);
+		return makeFunctionCall(varName===null?"Function":varName, varNames, varDefaults, code, scope);
 	}else{
 		scope[varName] = makeFunctionCall(varName, varNames, varDefaults, code, scope);
 	}
@@ -1862,7 +1958,7 @@ trimEvalMap["STRING"] = function(node) {
 		s = sub.replace(/\n/,"\\n");
 	}
 	s = new String(s);
-	s.parent = StringBase;
+	s.vector = new Vector([],[],StringBase);
 	return s;
 };
 trimEvalMap["INTEGER"] = function(node) {
@@ -2042,4 +2138,44 @@ function isUndefined(item){
 
 function isDefined(item){
 	return (! isUndefined(item));
+}
+
+function fireEvent(obj, eventName, eventObj){
+	var p;
+	var lastSelf  = obj;
+	if(obj instanceof Vector){
+		p = obj.parent;
+	}else if (obj.vector instanceof Vector){
+		obj = obj.vector;
+		p = obj.parent;
+	}else if (obj.parent instanceof Vector){
+		obj = obj.parent;
+		p = obj;
+	}else{
+		return false;
+	}
+	
+	try{
+		//console.log(eventName);
+		//console.log(obj);
+		var r = selectFromVector(obj, eventName);
+		//console.log("found!");
+	}catch(err){
+		//console.log(err);
+		return false;
+	}
+	
+	eventObj.optional = true;
+	
+	return callFunction(r.data, [eventObj], varBank, lastSelf, p);
+}
+
+function ObjToVec(obj){
+	var keys = Object.keys(obj);
+	var vals = [];
+	for(var i=0; i<keys.length; i++){
+		vals.push(obj[keys[i]]);
+	}
+	return new Vector(vals, keys);
+	
 }

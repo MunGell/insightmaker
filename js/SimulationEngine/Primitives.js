@@ -24,10 +24,13 @@ function Primitive() {
 	
 	this.equation = null;
 	
+	this.cachedValue = undefined;
 	this.pastValues = [];
 	this.pastData = new DataBank();
 	
 	this.cutoff = 0;
+	
+	this.vector = new Vector([],[], PrimitiveBase);
 }
 Primitive.method("clone", function(){
 	var p = new this.constructorFunction();
@@ -39,11 +42,21 @@ Primitive.method("clone", function(){
 	p.createIds();
 	p.pastValues = this.pastValues.slice(0);
 	p.cutoff = this.cutoff;
+	p.cachedValue = this.cachedValue?this.cachedValue.fullClone():this.cachedValue;
 	
 	this.innerClone(p);
 	
 	return p;
 });
+Primitive.method("clearCached", function(){
+	this.cachedValue = undefined;
+});
+Primitive.method("storeValue", function(){
+	if(isUndefined(this.cachedValue)){
+		this.value();
+	}
+	this.pastValues.push(this.cachedValue)
+})
 Primitive.method("toNum", function(){
 	return this.value();
 });
@@ -51,43 +64,31 @@ Primitive.method("calculateValue", function() {
 	throw "MSG: "+getText("[%s] does not have a value and can not be used as a value in an equation.", this.dna.name);
 });
 Primitive.method("createIds", function(){
-	this.fullId = ":"+this.id+"-"+this.agentId+"-"+this.index;
-	this.instanceId = ":"+this.agentId+"-"+this.index;
-});
-Primitive.method("clearPastValues", function(count) {
-	this.pastValues.splice(this.pastValues.length - 1 - count, count);
-	this.pastData.trimValues(this.pastValues.length - 1);
+	this.fullId = simulate.getID(this.id+"-"+this.agentId+"-"+this.index);
+	this.instanceId = simulate.getID(+this.agentId+"-"+this.index);
 });
 Primitive.method("getPastValues",  function( length ){
-	var res = [];
     if( isUndefined(length) ){
-      res = map(this.pastValues.slice(), function(x){return new Material(fn["real-part"](x.value), x.units?x.units.clone():undefined)});
+      res = this.pastValues.map(function(x){return x.fullClone()});
     }else{
-		var bins =  Math.ceil(div(length.forceUnits(timeStart.units), timeStep).value);
-		
+		var bins =  Math.ceil(div(length.forceUnits(simulate.timeUnits), this.dna.solver.userTimeStep).value);
+		var res = [];
 	    for(var i = this.pastValues.length-1; i >= Math.max(0, this.pastValues.length-1-bins); i--){
-	      	  res.push(new Material(fn["real-part"](this.pastValues[i].value), this.pastValues[i].units?this.pastValues[i].units.clone():undefined));
+	      	  res.push(this.pastValues[i].fullClone());
 	    }
 	}
-	if(RKOrder==4){
-		var it = true;
-		for(var i=0; i<res.length; i++){
-			it=!it
-			if(it){
-				res.splice(i, 1);
-				i--;
-			}
-		}
-	}
+
+	//res = [this.value().fullClone()].concat(res);
+	//console.log(res.map(function(x){return x.value}));
     return res;
 });
 Primitive.method("pastValue", function pastValue(delay, defaultValue){
     var periods;
 	
-    if( this.pastValues.length-1 < Math.round((time.value-timeStart.value)/timeStep.value) ){
-      periods  = div(delay.forceUnits(timeStart.units), timeStep).value;
+    if( this.pastValues.length-1 < Math.round((simulate.time().value-simulate.timeStart.value)/this.dna.solver.userTimeStep.value) ){
+      periods  = div(delay.forceUnits(simulate.timeUnits), this.dna.solver.userTimeStep).value;
     }else{
-      periods  = div(delay.forceUnits(timeStart.units), timeStep).value + 1;
+      periods  = div(delay.forceUnits(simulate.timeUnits), this.dna.solver.userTimeStep).value + 1;
     }
 	
 	if(periods==0){
@@ -125,47 +126,56 @@ Primitive.method("pastValue", function pastValue(delay, defaultValue){
     second_period = this.pastValues[this.pastValues.length-1-entry];
     return plus(mult(first_period, new Material(1-fraction)), mult(second_period, new Material(fraction)));
 });
-Primitive.method("smoothF", function( delay , initialV){
-	
-    var  a =  div(timeStep, delay.forceUnits(timeStart.units)).value;
+Primitive.method("smoothF", function(delay, initialV){
+	//console.log("--")
+    var a =  div(this.dna.solver.userTimeStep, delay.forceUnits(simulate.timeUnits)).value;
 	
     var dat =  this.pastData.getSeries( "Smooth: " + a + "," + initialV );
-    if( dat.length == 0  ){
+	
+    if( dat.length == 0 ){
       if( isUndefined(initialV) ){
-         this.value();
-        dat.push(this.pastValues[0]);
+        dat.push(this.pastValues[0]?this.pastValues[0]:this.value());
       }else{
         dat.push(initialV);
       }
     }
 
-    for(var i=dat.length; i <= Math.round((time.value-timeStart.value)/timeStep.value)-1; i++){
-		// dat.push(dat[i-1]*(1-a)+a*pastValues[i]);
-       dat.push(plus(mult(dat[i-1], new Material(1-a)), mult(new Material(a), this.pastValues[i]))); 
+	//console.log("--")
+	//console.log(this.pastValues.slice())
+	//console.log(dat.slice())
+	var maxInd = Math.floor((simulate.time().value-simulate.timeStart.value)/this.dna.solver.userTimeStep.value);
+	
+    for(var i = dat.length-1; i < maxInd; i++){
+		var m =  this.pastValues[i]?this.pastValues[i]:(this.cachedValue?this.cachedValue:this.pastValues[i-1]);
+		//console.log(m.value);
+		dat.push(plus(mult(dat[i], new Material(1-a)), mult(new Material(a), m))); 
     }
+	//if(dat.length <= maxInd){
+	//	dat.push(plus(mult(dat[i-1], new Material(1-a)), mult(new Material(a), this.value()))); 
+	//}
 	
     return dat[dat.length-1].fullClone();
   });
 Primitive.method("expDelayF", function( order , delay , initialV ){
     this.value();
 
-    var  a =  div(timeStep, delay.forceUnits(timeStart.units)).value * order;
+    var  a =  div(this.dna.solver.userTimeStep, delay.forceUnits(simulate.timeUnits)).value * order;
 
     var  dat =  this.pastData.getSeries("ExpDelay: " + order+"," + delay.value + "," + initialV);
 
     if( dat.length == 0 ){
       if( isUndefined(initialV) ){
-        dat.push(new ExpGroup( order, a, this.pastValues[0] ));
+        dat.push(new ExpGroup( order, a, this.pastValues[0]?this.pastValues[0]:this.value() ));
       }else{
         var exIV = new ExpGroup( order, a, initialV );
-        dat.push(exIV.moveForward( this.pastValues[0] ));
+        dat.push(exIV.moveForward( this.pastValues[0]?this.pastValues[0]:this.value() ));
       }
     }
     
     for(var i = dat.length; i < this.pastValues.length; i++){
       dat.push(dat[i-1].moveForward(this.pastValues[i]));
     }
-    
+    //console.log(dat);
     return dat[dat.length-1].out.fullClone();
   });
 Primitive.method("testUnits", function(m, ignoreFlow) {
@@ -204,7 +214,7 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 	if((this instanceof Flow) && (ignoreFlow != true) && this.dna.flowUnitless){
 			//console.log("mod2")
 			//console.log(m.units.exponents)
-		var x = mult(m, new Material(1, timeLength.units.clone()));
+		var x = mult(m, new Material(1, simulate.timeUnits.clone()));
 		m.value = x.value;
 		m.units = x.units;
 
@@ -215,9 +225,19 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 Primitive.method("setValue", function() {
 	throw "MSG: "+getText("You cannot set the value for that primitive.");
 });
+Primitive.method("printPastValues", function() {
+	console.log(this.pastValues.map(function(x){return x.value;}))
+});
+//var evals = [];
 Primitive.method("value", function() {
 	
-	if (this.pastValues.length - 1 < timeIndex) {
+	if (isUndefined(this.cachedValue)) {
+
+		//if(evals.indexOf(this.dna.name)>-1){
+			//console.log(this.dna.name);
+			//die
+			//}
+		//evals.push(this.dna.name);
 		try{
 			var x = this.calculateValue().toNum();
 			if((x instanceof Material) && ! isFinite(x.value)){
@@ -244,49 +264,22 @@ Primitive.method("value", function() {
 			}
 		}
 		if(! (this instanceof State)){
-			//console.log(this.name);
-			/*if(this instanceof Flow){
-				console.log("--")
-				console.log(RKPosition);
-				console.log("A: ")
-				if(this.primaryRateScaled.items){
-					console.log(this.primaryRateScaled.items[0].units.exponents)
-				}else{
-					console.log(this.primaryRateScaled.units.exponents)
-				}
-			}*/
 			this.testUnits(x);
-			/*if(this instanceof Flow){
-				console.log("B: ")
-				if(this.primaryRateScaled.items){
-					console.log(this.primaryRateScaled.items[0].units.exponents)
-				}else{
-					console.log(this.primaryRateScaled.units.exponents)
-				}
-			}*/
 			this.testConstraints(x);
 		}
-		if (this.pastValues.length - 1 < timeIndex-1) {
-			this.pastValues = [];
+		//if (this.pastValues.length - 1 < simulate.timeIndex-1) {
+		//	this.pastValues = [];
 			//this.pastValues.push(null);
-			this.cutoff = timeIndex;
-		}
-		this.pastValues.push(x);
+		//	this.cutoff = simulate.timeIndex;
+		//}
+		this.cachedValue = x;
 	}
 	
 	
-	var x = this.pastValues[timeIndex-this.cutoff];
-	/*if(this.cutoff){
-		console.log("--");
-		console.log(this.cutoff)
-		console.log(timeIndex);
-		console.log(this.pastValues);
-		console.log(x);
-	}*/
-	if(x && x.fullClone){
-		return x.fullClone();
+	if(this.cachedValue.fullClone){
+		return this.cachedValue.fullClone();
 	}else{
-		return x;
+		return this.cachedValue;
 	}
 });
 Primitive.method("testConstraints", function(x) {
@@ -358,11 +351,11 @@ State.method("innerClone", function(p){
 State.method("setValue", function(value) {
 	//console.log("--")
 	if(this.active === false && trueValue(value)){
-		this.arrivalTime = time.fullClone();
+		this.arrivalTime = simulate.time().fullClone();
 	}
 	this.active = trueValue(value);
+	this.cachedValue = undefined;
 	this.value();
-	this.clearPastValues(1);
 	
 	if(this.agentId){
 		this.container.updateStates();
@@ -414,7 +407,7 @@ State.method("setInitialActive", function() {
 	this.active = trueValue(init);
 	//console.log(this.active);
 	if (this.active) {
-		this.arrivalTime = timeStart.fullClone();
+		this.arrivalTime = simulate.timeStart.fullClone();
 	}
 	if(this.agentId){
 		this.container.updateStates();
@@ -462,7 +455,7 @@ Transition.method("calculateValue", function() {
 			return new Material(0);
 		}else{
 			if(this.dna.trigger == "Timeout" && unitless(x.units)){
-				x.units = time.units.clone();
+				x.units = simulate.timeUnits.clone();
 			}
 			return x;
 		}
@@ -472,16 +465,16 @@ Transition.method("calculateValue", function() {
 });
 Transition.method("transition", function() {
 
-	if((! this.block) && ((! this.alpha) || (this.alpha && this.alpha.getActive())) && ( (! this.alpha) || eq(timeStart, time) || ( ! eq(this.alpha.arrivalTime, time)))){
+	if((! this.block) && ((! this.alpha) || (this.alpha && this.alpha.getActive())) && ( (! this.alpha) || eq(simulate.timeStart, simulate.time()) || ( ! eq(this.alpha.arrivalTime, simulate.time())))){
 		if(this.dna.trigger == "Timeout"){
 			var v = this.value().toNum();
 			
 			if(this.alpha){
-				if(greaterThanEq(minus(time, this.alpha.arrivalTime), v)  ){
+				if(greaterThanEq(minus(simulate.time(), this.alpha.arrivalTime), v)  ){
 					this.doTransition();
 				}
 			}else{
-				if(greaterThanEq(minus(time, timeStart), v)  ){
+				if(greaterThanEq(minus(simulate.time(), simulate.timeStart), v)  ){
 					this.block = true;
 					this.doTransition();
 				}
@@ -498,7 +491,7 @@ Transition.method("transition", function() {
 					this.doTransition();
 				}else if(lessThanEq(v, new Material(0))){
 					//do nothing...
-				}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))).value){
+				}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(this.dna.solver.timeStep.value))).value){
 					this.doTransition();
 				}
 			}else{
@@ -519,7 +512,7 @@ Transition.method("doTransition", function() {
 	}
 	if(this.omega){
 		this.omega.active = true;
-		this.omega.arrivalTime = time.fullClone();
+		this.omega.arrivalTime = simulate.time().fullClone();
 	}
 	if(this.agentId){
 		this.container.updateStates();
@@ -537,7 +530,7 @@ Action.method("innerClone", function(p){
 	p.timerStart = this.timerStart;
 });
 Action.method("resetTimer", function(){
-	this.timerStart = time.fullClone();
+	this.timerStart = simulate.time().fullClone();
 });
 Action.method("test", function() {
 	var value;
@@ -559,9 +552,9 @@ Action.method("test", function() {
 	if(this.dna.trigger == "Timeout"){
 		var v = value;
 		if(unitless(v.units)){
-			v.units = time.units.clone();
+			v.units = simulate.timeUnits.clone();
 		}
-		if(greaterThanEq(minus(time, this.timerStart), v)  ){
+		if(greaterThanEq(minus(simulate.time(), this.timerStart), v)  ){
 			this.act();
 		}
 	}else if(this.dna.trigger == "Condition"){
@@ -575,7 +568,7 @@ Action.method("test", function() {
 				this.act();
 			}else if(lessThanEq(v, new Material(0))){
 				//do nothing...
-			}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(timeStep.value))).value){
+			}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(this.dna.solver.timeStep.value))).value){
 				this.act();
 			}
 		}else{
@@ -616,17 +609,17 @@ function Agents() {
 	this.geoDimUnitsObject = null;
 	this.geoWrap = null;
 	this.DNAs = null;
-	this.nextDie = [];
-	this.nextCreate = [];
 	this.stateIds = [];
 	this.constructorFunction = Agents;
+	
+	this.vector = new Vector([],[], PrimitiveBase);
 }
 Agents.inherits(Primitive);
 Agents.method("collectData", function() {
 	var x =[];
 	for(var i=0; i<this.agents.length; i++){
 		var agent = this.agents[i];
-		x.push({id: agent.id, instanceId: agent.instanceId, connected: agent.connected.map(function(x){return x.instanceId}), location: simpleNum(agent.location.clone(), this.geoDimUnitsObject), state: agent.states.length>0?agent.states.slice():null});
+		x.push({instanceId: agent.instanceId, connected: agent.connected.map(function(x){return x.instanceId}), location: simpleNum(agent.location.clone(), this.geoDimUnitsObject), state: agent.states.length>0?agent.states.slice():null});
 	}
 	return x;
 });
@@ -691,9 +684,16 @@ Agents.method("add", function(base){
 		
 	}
 	
-	this.nextCreate.push(agent);
-	
-	simulate.agentsChanged = true;
+	var me = this;
+	simulate.tasks.add(new Task({
+		priority: 10,
+		expires: 1,
+		name: "Add Agent",
+		time: simulate.time(),
+		action: function(){
+			me.agents.push(agent)
+		}
+	}));
 });
 
 
@@ -707,6 +707,8 @@ function Agent() {
 	this.constructorFunction = Agent;
 	this.stateIDs = [];
 	this.states = [];
+	
+	this.vector = new Vector([],[], AgentBase);
 }
 Agent.inherits(Primitive);
 Agent.method("toString", function(){
@@ -767,8 +769,30 @@ Agent.method("die", function(){
 		}
 	}
 	
+	for(var i = 0; i < this.children.length; i++){
+		var x = this.children[i];
+		var solver = x.dna.solver;
+		if(x instanceof Action){
+			solver.actions.splice(solver.actions.indexOf(x),1);
+		}else if(! (x instanceof Agents)){
+			solver.valued.splice(solver.valued.indexOf(x),1);
+			if(x instanceof Flow) {
+				solver.flows.splice(solver.flows.indexOf(x),1);
+			}
+			else if (x instanceof Stock) {
+				solver.stocks.splice(solver.stocks.indexOf(x),1);
+			}
+			else if (x instanceof State) {
+				solver.states.splice(solver.states.indexOf(x),1);
+			}
+			else if (x instanceof Transition) {
+				solver.transitions.splice(solver.transitions.indexOf(x),1);
+			}
+		}
+	}
+	
+	
 	this.dead = true;
-	simulate.agentsChanged = true;
 });
 Agent.method("connect", function(x) {
 	//try{
@@ -810,51 +834,51 @@ function indexOfID(arr, id){
 
 function Stock() {
 	Primitive.call(this);
-	this.level = [null];
-	this.oldLevel = [];
+	this.level = null;
 	this.constructorFunction = Stock;
+	this.delay = undefined;
+	this.tasks = [];
+	this.initRate = null;
+	this.oldLevel;
 }
 Stock.inherits(Primitive);
 Stock.method("innerClone", function(p){
-	p.level = this.level.slice(0);
-	p.oldLevel = this.oldLevel.slice(0);
+	p.level = this.level;
+	p.oldLevel = this.oldLevel;
+	p.tasks = this.tasks;
+	p.delay = this.delay;
 });
 Stock.method("setValue", function(value) {
 	//console.log("--")
-	this.level[this.level.length-1] = value;
+	this.level = value;
+	this.cachedValue = undefined;
 	this.value();
-	this.clearPastValues(1);
-	//console.log(value.value.toString());
-	//console.log(this.value().value.toString());
 });
-Stock.method("stepForward", function() {
-	if (this.level.length > 1) {
-		for (var i = this.level.length - 1; i > 0; i--) {
-			this.level[i] = plus(this.level[i], this.level[i - 1]);
-			this.level[i - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+Stock.method("print", function(){
+	console.log(this.level.map(function(x){return x.value}));
+});
+Stock.method("preserveLevel", function() {
+	//console.log("PRESERVING")
+	//console.log("total:"+this.level.value)
+	for(var i = this.tasks.length - 1; i >= 0; i--){
+		this.tasks[i].data.tentative = false;
+	}
+	this.oldLevel = this.level;
+});
+Stock.method("restoreLevel", function() {
+	//console.log("RESTORING")
+	for(var i = this.tasks.length - 1; i >= 0; i--){
+		if(this.tasks[i].data.tentative){
+			this.tasks[i].remove();
+			this.tasks.splice(i,1);
 		}
 	}
+	this.level = this.oldLevel;
+	//console.log("total: "+this.level.value)
 });
-Stock.method("preserveLevels", function() {
-	this.oldLevel = [];
-	for (var i = 0; i < this.level.length; i++) {
-		this.oldLevel.push(this.level[i]);
-	}
-});
-Stock.method("restoreLevels", function() {
-	this.level = [];
-	for (var i = 0; i < this.oldLevel.length; i++) {
-		this.level.push(this.oldLevel[i]);
-	}
-});
-Stock.method("setDelay", function( ){
-  this.setBuckets(this.dna.delay?Math.ceil(div(this.dna.delay, timeStep).value)+1:1);
-});
-Stock.method("setBuckets", function( count ){
-	this.level = [];
-	for(var i = 0; i < count; i++){
-		this.level.push(new Material(0, this.dna.units?this.dna.units.clone():undefined));
-	}
+Stock.method("setDelay", function(delay){
+	delay = delay || this.dna.delay;
+	this.delay = delay;
 });
 Stock.method("setInitialValue", function() {
 	var init;
@@ -876,7 +900,6 @@ Stock.method("setInitialValue", function() {
 			error(err, this, true);
 		}
 	}
-	
 	
 	if(typeof init == "boolean"){
 		if(init){
@@ -906,75 +929,138 @@ Stock.method("setInitialValue", function() {
 		}
 	}
 
-	//this.testUnits(init);
-	//this.testConstraints(init);
 
-	init = [init];
-	if (this.level.length == 1) { //it's a non-serialized stock;
+	if (isUndefined(this.delay)) {
+		//it's a non-serialized stock;
 		this.level = init;
 	} else { 
 		//it's serialized
-		var per = div(init[0], new Material(this.level.length-1));
-		for(var i=1; i<this.level.length; i++){
-			this.level[i] = per;
-		}
+		this.initRate = div(init, this.delay.forceUnits(simulate.timeUnits));
+		this.level = mult(new Material(0), init);
+		
+		var me = this;
+
+		simulate.tasks.addEvent(function(timeChange, oldTime, newTime){
+			if(timeChange.value > 0){
+				if(lessThanEq(newTime, me.delay)){
+					timeChange = functionBank["min"]([timeChange, minus(me.delay, oldTime)]);
+					me.level = plus(me.level, mult(timeChange, me.initRate));
+				}
+			}
+		});
 	}
 });
-Stock.method("subtract", function(amnt) {
-	this.level[this.level.length - 1] = minus(this.level[this.level.length - 1], amnt);
+Stock.method("subtract", function(amnt, time) {
+	this.level = minus(this.level, amnt);
 	if (this.dna.nonNegative) {
-		if(this.level[this.level.length - 1] instanceof Vector){
+		if(this.level instanceof Vector){
 			var d = this.dna;
-			this.level[this.level.length - 1].recurseApply(function(x){
+			this.level.recurseApply(function(x){
 				if(x.value < 0){
 					return new Material(0, d.units?d.units.clone():undefined);
 				}else{
 					return x;
 				}
 			});
-		}else if(this.level[this.level.length - 1].value < 0){
-			this.level[this.level.length - 1] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+		}else if(this.level.value < 0){
+			this.level = new Material(0, this.dna.units?this.dna.units.clone():undefined);
 		}
 	}
 });
-Stock.method("add", function(amnt) {
-	this.level[0] = plus(this.level[0], amnt);
-	if (this.dna.nonNegative) {
-		if(this.level[0] instanceof Vector) {
-			var d = this.dna;
-			this.level[0].recurseApply(function(x){
-				if(x.value < 0){
-					return new Material(0, d.units?d.units.clone():undefined);
-				}else{
-					return x;
+Stock.method("add", function(amnt, time) {
+	if(isUndefined(this.delay)){
+		this.level = plus(this.level, amnt);
+		if (this.dna.nonNegative) {
+			if(this.level instanceof Vector) {
+				var d = this.dna;
+				this.level.recurseApply(function(x){
+					if(x.value < 0){
+						return new Material(0, d.units?d.units.clone():undefined);
+					}else{
+						return x;
+					}
+				});
+			}else if(this.level.value < 0){
+				this.level = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+			}
+		}
+	}else{
+		this.scheduleAdd(amnt, time);
+	}
+});
+Stock.method("scheduleAdd", function(amnt, time, delay){
+	var me = this;
+	delay = delay || this.delay;
+	
+	var oldLevel;
+	
+	var t = new Task({
+		time: plus(time, delay),
+		data: {
+			amnt: amnt,
+			tentative: true
+		},
+		priority: -100,
+		name: "Conveyor Add ("+this.dna.name+")",
+		action: function(){
+			oldLevel = me.level;
+			//console.log("ADDING "+amnt.value);
+			me.level = plus(me.level, amnt);
+			//console.log("total "+me.level.value);
+			if (me.dna.nonNegative) {
+				if(me.level instanceof Vector) {
+					var d = me.dna;
+					me.level.recurseApply(function(x){
+						if(x.value < 0){
+							return new Material(0, d.units?d.units.clone():undefined);
+						}else{
+							return x;
+						}
+					});
+				}else if(me.level.value < 0){
+					me.level = new Material(0, me.dna.units?me.dna.units.clone():undefined);
 				}
-			});
-		}else if(this.level[0].value < 0){
-			this.level[0] = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+			}
+		},
+		rollback: function(){
+			me.level = oldLevel;
 		}
-	}
-});
+	});
+	this.tasks.push(t);
+	simulate.tasks.add(t);
+})
 Stock.method("totalContents", function() {
-	var res = new Material(0, this.dna.units?this.dna.units.clone():undefined);
-	for (var i = 0; i < this.level.length; i++) {;
-		res = plus(res, this.level[i]);
+	if(isDefined(this.delay)){
+		var res = this.level;
+		for(var i = 0; i < this.tasks.length; i++){
+			if(greaterThan(this.tasks[i].time, simulate.time()) && lessThanEq(this.tasks[i].time, plus(simulate.time(), this.delay)) ){
+				res = plus(res, this.tasks[i].data.amnt);
+			}
+		}
+		
+		if(greaterThan(this.delay, simulate.time())){
+			res = plus(res, mult(this.initRate, minus(this.delay, simulate.time())))
+		}
+		
+		return res;
+	}else{
+		return this.level;
 	}
-	return res;
 });
 Stock.method("calculateValue", function() {
-	//console.log(this.name);
-	//console.log(this.level.length);
-	if (this.level[0] === null) {
-		//console.log("Init");
+	if (this.level === null) {
 		this.setInitialValue();
 	}
-	//console.log(this.level);
-	//console.log(this.equation);
-	//console.log(this.units);
-	if (this.level.length > 1 && RKOrder == 4) {
-		return plus(this.level[this.level.length - 1], this.level[this.level.length - 2]);
-	} else {
-		return this.level[this.level.length - 1];
+	if(isDefined(this.delay) && this.dna.solver.RKOrder == 4){
+		var res = this.level;
+		for(var i = 0; i < this.tasks.length; i++){
+			if(greaterThan(this.tasks[i].time, simulate.time()) && lessThanEq(this.tasks[i].time, plus(simulate.time(), this.dna.solver.timeStep)) ){
+				res = plus(res, this.tasks[i].data.amnt);
+			}
+		}
+		return res;
+	}else{
+		return this.level;
 	}
 });
 
@@ -992,7 +1078,7 @@ Converter.method("setSource", function(source){
 Converter.method("getInputValue", function(){
      var inp;
      if( this.source == "*time"){
-        inp = time;
+        inp = simulate.time();
       }else{
 		  /*console.log("---")
 		  console.log(this.source.value());
@@ -1072,18 +1158,21 @@ Variable.inherits(Primitive);
 Variable.method("innerClone", function(p){
 });
 Variable.method("calculateValue", function() {
+	//console.log("--")
+	//console.log(this)
 	//console.log("calc!");
 	//console.log("--");
 	//console.log(this.name);
 	//console.log(this.equation);
 	//try{
-		var x = evaluateTree(this.equation, varBank);
-		//}catch(err){
-		//	console.log(this.dna.name);
-		//	throw "calc value error";
-		//}
+	var x = evaluateTree(this.equation, varBank);
+	//}catch(err){
+	//	console.log(this.dna.name);
+	//	throw "calc value error";
+	//}
 	//console.log(x);
 	//return x;
+	//console.log(x);
 	if(typeof x == "boolean"){
 		if(x){
 			x = new Material(1);
@@ -1104,8 +1193,7 @@ function Flow() {
 	Primitive.call(this);
 	this.alpha = null;
 	this.omega = null;
-	this.primaryRate = null;
-	this.primaryRateScale = null;
+	this.rate = null;
 	this.RKPrimary = [];
 	this.constructorFunction = Flow;
 }
@@ -1117,44 +1205,23 @@ Flow.method("setEnds", function(alpha, omega) {
 	this.omega = omega;
 });
 Flow.method("calculateValue", function() {
-	this.predict();
-	var sr = this.primaryRateScaled.fullClone();
-	if ((!this.dna.onlyPositive) || sr.value >= 0) {
-		
-		return sr;
-	} else {
-		if(sr instanceof Vector){
-			var d = this.dna;
-			sr.recurseApply(function(x){
-				if(x.value >= 0 ){
-					return x
-				}else{
-					return new Material(0, d.units?d.units.clone():undefined);
-				}
-			});
-			//console.log(sr.items[0].units.exponents[0])
-			return sr;
-		}else{
-			return new Material(0, this.dna.units?this.dna.units.clone():undefined);
-		}
-	}
+	//while(this.RKPrimary.length < this.dna.solver.RKPosition){
+		this.predict();
+		//}
+	return this.rate.fullClone();
 });
-
 Flow.method("clean", function() {
-	this.primaryRate = null;
-	this.primaryRateScaled = null;
-	//console.log("clean: "+this.id)
+	this.rate = null;
 	this.RKPrimary = [];
 });
 Flow.method("predict", function() {
-	if (this.primaryRate === null) {
+	if (this.rate === null) {
 		try{
 			//console.log("---");
 			var x = evaluateTree(this.equation, varBank).toNum();
 			//console.log(this.equation);
 			//console.log(x);
 			if(!((x instanceof Vector) || isFinite(x.value))){
-				//console.log(x)
 				throw("MSG: "+getText("The result of this calculation is not finite. Flows must have finite values. Are you dividing by 0?"));
 			}
 			
@@ -1179,147 +1246,82 @@ Flow.method("predict", function() {
 			}
 		}
 		
-		this.primaryRate = x.fullClone();
+		this.rate = x.fullClone();
 		
-		//console.log("--")
-		//console.log(this.primaryRate.units);
-		if(this.primaryRate instanceof Vector){
+		if(this.rate instanceof Vector){
 			var d = this.dna;
-			//console.log(this.dna.units)
-			this.primaryRate.recurseApply(function(x){
+			this.rate.recurseApply(function(x){
 				if (unitless(x.units)) {
-					//console.log("setting units")
 					x.units = d.units?d.units.clone():undefined;
 				}
 				return x
 			})
-		}else if (unitless(this.primaryRate.units)) {
-			this.primaryRate.units = this.dna.units?this.dna.units.clone():undefined;
+		}else if (unitless(this.rate.units)) {
+			this.rate.units = this.dna.units?this.dna.units.clone():undefined;
 		}
-		//console.log("---")
-		/*
-		console.log("C: ")
-		if(this.primaryRate.items){
-			console.log(this.primaryRate.items[0].units.exponents)
-		}else{
-			console.log(this.primaryRate.units.exponents)
-		}*/
-		this.testUnits(this.primaryRate, true);
-		/*console.log("D: ")
-		if(this.primaryRate.items){
-			console.log(this.primaryRate.items[0].units.exponents)
-		}else{
-			console.log(this.primaryRate.units.exponents)
-		}
-		*/
-		//console.log("+++")
 		
-		//console.log("--")
-		//console.log(this.primaryRate.items[0].units.exponents)
-		this.primaryRate = mult(this.primaryRate, timeStep);
-		//console.log(this.primaryRate.items[0].units.exponents)
-		//console.log("push: "+this.id)
-		this.RKPrimary.push(this.primaryRate);
-		/*
-		console.log("E: ")
-		if(this.primaryRate.items){
-			console.log(this.primaryRate.items[0].units.exponents)
-		}else{
-			console.log(this.primaryRate.units.exponents)
-		}
-		*/
-		this.primaryRateScaled = this.scaledPrimaryRate();
-		/*
-		console.log("F: ")
-		if(this.primaryRateScaled.items){
-			console.log(this.primaryRateScaled.items[0].units.exponents)
-		}else{
-			console.log(this.primaryRateScaled.units.exponents)
-		}*/
-		//console.log("-0-")
-		//console.log(this.primaryRateScaled.units.exponents[0]);
-	}
-});
-Flow.method("scaledPrimaryRate", function() {
-	//console.log("--")
-	var sr = this.primaryRate==null?null:this.primaryRate.fullClone();
-	//console.log(sr.items[0].units.exponents[0])
-	
-	//console.log("--")
-	//console.log(RKPosition);
-	if (RKOrder == 4) {
-		if (RKPosition == 1) {
-			sr = this.RKPrimary[0];
-		} else if (RKPosition == 2) {
-			sr = this.RKPrimary[1];
-		} else if (RKPosition == 3) {
-			sr = this.RKPrimary[2];
-		} else if (RKPosition == 4) {
-			//console.log(this);
-			//console.log(this.RKPrimary);
-			//console.log("adjusting")
-			
-			sr = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[4])), new Material(6));
-		}
-	}
-
-	//console.log(sr.items[0].units.exponents[0])
-	
-	//console.log(sr.value*2);
-	/*
-	console.log(this.RKPrimary);
-	
-	console.log("G:");
-	if(sr.items){
-		console.log(sr.items[0].units.exponents)
-	}else{
-		console.log(sr.units.exponents)
-	}*/
-	
-	sr = div(sr, timeStep);
-
-	//console.log(sr.items[0].units.exponents[0])
-	
-	
-	return sr;
-});
-Flow.method("apply", function() {
-	
-	try{
-		var rate = this.primaryRateScaled.fullClone();
-	
-		//console.log(rate);
-	
-
-		//console.log("--")
-		//console.log(rate.units.exponents[0])
-		rate = mult(rate, timeStep);
+		this.testUnits(this.rate, true);
 		
-		//console.log(rate.units.exponents[0])
+		this.rate = mult(this.rate, this.dna.solver.timeStep);
+		
+		this.RKPrimary.push(this.rate);
+		
+	
+		if (this.dna.solver.RKOrder == 4) {
+			if (this.dna.solver.RKPosition == 1) {
+				this.rate = this.RKPrimary[0];
+			} else if (this.dna.solver.RKPosition == 2) {
+				this.rate = this.RKPrimary[1];
+			} else if (this.dna.solver.RKPosition == 3) {
+				this.rate = this.RKPrimary[2];
+			} else if (this.dna.solver.RKPosition == 4) {
+				this.rate = div((plus(plus(plus(this.RKPrimary[0], mult(new Material(2), this.RKPrimary[1])), mult(new Material(2), this.RKPrimary[2])), this.RKPrimary[3])), new Material(6));
+			}
+		}
 
-		//console.log("Applying: "+rate.value);
-		//console.log("+++");
+		
+		this.rate  = div(this.rate, this.dna.solver.timeStep);
+		
 		if(this.dna.onlyPositive){
-			//console.log("===");
-			if(rate instanceof Vector){
-				rate.recurseApply(function(x){
+			if(this.rate instanceof Vector){
+				this.rate.recurseApply(function(x){
 					if(x.value >= 0 ){
 						return x
 					}else{
 						return new Material(0, x.units?x.units.clone():undefined);
 					}
 				});
-			//	console.log("--")
-			//	console.log(rate)
 			}else{
-				if(rate.value <= 0){
-					this.primaryRate = null;
-					return;
+				if(this.rate.value <= 0){
+					this.rate = new Material(0, this.rate.units?this.rate.units.clone():undefined);
 				}
 			}
 		}
 		
-		//console.log("a")
+		//console.log(this.dna.name+" - predict")
+		//console.log("RKPosition: "+this.dna.solver.RKPosition);
+		//console.log(this.RKPrimary.map(function(x){return x.value}));
+		//console.log(this.rate.value);
+	
+	}
+});
+Flow.method("apply", function(timeChange, oldTime, newTime) {
+	try{
+		
+		//console.log(this.dna.name+" - apply")
+		//console.log("RKPosition: "+this.dna.solver.RKPosition);
+		//console.log(this.RKPrimary.map(function(x){return x.value}));
+		//console.log(this.rate.value);
+		
+		if(this.rate === null){
+			return;
+		}
+
+		var rate = this.rate.fullClone();
+	
+		rate = mult(rate, timeChange);
+
+		
 		var in_rate = rate;
 		var out_rate = rate;
 		var collapsed = false;
@@ -1411,18 +1413,18 @@ Flow.method("apply", function() {
 			if (this.omega !== null) {
 				additionTest = 1;
 				if(collapsed){
-					this.omega.add(out_rate);
+					this.omega.add(out_rate, oldTime);
 				}else{
-					this.omega.add(rate);
+					this.omega.add(rate, oldTime);
 				}
 			}
 			if (this.alpha !== null) {
 				additionTest = 2;
 
 				if(collapsed){
-					this.alpha.subtract(in_rate);
+					this.alpha.subtract(in_rate, oldTime);
 				}else{
-					this.alpha.subtract(rate);
+					this.alpha.subtract(rate, oldTime);
 				}
 			}
 		}catch(err){
@@ -1437,7 +1439,6 @@ Flow.method("apply", function() {
 		}
 		
 		//console.log("null: "+this.id)
-		this.primaryRate = null;
 	}catch(err){
 		if(! err.substr){
 			throw err; //it's already an object, let's kick it up the chain

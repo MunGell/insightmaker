@@ -163,6 +163,7 @@
             if (xAxisType == 'Time' && typeof xValue == "string") {
                 xValue = Date.parse(xValue);
             }
+			
             // Ensure a value
             if (typeof xValue == 'string' || typeof xValue == 'object' && !Ext.isDate(xValue)
                 //set as uniform distribution if the axis is a category axis.
@@ -183,7 +184,7 @@
             if (typeof yValue == 'undefined' || (typeof yValue == 'string' && !yValue)) {
                 //<debug warn>
                 if (Ext.isDefined(Ext.global.console)) {
-                    Ext.global.console.warn("[Ext.chart.series.Line]  Skipping a store element with an undefined value at ", record, xValue, yValue);
+                   // Ext.global.console.warn("[Ext.chart.series.Line]  Skipping a store element with an undefined value at ", record, xValue, yValue); SFR XXX FIXME
                 }
                 //</debug>
                 continue;
@@ -198,6 +199,9 @@
             xValues.push(xValue);
             yValues.push(yValue);
         }
+		
+		//console.log(xValues)
+		//console.log(yValues)
 
         ln = xValues.length;
         if (ln > bbox.width) {
@@ -690,7 +694,7 @@
         var me = this,
             chart = me.chart,
             store = chart.getChartStore(),
-            data = store.queryBy(function(x) {
+            data = store.queryBy(function(x) {//SFR
 				return true;
 			}).items,
             series = chart.series.items,

@@ -1,3 +1,4 @@
+"use strict";
 /*
 
 Copyright 2010-2013 Scott Fortmann-Roe. All rights reserved.
@@ -13,6 +14,9 @@ function commaStr(nStr) {
 	//if(nStr instanceof String){
 	//	return nStr;
 	//}
+	if(isUndefined(nStr) || nStr === null){
+		return "";
+	}
 	if (nStr >= 1e9 || nStr <= 1e-9 && nStr != 0) {
 		return nStr.toPrecision(3);
 	} else {
@@ -634,7 +638,7 @@ function renderDisplay(display, displayInformation) {
 			header: getText("Time"),
 			sortable: true,
 			flex: 1,
-			dataIndex: "TimeValue",
+			dataIndex: "Time",
 			renderer: function(x) {
 				return round(x, 9);
 			}
@@ -782,7 +786,7 @@ function renderDisplay(display, displayInformation) {
 									trackMouse: true,
 									width: 160,
 									renderer: function(storeItem, item) {
-										this.setTitle(clean(item.series.title) + ":<br/>" + displayInformation.times[item.value[0]] + ", " + commaStr(item.value[1]));
+										this.setTitle(clean(item.series.title) + ":<br/>" + storeItem.get("Time") + ", " + commaStr(item.value[1]));
 									}
 								}
 
@@ -794,13 +798,13 @@ function renderDisplay(display, displayInformation) {
 				}
 			}
 		}
-
+		
 		var axes = [{
 			type: 'Numeric',
 			position: 'bottom',
 			fields: "Time",
-			minimum: isUndefined(display.getAttribute("xAxisMin")) ? undefined : display.getAttribute("xAxisMin") / (displayInformation.times[1] - displayInformation.times[0]) - displayInformation.times[0],
-			maximum: isUndefined(display.getAttribute("xAxisMax")) ? undefined : display.getAttribute("xAxisMax") / (displayInformation.times[1] - displayInformation.times[0]) - displayInformation.times[0],
+			minimum: isUndefined(display.getAttribute("xAxisMin")) ? displayInformation.store.min("Time") : display.getAttribute("xAxisMin") / (displayInformation.times[1] - displayInformation.times[0]) - displayInformation.times[0],
+			maximum: isUndefined(display.getAttribute("xAxisMax")) ?  undefined  : display.getAttribute("xAxisMax") / (displayInformation.times[1] - displayInformation.times[0]) - displayInformation.times[0],
 			title: quickLabel(display.getAttribute("xAxis"), display.getAttribute("name"), displayNames1.join(", ")),
 			grid: true,
 			labelTitle: {
@@ -808,10 +812,6 @@ function renderDisplay(display, displayInformation) {
 			},
 			label: {
 				renderer: function(x) {
-					//console.log(x);
-					if (displayInformation.times.length > 1) {
-						return round(displayInformation.times[0] + (displayInformation.times[1] - displayInformation.times[0]) * x, 9);
-					}
 					return round(x, 9);
 				}
 			},
@@ -886,6 +886,7 @@ function renderDisplay(display, displayInformation) {
 		}
 		
 		
+		
 
 	} else if (type == "Scatterplot") {
 		var displayIds = [];
@@ -895,7 +896,6 @@ function renderDisplay(display, displayInformation) {
 			for (var i = 0; i < displayInformation.ids.length; i++) {
 				if (primitives[j] == displayInformation.ids[i]) {
 					if (displayInformation.renderers[i]) {
-
 						displayIds.push("series" + i);
 						displayNames.push(displayInformation.headers[i]);
 					} else {
@@ -1008,66 +1008,11 @@ function renderDisplay(display, displayInformation) {
 			}
 			agents.push(a);
 			var agentName = getName(findID(a.item.getAttribute("Agent")));
+			addSeries("series_"+ id + "__", agentName);
 			for (var s = 0; s < a.data.states.length; s++) {
 				var base = "series_" + id + "_" + a.data.states[s] + "_";
 				var name = getName(findID(a.data.states[s]));
-				seriesBase.push(base);
-
-				xfields.push(base + "x");
-				yfields.push(base + "y");
-
-				storeFields.push({
-					type: "float",
-					name: base + "x"
-				});
-				storeFields.push({
-					type: "float",
-					name: base + "y"
-				});
-
-				var i = 0;
-				for (i = 0; i < displayInformation.colors.length; i++) {
-					if (displayInformation.ids[i] == id && displayInformation.headers[i] == name) {
-						break;
-					}
-				}
-				//console.log(i);
-				var color = null;
-				if (!isGray(displayInformation.colors[i])) {
-					color = displayInformation.colors[i];
-				} else {
-					color = defaultColors[defaultColorIndex];
-					defaultColorIndex++;
-					defaultColorIndex = defaultColorIndex % defaultColors.length;
-				}
-				//console.log(color);
-
-
-				displaySeries.push({
-					title: name,
-					animate: false,
-					type: 'line',
-					axis: "left",
-					xField: base + "x",
-					yField: base + "y",
-					showMarkers: true,
-					style: {
-						'stroke-width': 0,
-						opacity: 0,
-						stroke: 'none'
-					},
-					markerConfig: {
-						type: ["circle", "triangle", "diamond", "cross", "plus"][j % 6],
-						fill: color,
-						radius: 5
-					},
-					smooth: false,
-					tips: {
-						trackMouse: true,
-						width: 160,
-						renderer: createAgentTips(agentName)
-					}
-				});
+				addSeries(base, name);
 			}
 
 		}
@@ -1174,6 +1119,66 @@ function renderDisplay(display, displayInformation) {
 			}]
 		};
 		return p;
+	}
+	
+	function addSeries(base, name){
+		seriesBase.push(base);
+
+		xfields.push(base + "x");
+		yfields.push(base + "y");
+
+		storeFields.push({
+			type: "float",
+			name: base + "x"
+		});
+		storeFields.push({
+			type: "float",
+			name: base + "y"
+		});
+
+		var i = 0;
+		for (i = 0; i < displayInformation.colors.length; i++) {
+			if (displayInformation.ids[i] == id && displayInformation.headers[i] == name) {
+				break;
+			}
+		}
+		//console.log(i);
+		var color = null;
+		if (!isGray(displayInformation.colors[i])) {
+			color = displayInformation.colors[i];
+		} else {
+			color = defaultColors[defaultColorIndex];
+			defaultColorIndex++;
+			defaultColorIndex = defaultColorIndex % defaultColors.length;
+		}
+		//console.log(color);
+
+
+		displaySeries.push({
+			title: name,
+			animate: false,
+			type: 'line',
+			axis: "left",
+			xField: base + "x",
+			yField: base + "y",
+			showMarkers: true,
+			style: {
+				'stroke-width': 0,
+				opacity: 0,
+				stroke: 'none'
+			},
+			markerConfig: {
+				type: ["circle", "triangle", "diamond", "cross", "plus"][j % 6],
+				fill: color,
+				radius: 5
+			},
+			smooth: false,
+			tips: {
+				trackMouse: true,
+				width: 160,
+				renderer: createAgentTips(agentName)
+			}
+		});
 	}
 }
 
@@ -1335,7 +1340,7 @@ function createResultsWindow(displayInformation) {
 		//console.log("A");
 		this.store.filter([{
 			filterFn: function(item) {
-				return item.get("Time") <= time;
+				return item.get("TimeIndex") <= time;
 			}
 		}]);
 		//console.log("b");
@@ -1350,7 +1355,7 @@ function createResultsWindow(displayInformation) {
 		this.slider.setValue(time);
 		this.updatingSlider = false;
 	}
-	if (scripter.combo.getValue() != -1 && ! doFullSpeed) {
+	if (scripter.combo.getValue() != -1 && ! simulate.doFullSpeed) {
 		scripter.loadTime(1);
 		scripter.animInter = setInterval(function() {
 			scripter.advanceTimer()
@@ -1597,9 +1602,7 @@ function buildMapStore(item, time) {
 
 	var connections = {};
 	var locations = {};
-	//console.log("---");
-	//console.log(item);
-	//console.log(time);
+	
 	for (var i = 0; i < item.agents.length; i++) {
 		var agent = item.agents[i];
 		var xNull = -parseFloat(simpleNum(agent.data.width, agent.data.units));
@@ -1609,15 +1612,22 @@ function buildMapStore(item, time) {
 		for (var j = 0; j < data.length; j++) {
 			locations[data[j].instanceId] = data[j].location;
 			connections[data[j].instanceId] = data[j].connected;
-			//console.log(data[j]);
-			//console.log(data[j].state)
+			
 			if (data[j].state !== null) {
-				//console.log(data[j].state)
 				var states = data[j].state.map(function(x) {
 					return x.name
-				})
-					.join(", ");
-				//console.log(data[j].connected);
+				}).join(", ");
+			}else{
+				var states = "";
+			}
+			
+			var x = createDummyBase();
+			var base = "series_" + agent.id + "__";
+			x[base + "x"] = data[j].location.items[0];
+			x[base + "y"] = data[j].location.items[1];
+			res.push(x);
+			
+			if (data[j].state !== null) {
 				for (var k = 0; k < data[j].state.length; k++) {
 					var x = createDummyBase();
 					var base = "series_" + agent.id + "_" + data[j].state[k].id + "_";
@@ -1658,10 +1668,7 @@ function buildMapStore(item, time) {
 }
 
 function buildHistogramStore(item, time) {
-
-	//console.log(res);
 	item.store.loadData(createHistogramData(item.data[time], item.min, item.max));
-
 }
 
 function createHistogramChart(displayInformation, i) {

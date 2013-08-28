@@ -10,8 +10,8 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 // ********** Code for UnitStore **************
 function UnitStore(names, exponents) {
-  this.names = names?names:[];
-  this.exponents = exponents?exponents:[];
+  this.names = names || [];
+  this.exponents = exponents || [];
 }
 
 UnitStore.prototype.clone = function() {
@@ -22,8 +22,7 @@ UnitStore.prototype.multiplyUnitStore = function(rhs, exponent) {
     var j = this.names.indexOf(rhs.names[i]);
     if (j != -1) {
       this.exponents[j] = this.exponents[j] + rhs.exponents[i] * exponent;
-    }
-    else {
+    }else {
       this.names.push(rhs.names[i]);
       this.exponents.push(rhs.exponents[i] * exponent);
     }
@@ -34,14 +33,14 @@ UnitStore.prototype.unitless = function() {
 		return true;
 	}
 	
-	for(var i = this.names.length - 1 ; i >= 0; i--){
+	/*for(var i = this.names.length - 1 ; i >= 0; i--){
 		if(this.names[i] == "" && this.exponents[i] > 1){
 			this.exponents[i] = 1;
 		}else if(this.exponents[i] == 0){
 			this.exponents.splice(i, 1);
 			this.names.splice(i, 1);
 		}
-	}
+	}*/
 	
 	return (this.names.length == 0 || (this.names.length == 1 && this.names[0] == ""));
 	
@@ -142,6 +141,7 @@ Quantities.prototype.ApplyConversions = function() {
   var modified = true;
   while (modified) {
     modified = false;
+	
     for (var i = this.units.names.length - 1; i >= 0; i--) {
       if (this.units.exponents[i] == 0 || this.units.names[i]=="") {
         this.units.names.splice(i, 1);
@@ -158,6 +158,7 @@ Quantities.prototype.ApplyConversions = function() {
         }
       }
     }
+	
     for (var i = this.units.names.length - 2; i >= 0; i--) {
       for (var j = this.units.names.length - 1; j >= i + 1; j--) {
         if (this.units.names[j] == this.units.names[i]) {
@@ -174,6 +175,7 @@ Quantities.prototype.ApplyConversions = function() {
   }
   this.unitless = (this.units.names.length==0);
 }
+
 Quantities.prototype.equal = function(rhs) {
   if (rhs == null) {
     return false;

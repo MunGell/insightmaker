@@ -768,6 +768,33 @@ function propogateGhosts(cell){
 	}
 }
 
+function propogateName(cell, oldName){
+	if(isValued(cell)){
+		//console.log(oldName)
+		var newValue = getName(cell);
+		var patt = new RegExp("\\["+oldName+"\\]","gi");
+		
+		var connected = graph.getConnections(cell);
+		for(var i=0; i < connected.length; i++){
+			var neighbor;
+			if(connected[i].value.nodeName=="Flow" || connected[i].value.nodeName=="Transition"){
+				neighbor = connected[i];
+			}else if(connected[i].target.id == cell.id){
+				neighbor = connected[i].source;
+			}else {
+				neighbor = connected[i].target;
+			}
+			//console.log(neighbor.getAttribute("name"))
+			if(isValued(neighbor) || (neighbor && neighbor.value.nodeName=="Action")){
+				//console.log(getValue(neighbor))
+				setValue(neighbor, getValue(neighbor).replace(patt, "["+newValue+"]"))
+			}
+		}
+		
+		
+	}
+}
+
 function map(val, fn){
 	if (val instanceof Array) {
 		return Ext.Array.map(val, fn);
@@ -819,7 +846,6 @@ function inAgent(cell){
 	}
 	return inAgent(p);
 }
-
 
 function isGray(color){
 	if(isUndefined(color)){

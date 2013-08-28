@@ -25,9 +25,9 @@ AggregateSeries.method("get", function(data) {
 	if (this.spacing < 0) {
 		index = 0;
 	} else if (this.spacing == 0) {
-		index = Math.floor(div(minus(time, timeStart), timeStep).value);
+		index = Math.floor(div(minus(simulate.time(), simulate.timeStart), simulate.UserTimeStep).value);
 	} else {
-		index = Math.floor(div(minus(time, timeStart), this.spacing.forceUnits(timeStart.units)).value);
+		index = Math.floor(div(minus(simulate.time(), simulate.timeStart), this.spacing.forceUnits(simulate.timeUnits)).value);
 	}
 	
 	while (this.oldValues.length - 1 < index) {
@@ -41,51 +41,35 @@ AggregateSeries.method("get", function(data) {
 });
 
 function DataBank() {
-	this.dataSeries = [];
-	this.names = [];
+	this.dataSeries = {};
 }
+
+DataBank.method("series", function(){
+	return Object.keys(this.dataSeries);
+});
 
 DataBank.method("clone", function(){
 	var d = new DataBank();
-	d.dataSeries = this.dataSeries.slice(0);
-	d.names = this.names.slice(0);
+	var keys = this.series();
+	for(var i=0; i<keys.length; i++){
+		d.dataSeries[keys[i]] = this.dataSeries[keys[i]];
+	}
 	return d;
 })
 
 DataBank.method("getSeries", function(n) {
-	if (this.names.indexOf(n) > -1) {
-		return this.dataSeries[this.names.indexOf(n)];
-	} else {
-
-		this.names.push(n);
-		var type = n.split(":")[0];
-		if (type == "Smooth") {
-			var d = [];
-			this.dataSeries.push(d);
-			return d;
-		} else if (type == "ExpDelay") {
-			var d = [];
-			this.dataSeries.push(d);
-			return d;
-		}
+	if (! this.dataSeries[n]) {
+		this.dataSeries[n] = [];
 	}
+	return this.dataSeries[n];
 });
 
 DataBank.method("trimValues", function(newUbound) {
-	for (var i = 0; i < this.names.length; i++) {
-		var n = this.names[i];
-		var type = n.split(":")[0];
-		if (type == "Smooth") {
-			var d = this.getSeries(n);
-			if (d.length - 1 > newUbound) {
-				d.splice(newUbound+1, d.length-newUbound+1);
-			}
-		} else if (type == "ExpDelay") {
-			var d = this.getSeries(n);
-			if (d.length - 1 > newUbound) {
-				d.splice(newUbound+1, d.length-newUbound+1);
-				//console.log(d);
-			}
+	var series = this.series();
+	for (var i = 0; i < series.length; i++) {
+		var d = this.getSeries(series[i]);
+		if (d.length - 1 > newUbound) {
+			d.splice(newUbound+1, d.length-newUbound+1);
 		}
 	}
 });

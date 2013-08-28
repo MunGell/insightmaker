@@ -264,7 +264,7 @@ functionBank["map"] = function(x) {
 functionBank["map"].delayEvalParams = true;
 VectorObject["map"] = functionBank["map"];
 
-defineFunction( "Sample", {object: VectorObject, functionBank: true, params:[{name: "Vector", needVector: true}, {name: "Sample Size"}, {name: "Repeat", noVector: true, allowBoolean: true, defaultVal: false}]}, function(x){
+defineFunction( "Sample", {object: [functionBank, VectorObject], params:[{name: "Vector", needVector: true}, {name: "Sample Size"}, {name: "Repeat", noVector: true, allowBoolean: true, defaultVal: false}]}, function(x){
 	var v = x[0].toNum();
 	var count = x[1].toNum().value;
 	if(count == 0){
@@ -296,7 +296,7 @@ defineFunction( "Sample", {object: VectorObject, functionBank: true, params:[{na
 	return new Vector(res);
 });
 
-defineFunction("IndexOf", {object: VectorObject, functionBank: true,  params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true}]}, function(x){
+defineFunction("IndexOf", {object: [functionBank, VectorObject],  params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true}]}, function(x){
 
 	var v = x[1];
 	
@@ -311,7 +311,7 @@ defineFunction("IndexOf", {object: VectorObject, functionBank: true,  params:[{n
 	}
 });
 
-defineFunction("Contains", {object: VectorObject, functionBank: true, params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true, noVector:true}]}, function(x){
+defineFunction("Contains", {object: [functionBank, VectorObject], params:[{name: "Haystack", needVector: true, noUnits: true}, {name: "Needle", allowBoolean:true, noVector:true}]}, function(x){
 		
 	if(eq(new Material(0), functionBank["indexof"](x))){
 		return false;
@@ -321,7 +321,6 @@ defineFunction("Contains", {object: VectorObject, functionBank: true, params:[{n
 });
 
 defineFunction("Collapse", {params:[{name: "Source", needVector: true, noUnits: false}, {name: "Target",  noVector:false}]}, function(x){
-		
 	return x[0].toNum().collapseDimensions(x[1].toNum());
 });
 
@@ -467,16 +466,7 @@ defineFunction("Select", {params:[{name: "Haystack", needVector: true, noUnits: 
 defineFunction("Reverse", {allowEmpty:true, params:{name: "Items..."}, prep: function(x){
 	return functionBank["join"](x);
 }}, function(x){
-
-	var names = x.names?[]:undefined;
-	var res = [];
-	for (var i = x.items.length-1; i >= 0; i--) {
-		res.push(x.items[i]);
-		if(names){
-			names.push(x.names[i])
-		}
-	}
-	return new Vector(res, names);
+	return new Vector(x.items.slice().reverse(), x.names?x.names.slice().reverse():undefined);
 });
 defineFunction("Reverse", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
 	return functionBank["reverse"](x);
@@ -552,11 +542,11 @@ defineFunction("Unique", {object: VectorObject, params:[{name:"Vector", needVect
 	return functionBank["unique"](x);
 });
 
-defineFunction("Union", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Union", {object: [functionBank, VectorObject], params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	return functionBank["unique"](functionBank["join"](x).items);
 });
 
-defineFunction("Intersection", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Intersection", {object: [functionBank, VectorObject], params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	var v1 = x[0];
 	var v2 = x[1];
 	
@@ -574,7 +564,7 @@ defineFunction("Intersection", {object: VectorObject, functionBank: true, params
 });
 
 
-defineFunction("Difference", {object: VectorObject, functionBank: true, params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
+defineFunction("Difference", {object: [functionBank, VectorObject], params:[{name: "Vector 1", needVector: true}, {name: "Vector 2", needVector: true}]}, function(x){	
 	var v1 = x[0];
 	var v2 = x[1];
 	
@@ -632,20 +622,27 @@ defineFunction("Max", {object: VectorObject, params:[{name:"Vector", needVector:
 	return functionBank["max"](x);
 });
 
-function joinVector(x, notToNum){
+function joinVector(x, notToNum, skip){
 	if(! notToNum){
 		for(var i=0; i<x.length; i++){
 			x[i] = x[i].toNum();
 		}
 	}
 	if(x.length == 1 && (x[0] instanceof Vector)){
-		return x[0];
+		if(skip){
+			return x[0];
+		}else{
+			return functionBank["flatten"]([x[0]]);
+		}
 	}else{
 		return (new Vector(scalarsToVectors(x)));
 	}
 }
 function joinArray(x){
-	return joinVector(x).items;
+	if(x.length == 1 && (x[0] instanceof Vector)){
+		return functionBank["flatten"]([x[0].toNum()]).items;
+	}
+	return joinVector(x, undefined, true).items;
 }
 function scalarsToVectors(x){
 	var needVector = false;
@@ -681,7 +678,7 @@ function replicateVectorStructure(vec, val){
 	return v;
 }
 
-defineFunction("Fill", {object: VectorObject, functionBank: true, params: [{name: "Vector", needVector: true}, {name: "Value", allowBoolean: true} ]}, function(x){
+defineFunction("Fill", {object: [functionBank, VectorObject], params: [{name: "Vector", needVector: true}, {name: "Value", allowBoolean: true} ]}, function(x){
 	return replicateVectorStructure(x[0], x[1]);
 });
 
@@ -804,6 +801,9 @@ functionBank["flatten"] = function(x) {
 };
 
 defineFunction("Length", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return new Material(sn("#e"+x[0].items.length));
+});
+defineFunction("Count", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
 	return new Material(sn("#e"+x[0].items.length));
 });
 defineFunction("Flatten", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
@@ -939,7 +939,9 @@ function makeObjectBase(x){
 	for(var i=0; i<names.length; i++){
 		items.push(objectizeFunction(x[names[i]]));
 	}
-	return new Vector(items, names);
+	var vec = new Vector(items, names);
+	vec.parent = undefined;
+	return vec;
 }
 
 
@@ -966,11 +968,7 @@ function defineFunction(name, definition, fn){
 		fnName = name + "(items...)";
 	}
 	
-	var base = functionBank;
-	if(definition.object){
-		base = definition.object;
-	}
-	base[name.toLowerCase()] = function(x, id){
+	var f = function(x, id){
 		if(definition.prep){
 			x = definition.prep(x);
 		}
@@ -1026,16 +1024,26 @@ function defineFunction(name, definition, fn){
 		}
 		
 		if(definition.recurse && (x[0] instanceof Vector)){
-			return x[0].cloneApply(function(z){return base[name.toLowerCase()]([z].concat(x.slice(1)), id)});
+			return x[0].cloneApply(function(z){return f([z].concat(x.slice(1)), id)});
 		}else{
 			return fn(x, id);
 		}
 	}
-	if(definition.functionBank){
-		functionBank[name.toLowerCase()] = base[name.toLowerCase()];
+	
+	if(! definition.object){
+		functionBank[name.toLowerCase()] = f;
+	}else{
+		if(definition.object instanceof Array){
+			for(var i=0; i<definition.object.length; i++){
+				definition.object[i][name.toLowerCase()] = f;
+			}
+		}else{
+			definition.object[name.toLowerCase()] = f;
+		}
 	}
+		
 	if(definition.recurse){
-		VectorObject[name.toLowerCase()] = base[name.toLowerCase()];
+		VectorObject[name.toLowerCase()] = f;
 	}
 }
 

@@ -723,6 +723,31 @@ var executeLayout = function(layout, animate, ignoreChildCount) {
 };
 
 /*
+Method: setZoom
+
+Sets the scale of the diagram display.
+
+Parameters:
+
+scale - The diagram scale. If this is a number, then it determine the scale level. 1 means 100%, 0.5 means 50%, 2 means 200% and so on. You also pass one of the following strings: "fit" to fit the model to the diagram area, "actual" to reset the scale, "in" to zoom further in based on the current scale, and "out" to further out based on the current scale.
+
+*/
+
+function setZoom(scale) {
+	if(scale == "fit"){
+		graph.fit();
+	}else if(scale == "actual"){
+		graph.zoomActual();
+	}else if(scale == "in"){
+		graph.zoomIn();
+	}else if(scale == "out"){
+		graph.zoomOut();
+	}else{
+		graph.getView().setScale(scale);
+	}
+}
+
+/*
 
 Group: Simulation Settings
 
@@ -1872,21 +1897,23 @@ function getValue(primitive) {
 		var n = primitive.value.nodeName;
 		var v;
 		if (n == "Stock") {
-			v= primitive.getAttribute("InitialValue");
+			v = primitive.getAttribute("InitialValue");
 		} else if (n == "Flow") {
-			v= primitive.getAttribute("FlowRate");
+			v = primitive.getAttribute("FlowRate");
 		} else if (n == "Transition") {
-			v= primitive.getAttribute("Value");
+			v = primitive.getAttribute("Value");
 		} else if (n == "State") {
-			v= primitive.getAttribute("Active");
+			v = primitive.getAttribute("Active");
 		} else if (n == "Variable") {
-			v= primitive.getAttribute("Equation");
+			v = primitive.getAttribute("Equation");
 		} else if (n == "Button") {
-			v= primitive.getAttribute("Function");
+			v = primitive.getAttribute("Function");
 		} else if (n == "Converter") {
-			v= primitive.getAttribute("Data");
+			v = primitive.getAttribute("Data");
 		} else if (n == "Action") {
-			v= primitive.getAttribute("Action");
+			v = primitive.getAttribute("Action");
+		} else if (n == "Agents") {
+			v = primitive.getAttribute("Size");
 		}
 		if(isDefined(v)){
 			return v;
@@ -1934,6 +1961,12 @@ function setValue(primitive, value) {
 				edit = new mxCellAttributeChange(primitive, "Data", String(value));
 			} else if (n == "Action") {
 				edit = new mxCellAttributeChange(primitive, "Action", String(value));
+			} else if (n == "Agents") {
+				if(value < 0 || Math.round(value)!=value){
+					alert("The agent population size must be a non-negative integer.");
+					return;
+				}
+				edit = new mxCellAttributeChange(primitive, "Size", parseFloat(value));
 			}
 			
 			graph.getModel().execute(edit);
@@ -3506,6 +3539,58 @@ function setFolderType(folder, type) {
 		graph.getModel().execute(edit);
 	});
 }
+
+
+/*
+Method: getFolderSolver
+
+Gets the solver configuation for a folder. The configuration is an object with the properties:
+
+enabled - true is the folder should have its own solver
+algorithm - the solution algorithm. Current allowed values are "RK1" for Euler's method and "RK4" for a fourth order Runge-Kutta method
+timeStep - the time step for the folder's solver
+
+Parameters:
+
+folder - The folder for which the solver is requested. May also be an array of folders.
+
+Return:
+
+The solver object
+
+See also:
+
+<setFolderSolver>
+*/
+
+function getFolderSolver(folder) {
+	return map(folder, function(primitive) {
+		return JSON.parse(primitive.getAttribute("Solver"));
+	});
+}
+
+/*
+Method: setFolderSolver
+
+Sets the solver object for a folder
+
+Parameters:
+
+folder - The folder for which the solver will be set. May also be an array of folders.
+solver - The solver object
+
+See also:
+
+<getFolderSolver>
+*/
+
+function setFolderSolver(folder, solver) {
+	map(folder, function(primitive) {
+		var edit = new mxCellAttributeChange(primitive, "Solver", JSON.stringify(solver));
+		graph.getModel().execute(edit);
+	});
+}
+
 
 /*
 

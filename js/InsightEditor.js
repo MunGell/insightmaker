@@ -15,6 +15,32 @@ Ext.onReady(function() {
 
 var threads = 0;
 
+Ext.form.customFields = {
+	'code': Ext.extend(Ext.form.TriggerField, {
+		enableKeyEvents: false,
+		selectOnFocus: true
+	}),
+	'converter': Ext.extend(Ext.form.TriggerField, {
+		enableKeyEvents: false,
+		selectOnFocus: true,
+		stripCharsRe: /[^0-9\;\,\. \-]/g
+	}),
+	'units': Ext.extend(Ext.form.TriggerField, {
+		enableKeyEvents: false,
+		selectOnFocus: true,
+		stripCharsRe: /[^A-Za-z 0-9\.\/\(\)\*\^]/g
+	}),
+	'richText': Ext.extend(Ext.form.TriggerField, {
+		enableKeyEvents: false,
+		selectOnFocus: true
+	}),
+	'solver': Ext.extend(Ext.form.TriggerField, {
+		enableKeyEvents: false,
+		selectOnFocus: false,
+		clicksToEdit: 9999
+	})
+};
+
 //make html edit links target blank
 Ext.override(Ext.form.HtmlEditor, {
 	createLink: function() {
@@ -41,6 +67,29 @@ Ext.override(Ext.form.HtmlEditor, {
 		}
 	}
 });
+
+function renderTimeBut(value)
+   {
+	   var id = Ext.id();
+       
+       Ext.Function.defer(function() {
+           new Ext.Button({
+               text: "Edit Time Settings",
+			   height: 16,
+			   padding:0,
+			   margin:0,
+			   margins: 0,
+               handler : function(btn, e) {
+		   		 var config = JSON.parse(getSelected()[0].getAttribute("Solver"))
+		   		 config.cell = getSelected()[0];
+
+		   		 showTimeSettings(config);
+               
+               }
+           }).render(document.body, id);
+       }, 15);
+       return '<div id="' + id + '"></div>';
+   }
 
 window.addEventListener('message', callAPI, false);
 
@@ -418,30 +467,7 @@ function main() {
 			graph.getModel().execute(edit);
 			selectionChanged(false);
 			propogateGhosts(cell);
-			
-			if(isValued(cell)){
-				//console.log(oldName)
-				var patt = new RegExp("\\["+oldName+"\\]","gi");
-				
-				var connected = graph.getConnections(cell);
-				for(var i=0; i < connected.length; i++){
-					var neighbor;
-					if(connected[i].value.nodeName=="Flow" || connected[i].value.nodeName=="Transition"){
-						neighbor = connected[i];
-					}else if(connected[i].target.id == cell.id){
-						neighbor = connected[i].source;
-					}else {
-						neighbor = connected[i].target;
-					}
-					//console.log(neighbor.getAttribute("name"))
-					if(isValued(neighbor) || (neighbor && neighbor.value.nodeName=="Action")){
-						//console.log(getValue(neighbor))
-						setValue(neighbor, getValue(neighbor).replace(patt, "["+newValue+"]"))
-					}
-				}
-				
-				
-			}
+			propogateName(cell, oldName);
 			
 			graph.model.endUpdate();
 			return cell;
@@ -467,6 +493,8 @@ function main() {
 	primitiveBank.folder.setAttribute('name', getText('New Folder'));
 	primitiveBank.folder.setAttribute('Note', '');
 	primitiveBank.folder.setAttribute('Type', 'None');
+	var defaultSolver = '{"enabled": false, "algorithm": "RK1", "timeStep": 1}';
+	primitiveBank.folder.setAttribute('Solver', defaultSolver);
 	primitiveBank.folder.setAttribute('Image', 'None');
 	primitiveBank.folder.setAttribute('FlipHorizontal', false);
 	primitiveBank.folder.setAttribute('FlipVertical', false);
@@ -551,7 +579,7 @@ function main() {
 	primitiveBank.action.setAttribute('Note', '');
 	primitiveBank.action.setAttribute('Trigger', 'Condition');
 	primitiveBank.action.setAttribute('Value', 'true');
-	primitiveBank.action.setAttribute('Action', 'Move([Self], {Rand, Rand})');
+	primitiveBank.action.setAttribute('Action', '[Self].Move({Rand(), Rand()})');
 
 	primitiveBank.agents = doc.createElement('Agents');
 	primitiveBank.agents.setAttribute('name', getText('New Agent Population'));
@@ -562,7 +590,7 @@ function main() {
 	primitiveBank.agents.setAttribute('GeoWidth', 200);
 	primitiveBank.agents.setAttribute('GeoHeight', 100);
 	primitiveBank.agents.setAttribute('Placement', "Random");
-	primitiveBank.agents.setAttribute('PlacementFunction', "{Rand*Width([Self]), Rand*Height([Self])}");
+	primitiveBank.agents.setAttribute('PlacementFunction', "{Rand()*Width([Self]), Rand()*Height([Self])}");
 	primitiveBank.agents.setAttribute('Network', "None");
 	primitiveBank.agents.setAttribute('NetworkFunction', "RandBoolean(0.02)");
 	primitiveBank.agents.setAttribute('Agent', '');
@@ -570,6 +598,10 @@ function main() {
 	primitiveBank.agents.setAttribute('FlipHorizontal', false);
 	primitiveBank.agents.setAttribute('FlipVertical', false);
 	primitiveBank.agents.setAttribute('LabelPosition', "Middle");
+	primitiveBank.agents.setAttribute('ShowSlider', false);
+	primitiveBank.agents.setAttribute('SliderMax', 100);
+	primitiveBank.agents.setAttribute('SliderMin', 0);
+	primitiveBank.agents.setAttribute('SliderStep', 1);
 
 	primitiveBank.variable = doc.createElement('Variable');
 	primitiveBank.variable.setAttribute('name', getText('New Variable'));
@@ -617,7 +649,7 @@ function main() {
 
 	primitiveBank.setting = doc.createElement('Setting');
 	primitiveBank.setting.setAttribute('Note', '');
-	primitiveBank.setting.setAttribute('Version', '29');
+	primitiveBank.setting.setAttribute('Version', '31');
 	primitiveBank.setting.setAttribute('Throttle', '1');
 	primitiveBank.setting.setAttribute('TimeLength', '100');
 	primitiveBank.setting.setAttribute('TimeStart', '0');
@@ -1259,43 +1291,71 @@ function main() {
 			
 			mySetting.setAttribute("Version", 28);
 		}
+		
+		if (mySetting.getAttribute("Version") < 29) {
+
+			var obsolete = excludeType(findValue(/[A-Za-z0-9_]\s+\(/i), "Button");
+
+			if(viewConfig.allowEdits){
+				if (obsolete.length > 0) {
+
+					var msg = '<p>Insight Maker has received a significant update to its equation engine providing improved flexibility and power.</p>';
+					msg += '<br/><p>A side effect of this update is that function names must now immediately be followed by a parenthesis. Thus, for instance, "Max&nbsp;&nbsp(1,2)" is no longer valid and needs to be replaced with  "Max(1,2)." This also improves the clarity and readability of equations.</p> ';
+					msg += '<br/><p>The following of your primitives appear to use an unsupported format. Their equations will automatically be updated to use the correct format:</p>';
+					msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
+						return x.getAttribute("name")
+					}).join(", ") + '</b></p>';
+				
+					msg += '<br/><p>You may save your model to keep these updates.</p>'
+
+					Ext.Msg.show({
+						icon: Ext.MessageBox.WARNING,
+						title: 'Model Update Required',
+						msg: msg,
+						buttons: Ext.MessageBox.OK
+					});
+
+				}
+			}
+		
+			if(obsolete.length>0){
+				obsolete.map(function(x){
+					setValue(x, getValue(x).replace(/([A-Za-z0-9_])\s+\(/gi, "$1("));
+				});
+			}
+		
+			mySetting.setAttribute("Version", 29);
+		}
+	
+		if (mySetting.getAttribute("Version") < 30) {
+			var folders = primitives("Folder");
+
+			for (var i = 0; i < folders.length; i++) {
+				folders[i].setAttribute("Solver", defaultSolver);
+			}
+
+			mySetting.setAttribute("Version", 30);
+		}
+		
+		if (mySetting.getAttribute("Version") < 31) {
+			var agents = primitives("Agents");
+
+			for (var i = 0; i < agents.length; i++) {
+				agents[i].setAttribute('ShowSlider', false);
+				agents[i].setAttribute('SliderMax', 100);
+				agents[i].setAttribute('SliderMin', 0);
+				agents[i].setAttribute('SliderStep', 1);
+			}
+
+			mySetting.setAttribute("Version", 31);
+		}
+		
+		
 
 	}
 	
-	if (mySetting.getAttribute("Version") < 29) {
-
-		var obsolete = excludeType(findValue(/[A-Za-z0-9_]\s+\(/i), "Button");
-
-		if(viewConfig.allowEdits){
-			if (obsolete.length > 0) {
-
-				var msg = '<p>Insight Maker has received a significant update to its equation engine providing improved flexibility and power.</p>';
-				msg += '<br/><p>A side effect of this update is that function names must now immediately be followed by a parenthesis. Thus, for instance, "Max&nbsp;&nbsp(1,2)" is no longer valid and needs to be replaced with  "Max(1,2)." This also improves the clarity and readability of equations.</p> ';
-				msg += '<br/><p>The following of your primitives appear to use an unsupported format. Their equations will automatically be updated to use the correct format:</p>';
-				msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
-					return x.getAttribute("name")
-				}).join(", ") + '</b></p>';
-				
-				msg += '<br/><p>You can save your model to keep these updates.</p>'
-
-				Ext.Msg.show({
-					icon: Ext.MessageBox.WARNING,
-					title: 'Model Update Required',
-					msg: msg,
-					buttons: Ext.MessageBox.OK
-				});
-
-			}
-		}
-		
-		if(obsolete.length>0){
-			obsolete.map(function(x){
-				setValue(x, getValue(x).replace(/([A-Za-z0-9_])\s+\(/gi, "$1("));
-			});
-		}
-		
-		mySetting.setAttribute("Version", 29);
-	}
+	
+	
 	loadBackgroundColor();
 
 	if (viewConfig.saveEnabled) {
@@ -1835,7 +1895,7 @@ function main() {
 
 			}
 
-			if (isValued(cell) && cell.value.nodeName != "State" && cell.value.nodeName != "Action") {
+			if ((isValued(cell) || cell.value.nodeName == "Agents") && cell.value.nodeName != "State" && cell.value.nodeName != "Action") {
 				if (viewConfig.allowEdits && cell.value.nodeName != "Converter") {
 					properties.push({
 						'name': 'ShowSlider',
@@ -1883,7 +1943,7 @@ function main() {
 					});
 				}
 
-				if (cell.value.nodeName != "Transition") {
+				if (cell.value.nodeName != "Transition" && cell.value.nodeName != "Agents") {
 					properties.push({
 						'name': 'Units',
 						'text': getText('Units'),
@@ -1893,7 +1953,7 @@ function main() {
 					});
 				}
 
-				if (viewConfig.allowEdits) {
+				if (viewConfig.allowEdits && cell.value.nodeName != "Agents") {
 					properties.push({
 						'name': 'MaxConstraintUsed',
 						'text': getText('Max Constraint'),
@@ -2117,7 +2177,8 @@ function main() {
 				'name': 'Delay',
 				'text': getText('Delay'),
 				'value': isDefined(cell.getAttribute("Delay"))?cell.getAttribute("Delay").toString():"",
-				'group': getText('Behavior')
+				'group': getText('Behavior'),
+				'renderer': equationRenderer
 			});
 
 		} else if (cellType == "Variable") {
@@ -2153,6 +2214,15 @@ function main() {
 					selectOnFocus: true
 				})
 			});
+			properties.push({
+				'name': 'Solver',
+				'text': getText('Time Settings'),
+				'value': cell.getAttribute("Equation"),
+				'group': ' '+getText('Configuration'),
+				'renderer': renderTimeBut
+			});
+		    
+		       
 		} else if (cell.value.nodeName == "Button") {
 			bottomDesc = descBase + "Buttons are used for interactivity. To select a button without triggering its action, hold down the Shift key when you click the button. Buttons are currently in Beta and their implementation may change in later versions of Insight Maker. More button documentation is <a href='http://insightmaker.com/sites/default/files/API/' target='_blank'>available here</a>.";
 			properties.push({

@@ -10,9 +10,10 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 
 var simulatorProgress;
+var simulate;
+var model;
+
 var strictUnits = null;
-var submodels = null;
-var arrays = [];
 
 
 function runSimulation(config) {
@@ -61,20 +62,14 @@ function checkErr(err, config){
 var timeUnits = null;
 function innerRunSimulation(config) {
 	
+	simulate = new Simulator();
+	
 	bootCalc();
 	
-	if(getSetting().getAttribute("arrays")){
-		arrays = JSON.parse(getSetting().getAttribute("arrays"));
-		arrays.each(function(x){
-			x.data = JSON.decode(x.data);
-		});
-	}else{
-		arrays = [];
-	}
 	
 	allPlaceholders = [];
-	var model = {};
-	submodels = {"base": {id: "base", "DNAs":[], agents: [{children: [], childrenId: {}}], size: 1}};
+	model = {};
+	model.submodels = {"base": {id: "base", "DNAs":[], agents: [{children: [], childrenId: {}}], size: 1}};
 	var setting = getSetting();
 
 	strictUnits = isTrue(setting.getAttribute("StrictUnits"));
@@ -84,14 +79,10 @@ function innerRunSimulation(config) {
 		
 	timeUnits = setting.getAttribute("TimeUnits").toLowerCase();
 	var u = new UnitStore([timeUnits],[1]);
-	model["timeStep"] = new Material(sn("#i" + setting.getAttribute("TimeStep")), u.clone());
 	model["timeLength"] = new Material(sn("#i" + setting.getAttribute("TimeLength")), u.clone());
 	model["timeStart"] = new Material(sn("#i" + setting.getAttribute("TimeStart")), u.clone());
-	if (setting.getAttribute("SolutionAlgorithm") == "RK4") {
-		model["RKOrder"] = 4;
-	} else {
-		model["RKOrder"] = 1;
-	}
+	model["timeStep"] = new Material(sn("#i" + setting.getAttribute("TimeStep")), u.clone());
+	
 		
 	//End Simulation time settings setup
 		
@@ -104,11 +95,11 @@ function innerRunSimulation(config) {
 			newScalings = [],
 			newTargets = [];
 		for (var i = 0; i < units.length; i++) {
-			var u = units[i].split("<>");
-			if (Ext.String.trim(u[2]) != "") { //It has a synonym, otherwise we don't need to add it
-				newSources.push(u[0]);
-				newScalings.push(u[1]);
-				var newU = createUnitStore(u[2]);
+			var us = units[i].split("<>");
+			if (Ext.String.trim(us[2]) != "") { //It has a synonym, otherwise we don't need to add it
+				newSources.push(us[0]);
+				newScalings.push(us[1]);
+				var newU = createUnitStore(us[2]);
 				if(isUndefined(newU)){
 					throw {msg: 'You cannot define a units synonym for "unitless".'};
 				}else{
@@ -120,7 +111,53 @@ function innerRunSimulation(config) {
 
 	}
 		
+		
 	//End custom units setup
+	var solvers = {}; // Simulation solvers
+	solvers.base = {
+		timeStep: new Material(sn("#i" + setting.getAttribute("TimeStep")), u.clone()),
+		algorithm: setting.getAttribute("SolutionAlgorithm"),
+		id: "base"
+	};
+	
+	model.solvers = solvers;
+	var folders = findType("Folder");
+	for(var i=0; i<folders.length; i++){
+		var json = folders[i].getAttribute("Solver");
+		if(json){
+			var solver = JSON.parse(json);
+			if(solver.enabled){ 
+				solvers[folders[i].id] = solver;
+				solvers[folders[i].id].timeStep = new Material(sn("#i" + solvers[folders[i].id].timeStep), u.clone());
+				solvers[folders[i].id].id = folders[i].id;
+			}
+		}
+	}
+	
+	var solverKeys = Object.keys(solvers);
+	for(var i = 0; i < solverKeys.length; i++){
+		var solver = solvers[solverKeys[i]];
+		
+		solver.userTimeStep = solver.timeStep;
+		if(solver.algorithm == "RK4"){
+			solver.RKOrder = 4;
+		}else{
+			solver.RKOrder = 1;
+		}
+		if(solver.RKOrder == 4){
+			solver.timeStep = div(solver.userTimeStep, new Material(2));
+		}else{
+			solver.timeStep = solver.userTimeStep;
+		}
+		
+		solver.stocks = [];
+		solver.flows = [];
+		solver.transitions = [];
+		solver.actions = [];
+		solver.states = [];
+		solver.valued = [];
+		solver.displayed = [];
+	}
 
 	var modelItems = primitives();
 	
@@ -130,16 +167,24 @@ function innerRunSimulation(config) {
 			var item = modelItems[i];
 			
 			var id = item.getAttribute("Agent");
+			var z = parseInt(id, 10);
+			if(z == id){
+				id = z;
+			}
 			if(isUndefined(id)){
 				throw {msg: getText("You must select a base agent for %s.", "<i>"+clean(item.getAttribute("name"))+"</i>"), primitive: item, showEditor: false};
 			}
 				
 			var x = new Agents();
 			
-			x.dna = new DNA( "Agents", item, id.id, item.getAttribute("name"));
+			x.dna = new DNA( "Agents", item, id, item.getAttribute("name"));
 			x.id = item.id;
+			
 			x.agentId = id;
 			x.createIds();
+			
+			x.dna.solver = folderSolvers(item, solvers);
+			x.dna.solver.displayed.push(x);
 			
 			x.geoDimUnits = item.getAttribute("GeoDimUnits");
 			x.geoDimUnitsObject = createUnitStore(item.getAttribute("GeoDimUnits"));
@@ -158,7 +203,7 @@ function innerRunSimulation(config) {
 			x.DNAs = [];
 			for(var j=0; j<agentCells.length; j++){
 				if(modelType(agentCells[j].value.nodeName)){
-					x.DNAs.push(getDNA(agentCells[j]));
+					x.DNAs.push(getDNA(agentCells[j], solvers));
 				}
 				if(agentCells[j].value.nodeName=="State"){
 					x.stateIds.push(agentCells[j].id);
@@ -171,18 +216,18 @@ function innerRunSimulation(config) {
 			
 			x.dna.agents = x;
 			
-			submodels[item.id] = x;
-			submodels.base.DNAs.push(x.dna);
+			model.submodels[item.id] = x;
+			model.submodels.base.DNAs.push(x.dna);
 		}else if(! inAgent(modelItems[i])){
 			if(modelType(modelItems[i].value.nodeName)){
-				submodels.base.DNAs.push(getDNA(modelItems[i]));
+				model.submodels.base.DNAs.push(getDNA(modelItems[i], solvers));
 			}
 		}
 	};
 	
 	
-	for(var submodel in submodels){
-		submodel = submodels[submodel];
+	for(var submodel in model.submodels){
+		submodel = model.submodels[submodel];
 		for(var j = 0; j < submodel.size; j++){
 			var agent = new Agent();
 			if(submodel.id == "base"){
@@ -219,32 +264,15 @@ function innerRunSimulation(config) {
 	}
 	
 	// Initialize Actual Simulation
-	
-	oldAggregateSeries = [];
-	
-	timeStart = model.timeStart;
-	timeLength = model.timeLength;
-	timeEnd = plus(timeStart, timeLength);
-	userTimeStep = model.timeStep;
-	timeStep = userTimeStep;
-	time = timeStart;
-	timeIndex = 0;
-	RKOrder = model.RKOrder;
-	RKPosition = 1;
-	PreviousRandLists = [];
-	RandLoc = -1;
-	lastRandPos = -1;
-	
- 	timeIndex = Math.round((time.value - timeStart.value) / timeStep.value);
-	if (RKOrder == 4) {
-		timeStep = div(timeStep, new Material(2));
-	}
+	simulate.setup({
+		model: model
+	});
 	
 	
 	
-	for(var submodel in submodels){
+	for(var submodel in model.submodels){
 		//console.log("[[["+submodel+"]]]]");
-		submodel = submodels[submodel];
+		submodel = model.submodels[submodel];
 		for(var j = 0; j < submodel.size; j++){
 			for(var i = 0; i < submodel.DNAs.length; i++){
 				//console.log(i);
@@ -273,17 +301,17 @@ function innerRunSimulation(config) {
 	}
 	
 	
-	for(var submodel in submodels){
-		submodel = submodels[submodel];
+	for(var submodel in model.submodels){
+		submodel = model.submodels[submodel];
 		for(var j = 0; j < submodel.size; j++){
 			setAgentInitialValues(submodel.agents[j]);
 		}
 	} 	
 		
-	for(var submodel in submodels){
+	for(var submodel in model.submodels){
 		if(submodel != "base"){
 			try{
-				buildNetwork(submodels[submodel]);	
+				buildNetwork(model.submodels[submodel]);	
 			}catch(err){
 				if (isLocal()) {
 					console.log(err);
@@ -297,7 +325,7 @@ function innerRunSimulation(config) {
 						
 				throw {
 					msg: msg,
-					primitive: submodels[submodel].cell,
+					primitive: model.submodels[submodel].cell,
 					showEditor: false
 				};
 			}
@@ -305,7 +333,7 @@ function innerRunSimulation(config) {
 					
 			try{
 				
-				buildPlacements(submodels[submodel]);
+				buildPlacements(model.submodels[submodel]);
 					
 			}catch(err){
 				if (isLocal()) {
@@ -320,7 +348,7 @@ function innerRunSimulation(config) {
 						
 				throw {
 					msg: msg,
-					primitive: submodels[submodel].cell,
+					primitive: model.submodels[submodel].cell,
 					showEditor: false
 				};
 			}
@@ -328,10 +356,8 @@ function innerRunSimulation(config) {
 		}
 	}
 
-	model["submodels"] = submodels;
-
 	if (config.silent) {
-		var res = formatSimResults(simulate(model, config));
+		var res = formatSimResults(simulate.run(config));
 		if(config.onSuccess){
 			config.onSuccess(res);
 		}
@@ -348,7 +374,7 @@ function innerRunSimulation(config) {
 			progress: true
 		});
 		
-		simulate(model, config, finishSim);
+		simulate.run({callback: finishSim});
 	}
 
 	
@@ -358,7 +384,7 @@ function formatSimResults(res){
 	res.error = "none";
 	res.errorPrimitive = null;
 	res.names = {};
-	var items = submodels["base"].agents[0].children;
+	var items = model.submodels["base"].agents[0].children;
 	for (var i = 0; i < items.length; i++) {
 		res.names[items[i].name] = items[i].id;
 	}
@@ -534,6 +560,9 @@ function indexedSeries(res, cell){
 }
 
 function finishSim(res, displayInformation, config) {
+	
+	
+	
 	var ids = [];
 	var headers = [];
 	var agents = {};
@@ -622,8 +651,8 @@ function finishSim(res, displayInformation, config) {
 
 	for (var k = 0; k < res.Time.length; k++) {
 		storeData.push({});
-		storeData[k]["Time"] = k;
-		storeData[k]["TimeValue"] = res["Time"][k];
+		storeData[k]["TimeIndex"] = k;
+		storeData[k]["Time"] = res["Time"][k];
 		for (var i = 0; i < ids.length; i++) {
 			if(agentKeys[i]){
 				storeData[k]["series" + i] = agents[ids[i].toString()].aggregate[agentKeys[i].toString()][k];
@@ -631,7 +660,7 @@ function finishSim(res, displayInformation, config) {
 				//console.log(id);
 				storeData[k]["series" + i] = indexedData[ids[i].toString()][indexNames[i].toString()][k];
 			}else{
-				storeData[k]["series" + i] = res[ids[i]].results[k];
+				storeData[k]["series" + i] = res.data[k][ids[i]];
 			}
 		}
 	}
@@ -640,18 +669,20 @@ function finishSim(res, displayInformation, config) {
 		type: "float",
 		name: "Time"
 	},{
-		type: "float",
-		name: "TimeValue"
+		type: "int",
+		name: "TimeIndex"
 	}];
 	
 	for (var i = 0; i < headers.length; i++) {
 		var n = "series" + i;
 		storeFields.push({
 			type: res[ids[i]].dataMode,
-			name: n
+			name: n,
+			defaultValue: undefined
 		});
 	}
 
+	//console.log(storeData)
 	
 	var store = new Ext.data.Store({
 		fields: storeFields,
@@ -702,14 +733,20 @@ function evaluateMacros(macros){
 function DNA(type, cell, id, name){
 	this.type = type;
 	this.cell = cell;
-	this.id = id;
+	var x = parseInt(id,10);
+	if(x == id){
+		this.id = x;
+	}else{
+		this.id = id;
+	}
 	this.name = name;
 	this.units = null;
 }
 
-function getDNA(cell){
+function getDNA(cell, solvers){
 	var type = cell.value.nodeName;
 	var dna = new DNA(type, cell, cell.id, cell.getAttribute("name"));
+	dna.solver = folderSolvers(cell, solvers);
 	
 	if(type=="Flow" || type=="Transition"){
 		if (cell.target !== null) {
@@ -836,22 +873,25 @@ function getDNA(cell){
 		
 	}
 	
-	
 	dna.toBase = dna.units?(new Quantities(dna.units)).toBase:1;
 	dna.unitless = (! dna.units) || unitless(dna.units);
 	
-	dna.dimensions = [];
-	for(var i = 0; i < arrays.length; i++){
-		if(arrays[i].data.ids.indexOf(dna.id) > -1){
-			dna.dimensions.push({index: i, name: arrays[i].text});
-		}
-	}
-	if(dna.dimensions.length == 0){
-		dna.dimensions = undefined;
-	}
-	
 	return dna;
 }
+
+function folderSolvers(cell, solvers){
+	if((! cell) || cell==null){
+		return solvers.base;
+	}
+	
+	var p = getParent(cell);
+	if(p && solvers[p.id]){
+		return solvers[p.id];
+	}
+	
+	return folderSolvers(p, solvers);
+}
+
 
 function decodeDNA(dna, agent, keys){
 	var type = dna.type;
@@ -883,10 +923,30 @@ function decodeDNA(dna, agent, keys){
 		
 		agent.children.push(x);
 		agent.childrenId[x.id] = x;
+		
+	
+		if(x instanceof Action){
+			dna.solver.actions.push(x);
+		}else if(! (x instanceof Agents)){
+			dna.solver.valued.push(x)
+			if(x instanceof Flow) {
+				dna.solver.flows.push(x);
+			}
+			else if (x instanceof Stock) {
+				dna.solver.stocks.push(x);
+			}
+			else if (x instanceof State) {
+				dna.solver.states.push(x);
+			}
+			else if (x instanceof Transition) {
+				dna.solver.transitions.push(x);
+			}
+		}
 	}else if(type == "Agents"){
 		agent.children.push(dna.agents);
 		agent.childrenId[dna.id] = dna;
 	}
+	
 }
 
 function linkPrimitive(primitive, dna){
@@ -1006,16 +1066,20 @@ function buildPlacements(submodel, items){
 	
 	if(submodel.placement == "Random"){
 		submodel.agents.forEach(function(s){
-			s.location = new Vector([mult(submodel.geoWidth, new Material(Rand())),mult(submodel.geoHeight, new Material(Rand()))]);
+			s.location = new Vector([mult(submodel.geoWidth, new Material(Rand())),mult(submodel.geoHeight, new Material(Rand()))], ['x','y']);
 		});
 	}else if(submodel.placement == "Custom Function"){
 		 submodel.agents.forEach(function(s){
 			var n = getPrimitiveNeighborhood(submodel, submodel.dna);
 			n.self = s;
 		 	s.location = simpleUnitsTest(simpleEquation(submodel.placementFunction, varBank, n), submodel.geoDimUnitsObject);
+			if(! s.location.names){
+				s.location.names = ['x','y'];
+				s.location.namesLC = ['x','y'];
+			}
 		 });
 	}else if(submodel.placement == "Grid"){
-		tree = trimTree(createTree("<<x*width(agent), y*height(agent)>>"), {});
+		tree = trimTree(createTree("{x: x*width(agent), y: y*height(agent)}"), {});
 		var size = submodel.agents.length;
 		var ratio = simpleNum(simpleEquation("width(agent)/height(agent)", {"agent": submodel, "-parent": varBank}, {}), submodel.geoDimUnitsObject);
 		//console.log(ratio)
@@ -1031,7 +1095,7 @@ function buildPlacements(submodel, items){
 		submodel.agents.forEach(function(s){
 			var xPos = ((j % wCount) + 0.5)/wCount;
 			var yPos = (Math.floor(j/wCount)+ 0.5)/hCount;
-			s.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": s, "x": new Material(xPos), "y":new Material(yPos), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
+			s.location = simpleUnitsTest(simpleEquation("{x: x*width(agent), y: y*height(agent)}", {"agent": s, "x": new Material(xPos), "y":new Material(yPos), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
 			j++;
 		});
 	}else if(submodel.placement == "Ellipse"){
@@ -1041,7 +1105,7 @@ function buildPlacements(submodel, items){
 			s.location = simpleUnitsTest(simpleEquation("<<width(agent), height(agent)>>/2+<<sin(index(agent)/size*2*3.14159), cos(index(agent)/size*2*3.14159)>>*<<width(agent), heigh(agent)>>/2", {"agent": s, "size": size, "-parent": varBank }, {}, tree), submodel.geoDimUnitsObject);
 		});
 	}else if(submodel.placement == "Network"){
-		tree = trimTree(createTree("<<x*width(agent), y*height(agent)>>"), {});
+		tree = trimTree(createTree("{x: x*width(agent), y: y*height(agent)}"), {});
 							 
 		var graph = new Graph();
 							
@@ -1093,7 +1157,7 @@ function buildPlacements(submodel, items){
 		layout.eachNode(function(node, point) {
 			var p = scalePoint(point.p);
 			//console.log(scalePoint(p));
-			node.data.data.location = simpleUnitsTest(simpleEquation("<<x*width(agent), y*height(agent)>>", {"agent": submodel, "x":new Material(p.x), "y":new Material(p.y), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
+			node.data.data.location = simpleUnitsTest(simpleEquation("{x: x*width(agent), y: y*height(agent)}", {"agent": submodel, "x":new Material(p.x), "y":new Material(p.y), "-parent": varBank}, {}, tree), submodel.geoDimUnitsObject);
 		});
 		//console.log("done");
 						
@@ -1130,10 +1194,10 @@ function getPrimitiveNeighborhood(primitive, dna){
 	for(var k=0; k<neighbors.length; k++){
 		var item = neighbors[k].item;
 		if(item.value.nodeName == "Agents"){
-			hood[submodels[item.id].dna.name.toLowerCase()] = submodels[item.id];
+			hood[model.submodels[item.id].dna.name.toLowerCase()] = model.submodels[item.id];
 			if(! neighbors.placeholders){
-				for(var i = 0; i < submodels[item.id].DNAs.length; i++){
-					hood[submodels[item.id].DNAs[i].name.toLowerCase()] = new Placeholder(submodels[item.id].DNAs[i], primitive);
+				for(var i = 0; i < model.submodels[item.id].DNAs.length; i++){
+					hood[model.submodels[item.id].DNAs[i].name.toLowerCase()] = new Placeholder(model.submodels[item.id].DNAs[i], primitive);
 				}
 			}
 		}else{
@@ -1151,12 +1215,12 @@ function getPrimitiveNeighborhood(primitive, dna){
 				}
 			}
 			if(! found){
-				if (submodels["base"]["agents"][0].childrenId[item.id]) {
-					var hoodName = submodels["base"]["agents"][0].childrenId[item.id].dna.name.toLowerCase();
+				if (model.submodels["base"]["agents"][0].childrenId[item.id]) {
+					var hoodName = model.submodels["base"]["agents"][0].childrenId[item.id].dna.name.toLowerCase();
 					//while(hood[hoodName]){
 					//	hoodName += ".extra";
 					//}
-					hood[hoodName] = submodels["base"]["agents"][0].childrenId[item.id];
+					hood[hoodName] = model.submodels["base"]["agents"][0].childrenId[item.id];
 					found = true;
 				}
 			}

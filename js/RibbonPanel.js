@@ -17,74 +17,74 @@ function ribbonPanelItems() {
 }
 
 var showMacros = function() {
-		if (isUndefined(macrosWin)) {
+	if (isUndefined(macrosWin)) {
 
-			macrosWin = new Ext.Window({
-				layout: 'fit',
-				modal: true,
+		macrosWin = new Ext.Window({
+			layout: 'fit',
+			modal: true,
+			autoScroll: true,
+			width: 440,
+			title: getText("Insight Macros"),
+			height: 360,
+			resizable: false,
+			closeAction: 'close',
+			plain: true,
+			items: [new Ext.FormPanel({
+				fieldDefaults: {
+					labelWidth: 100
+				},
+				frame: true,
 				autoScroll: true,
-				width: 440,
-				title: getText("Insight Macros"),
-				height: 360,
-				resizable: false,
-				closeAction: 'close',
-				plain: true,
-				items: [new Ext.FormPanel({
-					fieldDefaults: {
-						labelWidth: 100
-					},
-					frame: true,
-					autoScroll: true,
-					bodyStyle: 'padding:5px 5px 0',
-					defaults: {
-						width: 405
-					},
-					items: [{
-						xtype: "textareafield",
-						fieldLabel: getText('Macros'),
-						id: 'macroTxt',
-						name: 'macroTxt',
-						height: 210
-					}, {
-						xtype: "displayfield",
-						labelAlign: 'center',
-						fieldLabel: getText('Example Macros'),
-						value: "g <- {9.80665 meters/seconds^2}<br/>TemperatureFtoC(f) <- (f+32)*5/9"
-					}]
-				})],
-
-				buttons: [{
-					scale: "large",
-					iconCls: "cancel-icon",
-					text: getText('Cancel'),
-					handler: function() {
-						macrosWin.hide();
-					}
+				bodyStyle: 'padding:5px 5px 0',
+				defaults: {
+					width: 405
+				},
+				items: [{
+					xtype: "textareafield",
+					fieldLabel: getText('Macros'),
+					id: 'macroTxt',
+					name: 'macroTxt',
+					height: 210
 				}, {
-					iconCls: "apply-icon",
-					scale: "large",
-					text: getText('Apply'),
-					handler: function() {
+					xtype: "displayfield",
+					labelAlign: 'center',
+					fieldLabel: getText('Example Macros'),
+					value: "g <- {9.80665 meters/seconds^2}<br/>TemperatureFtoC(f) <- (f+32)*5/9"
+				}]
+			})],
 
-						graph.getModel().beginUpdate();
-
-						var edit = new mxCellAttributeChange(
-						getSetting(), "Macros", Ext.getCmp('macroTxt').getValue());
-						graph.getModel().execute(edit);
-
-						graph.getModel().endUpdate();
-
-						macrosWin.hide();
-
-					}
+			buttons: [{
+				scale: "large",
+				iconCls: "cancel-icon",
+				text: getText('Cancel'),
+				handler: function() {
+					macrosWin.hide();
 				}
+			}, {
+				iconCls: "apply-icon",
+				scale: "large",
+				text: getText('Apply'),
+				handler: function() {
 
-				]
-			});
-		}
-		Ext.getCmp('macroTxt').setValue(getSetting().getAttribute("Macros"));
-		macrosWin.show();
-	};
+					graph.getModel().beginUpdate();
+
+					var edit = new mxCellAttributeChange(
+					getSetting(), "Macros", Ext.getCmp('macroTxt').getValue());
+					graph.getModel().execute(edit);
+
+					graph.getModel().endUpdate();
+
+					macrosWin.hide();
+
+				}
+			}
+
+			]
+		});
+	}
+	Ext.getCmp('macroTxt').setValue(getSetting().getAttribute("Macros"));
+	macrosWin.show();
+};
 
 var scratchpadFn = function() {
 	if (scratchPadStatus == "shown") {
@@ -376,48 +376,47 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 
 	var zoomMenu = {
 		items: [
-
 		{
 			text: '400%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(4);
+				setZoom(4);
 			}
 		}, {
 			text: '200%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(2);
+				setZoom(2);
 			}
 		}, {
 			text: '150%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(1.5);
+				setZoom(1.5);
 			}
 		}, {
 			text: '100%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(1);
+				setZoom(1);
 			}
 		}, {
 			text: '75%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(0.75);
+				setZoom(0.75);
 			}
 		}, {
 			text: '50%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(0.5);
+				setZoom(0.5);
 			}
 		}, {
 			text: '25%',
 			scope: this,
 			handler: function(item) {
-				graph.getView().setScale(0.25);
+				setZoom(0.25);
 			}
 		}, '-',
 		{
@@ -425,14 +424,14 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			iconCls: 'zoomin-icon',
 			scope: this,
 			handler: function(item) {
-				graph.zoomIn();
+				setZoom("in");
 			}
 		}, {
 			text: getText('Zoom Out'),
 			iconCls: 'zoomout-icon',
 			scope: this,
 			handler: function(item) {
-				graph.zoomOut();
+				setZoom("out");
 			}
 		}, '-',
 		{
@@ -440,14 +439,14 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			iconCls: 'zoomactual-icon',
 			scope: this,
 			handler: function(item) {
-				graph.zoomActual();
+				setZoom("actual");
 			}
 		}, {
 			text: getText('Fit Window'),
 			iconCls: 'fit-icon',
 			scope: this,
 			handler: function(item) {
-				graph.fit();
+				setZoom("fit");
 			}
 		}]
 	};
