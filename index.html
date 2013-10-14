@@ -57,12 +57,13 @@
 
 <div id="loading-mask"></div>
 <div id="loading">
-  <div class="loading-indicator">
-    Loading Insight Maker...
-	<br/><p>
-	<img src="images/loading.gif" width=54 height=55/></p><br/>
-	(This may take a few moments)
-  </div>
+    <div id="loading-indicator">
+      Loading Insight Maker...
+  		<p><br/>
+  			<img src="images/loading.gif" height="15"/>
+		</p><br/>
+  	(This may take a few moments)
+	</div>
 </div>
 <div id="toplinks-holder" name="toplinks-holder"></div>
 
@@ -97,12 +98,15 @@
 	var mxLoadStylesheets = false;
 	</script>
 	
+	<script type="text/javascript" src="resources/require.js"></script>
 	<script type="text/javascript" src="js/Localization.js"></script>
 	<script type="text/javascript" src="js/SharedJS.js"></script>
 	<script type="text/javascript" src="resources/mxClient.js"></script>
 	<script type="text/javascript" src="js/Ext.ux.util.js"></script>
 	<script type="text/javascript" src="js/ExtOverrides.js"></script>
 	<script type="text/javascript" src="js/graph.js"></script>
+	<script type="text/javascript" src="js/Updater.js"></script>
+	<script type="text/javascript" src="js/Sliders.js"></script>
 	<script type="text/javascript" src="js/InsightEditor.js"></script>
 	<script type="text/javascript" src="js/Utilities.js"></script>		
 	<script type="text/javascript" src="js/RibbonPanel.js"></script>
@@ -139,8 +143,7 @@
 	<script type="text/javascript" src="js/SimulationEngine/OO.js"></script>
 	<script type="text/javascript" src="js/SimulationEngine/calc/unitsStructure.js"></script>
 	<script type="text/javascript" src="js/SimulationEngine/calc/units.js"></script>
-	<script type="text/javascript" src="js/SimulationEngine/calc/bignum/biginteger.js"></script>
-	<script type="text/javascript" src="js/SimulationEngine/calc/bignum/schemeNumber.js"></script>
+	<script type="text/javascript" src="js/SimulationEngine/SimpleCalc.js"></script>
 	<script type="text/javascript" src="js/SimulationEngine/calc/antlr3-all-min.js"></script>
 	<script type="text/javascript" src="js/SimulationEngine/calc/output/FormulaLexer.js"></script>
 	<script type="text/javascript" src="js/SimulationEngine/calc/output/FormulaParser.js"></script>

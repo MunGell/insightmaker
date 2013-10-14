@@ -9,6 +9,52 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 */
 
 /*
+
+	var t = new TaskQueue({start: new Material(0), end: new Material(20)});
+	var a = new Task({
+		name: "A",
+		time: new Material(10),
+		priority: 0,
+		action: function(){
+			console.log("A");
+		}
+	});
+	var b = new Task({
+		name: "B",
+		time: new Material(10),
+		priority: 1,
+		action: function(){
+			console.log("B");
+			b.kill();
+		}
+	});
+	var c = new Task({
+		name: "C",
+		time: new Material(10),
+		priority: 1,
+		action: function(){
+			console.log("C");
+		}
+	});
+	t.add(a);
+	t.add(b);
+	t.add(c);
+	t.tasks.goMin();
+	while(! t.completed()){
+		t.step();
+	}
+
+	var t = new TaskQueue;
+	t.add(new Task({
+		name:"test 1",
+		time: new Material(10),
+		priority: -10,
+		expires: 1,
+		action: function(){},
+		rollback: function(){}
+	}));
+
+
 var t =  new RedBlackTree();
 function N(x){
 	this.value = x;
@@ -34,7 +80,7 @@ t.add(new N(12))
 t.add(new N(15))
 t.toString()
 
-	var t = new TaskQueue;
+	var t = new TaskQueue(new Material(20));
 	t.add(new Task({
 		name:"test 1",
 		time: new Material(10),
@@ -247,7 +293,7 @@ TaskQueue.prototype.step = function(){
 	//debugger;
 	
 //	console.log("--")
-	while(this.tasks.current() !== null && eq(t, this.tasks.current().time)){
+	if(this.tasks.current() !== null /*&& eq(t, this.tasks.current().time)*/){
 		var dead = this.tasks.current().deadAction;
 		this.tasks.current().execute();
 		if((! dead) && this.tasks.current().timeShift){
@@ -307,7 +353,25 @@ TaskQueue.prototype.completed = function(){
 }
 
 TaskQueue.prototype.remove = function(task){
+	//var c;
+	if(task == this.tasks.current()){
+		//console.log("overlap!!!")
+		//console.log(this.time.value);
+		this.tasks.next();
+		//if(this.tasks.current() !== null){
+		//	this.setTime(this.tasks.current().time);
+		//}else{
+		//	this.tasks.next();
+		//	this.setTime(mult(this.tasks.max().time, new Material(10)));
+		//}
+		//var c = this.tasks._cursor;
+	}
 	this.tasks.remove(task);
+	//if(c){
+	//	this.tasks._cursor = c;
+		//console.log(this.time.value);
+		//console.log(this.tasks.current().name);
+		//}
 }
 
 var TaskId = 0
@@ -397,6 +461,11 @@ Task.prototype.remove = function(){
 	this.queue.remove(this);
 }
 
+Task.prototype.kill = function(){
+	this.deadAction = true;
+	this.deadReverse = true;
+}
+
 Task.prototype.block = function(id){
 	id = id || this.blocker;
 	this.queue.states[id] = true;
@@ -412,10 +481,10 @@ Task.prototype.compare = function(other){
 		if(other.priority == this.priority){
 			if(other.id == this.id){
 				return 0;
-			}else if(other.id > this.id){
-				return -1;
-			}else{
+			}else if(other.id < this.id){
 				return 1;
+			}else{
+				return -1;
 			}
 		}else if(other.priority < this.priority){
 			return 1

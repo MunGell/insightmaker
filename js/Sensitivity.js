@@ -174,8 +174,6 @@ function doSensitivity(){
 				
 				setTimeout("runSensitivity()", 15);
 				
-				threads++;
-				
 				win.close();
             }
         }]
@@ -193,7 +191,6 @@ function runSensitivity(){
 		highlight(res.errorPrimitive);
 		if(sensitivityProgress){
 			sensitivityProgress.close();
-			threads--;
 		}
 		return;
 	}
@@ -314,7 +311,6 @@ function runSensitivity(){
 	
 	showData(getText("Sensitivity Analysis Results"), data);
 
-	threads--;
 	
 }
 

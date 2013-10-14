@@ -13,10 +13,7 @@ function Primitive() {
 	this.id = null;
 	this.agentId = null;
 	this.index = null;
-	this.fullId = null;
 	this.instanceId = null;
-	
-	this.keys = null;
 
 	this.container = null;
 
@@ -28,9 +25,7 @@ function Primitive() {
 	this.pastValues = [];
 	this.pastData = new DataBank();
 	
-	this.cutoff = 0;
-	
-	this.vector = new Vector([],[], PrimitiveBase);
+	this.parent = PrimitiveBase;
 }
 Primitive.method("clone", function(){
 	var p = new this.constructorFunction();
@@ -41,7 +36,16 @@ Primitive.method("clone", function(){
 	p.id = this.id;
 	p.createIds();
 	p.pastValues = this.pastValues.slice(0);
-	p.cutoff = this.cutoff;
+	
+	if(this.dna.slider){
+		if(simulate.sliders[this.dna.id]){
+			simulate.sliders[this.dna.id].push(p);
+		}else{
+			simulate.sliders[this.dna.id] = [p];
+		}
+		
+	}
+	
 	p.cachedValue = this.cachedValue?this.cachedValue.fullClone():this.cachedValue;
 	
 	this.innerClone(p);
@@ -64,8 +68,7 @@ Primitive.method("calculateValue", function() {
 	throw "MSG: "+getText("[%s] does not have a value and can not be used as a value in an equation.", this.dna.name);
 });
 Primitive.method("createIds", function(){
-	this.fullId = simulate.getID(this.id+"-"+this.agentId+"-"+this.index);
-	this.instanceId = simulate.getID(+this.agentId+"-"+this.index);
+	this.instanceId = simulate.getID(this.agentId+"-"+this.index);
 });
 Primitive.method("getPastValues",  function( length ){
     if( isUndefined(length) ){
@@ -189,10 +192,10 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 		return
 	}
 	
-	if(unitless(this.dna.units) && ! unitless(m.units)){
+	if((! this.dna.units) && m.units){
 		error(getText("Wrong units generated for %s. Expected no units and got %s. Either specify units for the primitive or adjust the equation.", "<i>"+clean(this.dna.name)+"</i>", "<i>"+clean(m.units.toString())+"</i>"), this, true);
-	}else if (! unitsEqual(this.dna.units, m.units)) {
-		var scale = convertUnits(m.units, this.dna.units, true);
+	}else if (this.dna.units !== m.units) {
+		var scale = convertUnits(m.units, this.dna.units, true);//XXX fixme
 		if (scale == 0) {
 			if(isLocal()){
 				console.log(m.units);
@@ -205,7 +208,7 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 			//console.log("mod1")
 			//console.log(m.units.exponents)
 			m.value = m.value * scale;
-			m.units = this.dna.units.clone();
+			m.units = this.dna.units;
 			//console.log(m.units.exponents)
 			//console.log((this instanceof Flow));
 			//console.log(ignoreFlow);	
@@ -214,7 +217,7 @@ Primitive.method("testUnits", function(m, ignoreFlow) {
 	if((this instanceof Flow) && (ignoreFlow != true) && this.dna.flowUnitless){
 			//console.log("mod2")
 			//console.log(m.units.exponents)
-		var x = mult(m, new Material(1, simulate.timeUnits.clone()));
+		var x = mult(m, new Material(1, simulate.timeUnits));
 		m.value = x.value;
 		m.units = x.units;
 
@@ -336,39 +339,17 @@ Placeholder.method("calculateValue",function(){
 function State() {
 	Primitive.call(this);
 	this.active = null;
-	this.oldActive = null;
-	this.arrivalTime = null;
-	this.oldArrivalTime = null;
+	this.downStreamTransitions = [];
 	this.constructorFunction = State;
 }
 State.inherits(Primitive);
 State.method("innerClone", function(p){
 	p.active = this.active;
-	p.oldActive = this.oldActive;
-	p.arrivalTime = this.arrivalTime;
-	p.oldArrivalTime = this.oldArrivalTime;
 });
 State.method("setValue", function(value) {
-	//console.log("--")
-	if(this.active === false && trueValue(value)){
-		this.arrivalTime = simulate.time().fullClone();
-	}
-	this.active = trueValue(value);
+	this.setActive(trueValue(value));
 	this.cachedValue = undefined;
 	this.value();
-	
-	if(this.agentId){
-		this.container.updateStates();
-	}
-	
-});
-State.method("preserveActive", function() {
-	this.oldActive = this.active;
-	this.oldArrivalTime = this.arrivalTime;
-});
-State.method("restoreActive", function() {
-	this.active = this.oldActive;
-	this.arrivalTime = this.oldArrivalTime;
 	if(this.agentId){
 		this.container.updateStates();
 	}
@@ -384,11 +365,12 @@ State.method("calculateValue", function() {
 	}else{
 		return new Material(0);
 	}
+	
 });
-State.method("setInitialActive", function() {
+State.method("setInitialActive", function(suppress) {
 	var init;
 	try{
-		init = evaluateTree(this.equation, varBank).toNum();
+		init = evaluateTree(this.equation, globalVars(this)).toNum();
 	}catch(err){
 		if(! err.substr){
 			throw err; //it's already an object, let's kick it up the chain
@@ -403,15 +385,41 @@ State.method("setInitialActive", function() {
 		}
 	}
 	
+	//console.log("--")
+	//console.log(this.dna.name)
+	//console.log("init")
 	
-	this.active = trueValue(init);
-	//console.log(this.active);
-	if (this.active) {
-		this.arrivalTime = simulate.timeStart.fullClone();
-	}
+	this.setActive(trueValue(init), suppress);
 	if(this.agentId){
 		this.container.updateStates();
 	}
+	
+});
+State.method("setActive", function(active, suppress){
+	this.active = active;
+	
+	
+	if( (! active) || this.dna.residency === null){
+		if(! suppress){
+			for(var i = 0; i < this.downStreamTransitions.length; i++){
+				scheduleTrigger.call(this.downStreamTransitions[i]);
+			}
+		}
+	}else{
+		var me = this;
+		simulate.tasks.add(new Task({
+			name: "State Residency",
+			time: plus(simulate.time(), this.dna.residency),
+			priority: 5,
+			expires: 1,
+			action: function(){
+				for(var i = 0; i < me.downStreamTransitions.length; i++){
+					scheduleTrigger.call(me.downStreamTransitions[i]);
+				}
+			}
+		}));
+	}
+		
 });
 State.method("getActive", function(){
 	if (this.active === null) {
@@ -426,8 +434,7 @@ function Transition() {
 	Primitive.call(this);
 	this.alpha = null;
 	this.omega = null;
-	this.block = false;
-	this.oldBlock = false;
+	this.scheduledTrigger = null;
 	this.constructorFunction = Transition;
 }
 Transition.inherits(Primitive);
@@ -436,152 +443,213 @@ Transition.method("innerClone", function(p){
 Transition.method("setEnds", function(alpha, omega) {
 	this.alpha = alpha;
 	this.omega = omega;
-});
-Transition.method("preserveState", function() {
-	this.oldBlock = this.block;
-});
-Transition.method("restoreState", function() {
-	this.block = this.oldBlock;
-});
-Transition.method("calculateValue", function() {
-	//if(this.alpha && this.alpha.getActive()){
-		var x = evaluateTree(this.equation, varBank).toNum();
-		
-		
-		
-		if(x===true){
-			return new Material(1);
-		}else if(x===false){
-			return new Material(0);
-		}else{
-			if(this.dna.trigger == "Timeout" && unitless(x.units)){
-				x.units = simulate.timeUnits.clone();
-			}
-			return x;
-		}
-		//}else{
-		//return  new Material(0);
-		//}
-});
-Transition.method("transition", function() {
-
-	if((! this.block) && ((! this.alpha) || (this.alpha && this.alpha.getActive())) && ( (! this.alpha) || eq(simulate.timeStart, simulate.time()) || ( ! eq(this.alpha.arrivalTime, simulate.time())))){
-		if(this.dna.trigger == "Timeout"){
-			var v = this.value().toNum();
-			
-			if(this.alpha){
-				if(greaterThanEq(minus(simulate.time(), this.alpha.arrivalTime), v)  ){
-					this.doTransition();
-				}
-			}else{
-				if(greaterThanEq(minus(simulate.time(), simulate.timeStart), v)  ){
-					this.block = true;
-					this.doTransition();
-				}
-			}
-			
-		}else if(this.dna.trigger == "Condition"){
-			if(trueValue(this.value().toNum())){
-				this.doTransition();
-			}
-		}else if(this.dna.trigger == "Probability"){
-			var v = this.value().toNum();
-			if(unitless(v.units)){
-				if(greaterThanEq(v, new Material(1))){
-					this.doTransition();
-				}else if(lessThanEq(v, new Material(0))){
-					//do nothing...
-				}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(this.dna.solver.timeStep.value))).value){
-					this.doTransition();
-				}
-			}else{
-				error(getText("The probability for the trigger had units of %s. Probabilities must be unitless.", this.value().units.toString()), this, true);
-			}
-		}else{
-			error("Unknown trigger: "+this.dna.trigger, this, true);
-		}
-	}else{
-		this.value();
+	if(alpha){
+		alpha.downStreamTransitions.push(this);
 	}
 });
-Transition.method("doTransition", function() {
-	//console.log(this.alpha)
+Transition.method("canTrigger", function() {
+	return (! this.alpha) || (this.alpha && this.alpha.getActive()) || this.dna.repeat;
+});
+Transition.method("trigger", function() {
+	//console.log("--")
+	//console.log(this.dna.name)
+	//console.log(simulate.time().value);
+	//console.log("transition");
+	
+	this.scheduledTrigger = null;
 	if(this.alpha){
-		this.alpha.active = false;
-		this.alpha.arrivalTime = null;
+		this.alpha.setActive(false);
 	}
 	if(this.omega){
-		this.omega.active = true;
-		this.omega.arrivalTime = simulate.time().fullClone();
+		this.omega.setActive(true);
 	}
 	if(this.agentId){
 		this.container.updateStates();
 	}
+	if(this.dna.repeat){
+		this.schedule();
+	}
 });
+
+function scheduleTrigger(){
+	updateTrigger.call(this, true);
+	
+}
+
+function updateTrigger(clear){
+	if( clear ){
+		if(this.scheduledTrigger && ! this.dna.repeat){
+			this.scheduledTrigger.kill();
+			this.scheduledTrigger = null;
+		}
+	}
+
+
+	if( this.canTrigger() ){
+		try{
+			var v = evaluateTree(this.equation, globalVars(this)).toNum();
+		}catch(err){
+			if(! err.substr){
+				throw err; //it's already an object, let's kick it up the chain
+			}
+			if(isLocal()){
+				console.log(err);
+			}
+			if(err.substr(0,4)=="MSG:"){
+				error(err.substr(4, err.length), this, true);
+			}else{
+				error(err, this, true);
+			}
+		}
+		
+		if(this.dna.trigger == "Condition"){
+			if(trueValue(v)){
+				//console.log("triggering")
+				//console.log(v);
+				this.trigger();
+				//console.log("end triggering")
+			}
+		}else{
+			if(! (v instanceof Material)){
+				error(getText("The value of this trigger must evaluate to a number."), this, true);
+			}
+		
+			var t;
+		
+			if( this.dna.trigger == "Timeout" ){
+				
+				if(! v.units){
+					v.units = simulate.timeUnits;
+				}
+				
+				if(this.scheduledTrigger && eq(v, this.scheduledTrigger.data.value)){
+					return;
+				}
+				if(this.dna.repeat && v.value == 0){
+					error(getText("A trigger Timeout of 0 with 'Repeat' set to true results in an infinite loop."), this, true);
+				}
+			
+				t = v;
+			
+			}else if( this.dna.trigger == "Probability" ){
+			
+				if(v.units){
+					error(getText("The probability for the trigger had units of %s. Probabilities must be unitless.", this.value().units.toString()), this, true);
+				}
+				var v = v.value
+				if(this.scheduledTrigger && eq(v, this.scheduledTrigger.data.value)){
+					return;
+				}
+			
+				if(v == 1){
+					if(this.dna.repeat){
+						error(getText("A trigger probability of 1 with 'Repeat' as true results in an infinite loop."), this, true);
+					}
+					t = new Material(0, simulate.timeUnits);
+				}else if(v > 1){
+					error(getText("The probability for the trigger must be less than or equal to 1."), this, true);
+				}else if(v < 0){
+					error(getText("The probability for the trigger must be greater than or equal to 0."), this, true);
+				}else if(v == 0){
+					if(! this.scheduledTrigger){
+						return;
+					}
+				}else{
+					var l = -Math.log(1-v);
+					t = new Material(RandExp(l), simulate.timeUnits);
+				}
+
+			}
+		
+			/*console.log("--");
+			console.log(this);
+			console.log(v);
+			console.log(t);
+			debugger;*/
+			
+			var start = simulate.time()
+		
+			if(this.scheduledTrigger){
+				
+				this.scheduledTrigger.kill();
+				if(this.dna.trigger == "Timeout"){
+					if(lessThanEq(t, minus(simulate.time(), this.scheduledTrigger.data.start))){
+						this.scheduledTrigger = null;
+						this.trigger();
+						return;
+					}else{
+						var start = this.scheduledTrigger.data.start;
+						t = minus(t, minus(simulate.time(), start));
+						this.scheduledTrigger = null;
+					}
+				}else if(this.dna.trigger == "Probability"){
+					if( v == 0){
+						this.scheduledTrigger = null;
+						return;
+					}
+					t = minus(this.scheduledTrigger.time, simulate.time());
+				
+					var l0 = -Math.log(1-this.scheduledTrigger.data.value);
+					var l = -Math.log(1-v);
+					
+					t = mult(t, new Material(l0/l));
+				
+					start = this.scheduledTrigger.data.start;
+				
+					this.scheduledTrigger = null;
+				}
+			}
+			//console.log(t);
+			t = plus(t, simulate.time());
+		
+			var me = this;
+			this.scheduledTrigger = new Task({
+				name: "Trigger",
+				time: t,
+				priority: 5,
+				expires: 1,
+				action: function(){
+					me.trigger();
+				},
+				data: {start: start, value: v}
+			})
+			simulate.tasks.add(this.scheduledTrigger);
+		}
+	}
+}
 
 function Action() {
 	Primitive.call(this);
 	this.action = null;
-	this.timerStart = null;
+	this.scheduledTrigger = null;
+	this.block = false;
 	this.constructorFunction = Action;
 }
 Action.inherits(Primitive);
 Action.method("innerClone", function(p){
-	p.timerStart = this.timerStart;
-});
-Action.method("resetTimer", function(){
-	this.timerStart = simulate.time().fullClone();
-});
-Action.method("test", function() {
-	var value;
-	try{
-		value = evaluateTree(this.equation, varBank).toNum();
-	}catch(err){
-		if(! err.substr){
-			throw err; //it's already an object, let's kick it up the chain
-		}
-		if(isLocal()){
-			console.log(err);
-		}
-		if(err.substr(0,4)=="MSG:"){
-			error(err.substr(4,err.length), this, false);
-		}else{
-			error(err, this, false);
-		}
-	}
-	if(this.dna.trigger == "Timeout"){
-		var v = value;
-		if(unitless(v.units)){
-			v.units = simulate.timeUnits.clone();
-		}
-		if(greaterThanEq(minus(simulate.time(), this.timerStart), v)  ){
-			this.act();
-		}
-	}else if(this.dna.trigger == "Condition"){
-		if(trueValue(value)){
-			this.act();
-		}
-	}else if(this.dna.trigger == "Probability"){
-		var v = value;
-		if(unitless(v.units)){;
-			if(greaterThanEq(v, new Material(1))){
-				this.act();
-			}else if(lessThanEq(v, new Material(0))){
-				//do nothing...
-			}else if(Rand() < minus(new Material(1), power(minus(new Material(1), v), new Material(this.dna.solver.timeStep.value))).value){
-				this.act();
-			}
-		}else{
-			error(getText("The probability for the trigger had units of %s. Probabilities must be unitless.", this.value().units.toString()), this, true);
-		}
-	}else{
-		error("Unknown trigger: "+this.dna.trigger, this, true);
-	}
 	
 });
-Action.method("act", function() {
+Action.method("canTrigger", function() {	
+	return ! this.block;
+});
+Action.method("resetTimer", function(){
+	scheduleTrigger.call(this);
+});
+Action.method("trigger", function() {
+
+	this.scheduledTrigger = null;
+	
 	try{
-		evaluateTree(this.action, varBank);
+		//console.log("action")
+		evaluateTree(this.action, globalVars(this));
+		//console.log("end action")
+		if(this.dna.repeat){
+			if(this.dna.trigger !== "Condition"){
+				scheduleTrigger.call(this);
+			}
+		}else{
+			this.block = true;
+		}
 	}catch(err){
 		if(! err.substr){
 			throw err; //it's already an object, let's kick it up the chain
@@ -665,7 +733,7 @@ Agents.method("add", function(base){
 		//console.log(hood);
 		if(this.placement == "Custom Function"){
 			hood.self = agent;
-			agent.location = simpleUnitsTest(simpleEquation(this.placementFunction, varBank, hood), this.geoDimUnitsObject);
+			agent.location = simpleUnitsTest(simpleEquation(this.placementFunction, {"-parent": varBank, self: agent}, hood), this.geoDimUnitsObject);
 			if(! agent.location.names){
 				agent.location.names = ["x", "y"];
 				agent.location.namesLC = ["x", "y"];
@@ -698,7 +766,8 @@ Agents.method("add", function(base){
 
 
 function Agent() {
-	Primitive.call(this);
+	this.agentId = null;
+	this.instanceId = null;
 	this.index = null;
 	this.children = null;
 	this.location = null;
@@ -710,7 +779,7 @@ function Agent() {
 	
 	this.vector = new Vector([],[], AgentBase);
 }
-Agent.inherits(Primitive);
+Agent.prototype.createIds = Primitive.prototype.createIds;
 Agent.method("toString", function(){
 	return "Agent "+(this.index+1);
 })
@@ -763,7 +832,7 @@ Agent.method("die", function(){
 	}
 	
 	for(var i=0; i<this.container.agents.length; i++){
-		if(this.container.agents[i].fullId == this.fullId){
+		if(this.container.agents[i] == this){
 			this.container.agents.splice(i,1);
 			break;
 		}
@@ -774,6 +843,8 @@ Agent.method("die", function(){
 		var solver = x.dna.solver;
 		if(x instanceof Action){
 			solver.actions.splice(solver.actions.indexOf(x),1);
+		}else if(x instanceof Transition){
+			solver.transitions.splice(solver.transitions.indexOf(x),1);
 		}else if(! (x instanceof Agents)){
 			solver.valued.splice(solver.valued.indexOf(x),1);
 			if(x instanceof Flow) {
@@ -785,9 +856,6 @@ Agent.method("die", function(){
 			else if (x instanceof State) {
 				solver.states.splice(solver.states.indexOf(x),1);
 			}
-			else if (x instanceof Transition) {
-				solver.transitions.splice(solver.transitions.indexOf(x),1);
-			}
 		}
 	}
 	
@@ -796,9 +864,8 @@ Agent.method("die", function(){
 });
 Agent.method("connect", function(x) {
 	//try{
-	if(x.instanceId != this.instanceId){
-		var i = indexOfID(this.connected, x.instanceId);
-		if(i == -1){
+	if(x !== this){
+		if(this.connected.indexOf(x) == -1){
 			if(x instanceof Agent){
 				this.connected.push(x);
 				x.connected.push(this);
@@ -813,24 +880,15 @@ Agent.method("connect", function(x) {
 		//}
 });
 Agent.method("unconnect", function(x) {
-	if(x.instanceId != this.instanceId){
-		var i = indexOfID(this.connected, x.instanceId);
+	if(x !== this){
+		var i = this.connected.indexOf(x);
 		if(i != -1){
 			this.connected.splice(i,1);
-			i = indexOfID(x.connected, this.instanceId)
+			i = x.connected.indexOf(this);
 			x.connected.splice(i, 1);
 		}
 	}
 });
-
-function indexOfID(arr, id){
-	for(var i = 0; i < arr.length; i++){
-		if(arr[i].instanceId==id){
-			return i;
-		}
-	}
-	return -1;
-}
 
 function Stock() {
 	Primitive.call(this);
@@ -883,9 +941,11 @@ Stock.method("setDelay", function(delay){
 Stock.method("setInitialValue", function() {
 	var init;
 	
-	//console.log("Setting Initial value:"+this.name);
+	//console.log("Setting Initial value:"+this.dna.name);
 	try{
-		init = evaluateTree(this.equation, varBank).toNum();
+		//console.log(this.equation);
+		//console.log(globalVars(this))
+		init = evaluateTree(this.equation, globalVars(this)).toNum();
 	//	console.log(init);
 	}catch(err){
 		if(! err.substr){
@@ -913,19 +973,19 @@ Stock.method("setInitialValue", function() {
 		var d = this.dna;
 		init.recurseApply(function(x){
 			if (d.nonNegative && x.value < 0) {
-				x = new Material(0, d.units?d.units.clone():undefined);
+				x = new Material(0, d.units);
 			}
-			if (unitless(x.units)) {
-				x.units = d.units?d.units.clone():undefined;
+			if (! x.units) {
+				x.units = d.units;
 			}
 			return x;
 		})
 	}else{
 		if (this.dna.nonNegative && init.value < 0) {
-			init = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+			init = new Material(0, this.dna.units);
 		}
-		if (unitless(init.units)) {
-			init.units = this.dna.units?this.dna.units.clone():undefined;
+		if (! init.units) {
+			init.units = this.dna.units;
 		}
 	}
 
@@ -935,14 +995,15 @@ Stock.method("setInitialValue", function() {
 		this.level = init;
 	} else { 
 		//it's serialized
+		var startVal = mult(init, div(simulate.userTimeStep, this.delay))
 		this.initRate = div(init, this.delay.forceUnits(simulate.timeUnits));
-		this.level = mult(new Material(0), init);
+		this.level = startVal;
 		
 		var me = this;
 
 		simulate.tasks.addEvent(function(timeChange, oldTime, newTime){
 			if(timeChange.value > 0){
-				if(lessThanEq(newTime, me.delay)){
+				if(lessThanEq(newTime, minus(me.delay, simulate.userTimeStep))){
 					timeChange = functionBank["min"]([timeChange, minus(me.delay, oldTime)]);
 					me.level = plus(me.level, mult(timeChange, me.initRate));
 				}
@@ -957,13 +1018,13 @@ Stock.method("subtract", function(amnt, time) {
 			var d = this.dna;
 			this.level.recurseApply(function(x){
 				if(x.value < 0){
-					return new Material(0, d.units?d.units.clone():undefined);
+					return new Material(0, d.units);
 				}else{
 					return x;
 				}
 			});
 		}else if(this.level.value < 0){
-			this.level = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+			this.level = new Material(0, this.dna.units);
 		}
 	}
 });
@@ -975,13 +1036,13 @@ Stock.method("add", function(amnt, time) {
 				var d = this.dna;
 				this.level.recurseApply(function(x){
 					if(x.value < 0){
-						return new Material(0, d.units?d.units.clone():undefined);
+						return new Material(0, d.units);
 					}else{
 						return x;
 					}
 				});
 			}else if(this.level.value < 0){
-				this.level = new Material(0, this.dna.units?this.dna.units.clone():undefined);
+				this.level = new Material(0, this.dna.units);
 			}
 		}
 	}else{
@@ -1012,13 +1073,13 @@ Stock.method("scheduleAdd", function(amnt, time, delay){
 					var d = me.dna;
 					me.level.recurseApply(function(x){
 						if(x.value < 0){
-							return new Material(0, d.units?d.units.clone():undefined);
+							return new Material(0, d.units);
 						}else{
 							return x;
 						}
 					});
 				}else if(me.level.value < 0){
-					me.level = new Material(0, me.dna.units?me.dna.units.clone():undefined);
+					me.level = new Material(0, me.dna.units);
 				}
 			}
 		},
@@ -1039,7 +1100,7 @@ Stock.method("totalContents", function() {
 		}
 		
 		if(greaterThan(this.delay, simulate.time())){
-			res = plus(res, mult(this.initRate, minus(this.delay, simulate.time())))
+			res = plus(res, mult(this.initRate, minus(minus(this.delay, simulate.userTimeStep), simulate.time())))
 		}
 		
 		return res;
@@ -1099,7 +1160,7 @@ Converter.method("getInputValue", function(){
   }
 );
 Converter.method("calculateValue", function() {
-	return new Material(this.getOutputValue().value, this.dna.units?this.dna.units.clone():undefined);
+	return new Material(this.getOutputValue().value, this.dna.units);
 });
 Converter.method("getOutputValue", function() {
 	//console.log("---")
@@ -1165,7 +1226,7 @@ Variable.method("calculateValue", function() {
 	//console.log(this.name);
 	//console.log(this.equation);
 	//try{
-	var x = evaluateTree(this.equation, varBank);
+	var x = evaluateTree(this.equation, globalVars(this));
 	//}catch(err){
 	//	console.log(this.dna.name);
 	//	throw "calc value error";
@@ -1183,8 +1244,8 @@ Variable.method("calculateValue", function() {
 		return x;
 	//	error("Cannot set a variable value to a vector.", this, true)
 	}
-	if(unitless(x.units)) {
-		x.units = this.dna.units?this.dna.units.clone():undefined;
+	if(! x.units) {
+		x.units = this.dna.units;
 	}
 	return x;
 });
@@ -1214,11 +1275,11 @@ Flow.method("clean", function() {
 	this.rate = null;
 	this.RKPrimary = [];
 });
-Flow.method("predict", function() {
-	if (this.rate === null) {
+Flow.method("predict", function(override) {
+	if (this.rate === null || override) {
 		try{
 			//console.log("---");
-			var x = evaluateTree(this.equation, varBank).toNum();
+			var x = evaluateTree(this.equation, globalVars(this)).toNum();
 			//console.log(this.equation);
 			//console.log(x);
 			if(!((x instanceof Vector) || isFinite(x.value))){
@@ -1251,21 +1312,29 @@ Flow.method("predict", function() {
 		if(this.rate instanceof Vector){
 			var d = this.dna;
 			this.rate.recurseApply(function(x){
-				if (unitless(x.units)) {
-					x.units = d.units?d.units.clone():undefined;
+				if (! x.units) {
+					x.units = d.units;
 				}
 				return x
 			})
-		}else if (unitless(this.rate.units)) {
-			this.rate.units = this.dna.units?this.dna.units.clone():undefined;
+		}else if (! this.rate.units) {
+			this.rate.units = this.dna.units;
 		}
 		
 		this.testUnits(this.rate, true);
 		
 		this.rate = mult(this.rate, this.dna.solver.timeStep);
 		
-		this.RKPrimary.push(this.rate);
-		
+		if(override){
+			if(this.RKPrimary.length > 0){
+				this.RKPrimary[this.RKPrimary.length-1] = this.rate;
+			}else{
+				return;
+			}
+			
+		}else{
+			this.RKPrimary.push(this.rate);
+		}
 	
 		if (this.dna.solver.RKOrder == 4) {
 			if (this.dna.solver.RKPosition == 1) {
@@ -1288,20 +1357,16 @@ Flow.method("predict", function() {
 					if(x.value >= 0 ){
 						return x
 					}else{
-						return new Material(0, x.units?x.units.clone():undefined);
+						return new Material(0, x.units);
 					}
 				});
 			}else{
 				if(this.rate.value <= 0){
-					this.rate = new Material(0, this.rate.units?this.rate.units.clone():undefined);
+					this.rate = new Material(0, this.rate.units);
 				}
 			}
 		}
 		
-		//console.log(this.dna.name+" - predict")
-		//console.log("RKPosition: "+this.dna.solver.RKPosition);
-		//console.log(this.RKPrimary.map(function(x){return x.value}));
-		//console.log(this.rate.value);
 	
 	}
 });
@@ -1354,7 +1419,7 @@ Flow.method("apply", function(timeChange, oldTime, newTime) {
 						if (x.value < 0 ) {
 							return x;
 						}else{
-							return new Material(0, x.units?x.units.clone():undefined);
+							return new Material(0, x.units);
 						}
 					})
 					rate = minus(rate, modifier);
@@ -1373,7 +1438,7 @@ Flow.method("apply", function(timeChange, oldTime, newTime) {
 						if (x.value < 0 ) {
 							return x;
 						}else{
-							return new Material(0, x.units?x.units.clone():undefined);
+							return new Material(0, x.units);
 						}
 					})
 					rate = minus(rate, modifier);
@@ -1450,3 +1515,13 @@ Flow.method("apply", function(timeChange, oldTime, newTime) {
 		}
 	}
 });
+
+function globalVars(primitive){
+	if(primitive instanceof Agent){
+		return {"-parent": varBank, "self": primitive};
+	}else if(primitive.container){
+		return {"-parent": varBank, "self": primitive.container};
+	}else{
+		return varBank;
+	}
+}

@@ -23,6 +23,11 @@ functionLoaders.push(function(){
 			msg: "STOP"
 		};
 	});
+	
+	defineFunction("Pause", {params:[]}, function(x) {
+		simulate.sleep(true);
+		return new Material(0);
+	});
 
 	defineFunction("Time", {params:[]}, function(x) {
 		return simulate.time().fullClone();
@@ -51,7 +56,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["seconds"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["seconds"],[-1])));
 	});
 
 	defineFunction("Minutes", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -61,7 +66,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["minutes"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["minutes"],[-1])));
 	});
 
 	defineFunction("Hours", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -71,7 +76,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["hours"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["hours"],[-1])));
 	});
 
 	defineFunction("Days", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -81,7 +86,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["days"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["days"],[-1])));
 	});
 
 	defineFunction("Weeks", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -91,7 +96,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["weeks"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["weeks"],[-1])));
 	});
 
 	defineFunction("Months", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -101,7 +106,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["months"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["months"],[-1])));
 	});
 
 	defineFunction("Years", {params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
@@ -111,7 +116,7 @@ functionLoaders.push(function(){
 		} else {
 			item = x[0].toNum();
 		}
-		return mult(item, new Material(1, new UnitStore(["years"],[-1])));
+		return mult(item, new Material(1, getUnitStore(["years"],[-1])));
 	});
 
 	defineFunction("Unitless", { params:[{name: "Value",  noVector: true}]}, function(x) {
@@ -213,14 +218,14 @@ functionLoaders.push(function(){
 				}
 			}
 		}
-		if (unitless(start.units)) {
-			start.units = simulate.timeUnits.clone();
+		if (! start.units) {
+			start.units = simulate.timeUnits;
 		}
-		if (unitless(width.units)) {
-			width.units = simulate.timeUnits.clone();
+		if (! width.units) {
+			width.units = simulate.timeUnits;
 		}
-		if (unitless(repeat.units)) {
-			repeat.units = simulate.timeUnits.clone();
+		if (! repeat.units) {
+			repeat.units = simulate.timeUnits;
 		}
 
 		if (repeat.value <= 0) {
@@ -245,11 +250,11 @@ functionLoaders.push(function(){
 		if (x.length == 3) {
 			height = x[2].toNum();
 		}
-		if (unitless(start.units)) {
-			start.units = simulate.timeUnits.clone();
+		if (! start.units) {
+			start.units = simulate.timeUnits;
 		}
-		if (unitless(finish.units)) {
-			finish.units = simulate.timeUnits.clone();
+		if (! finish.units) {
+			finish.units = simulate.timeUnits;
 		}
 		if (greaterThanEq(simulate.time(), start)) {
 			var q = div(mult(functionBank["min"]([minus(finish, start), minus(simulate.time(), start)]), height), minus(finish, start));
@@ -267,8 +272,8 @@ functionLoaders.push(function(){
 		if (x.length == 2) {
 			height = x[1].toNum();
 		}
-		if (unitless(start.units)) {
-			start.units = simulate.timeUnits.clone();
+		if (! start.units) {
+			start.units = simulate.timeUnits;
 		}
 
 		if (greaterThanEq(simulate.time(), start)) {
@@ -420,7 +425,7 @@ functionLoaders.push(function(){
 
 	defineFunction("ResetTimer", {object: [functionBank, PrimitiveObject], params: [{needPrimitive: true, name: "[Action]"}]}, function(x) {
 		if(! (x[0] instanceof Action)){
-			throw "ResetTimer requires an Action primitive.";
+			throw "MSG: ResetTimer requires an Action primitive.";
 		}
 		x[0].resetTimer();
 		return new Material(0);
@@ -428,7 +433,7 @@ functionLoaders.push(function(){
 
 	defineFunction("Transition", {object: [functionBank, PrimitiveObject], params: [{needPrimitive: true, name: "[Transition]"}]}, function(x) {
 		if(! (x[0] instanceof Transition)){
-			throw "Transition requires an Transition primitive.";
+			throw "MSG: Transition requires an Transition primitive.";
 		}
 		x[0].doTransition()
 		return new Material(0);
@@ -532,7 +537,7 @@ functionLoaders.push(function(){
 
 		var population = x[0];
 	
-		if(! ((x[1] instanceof State) || (x[1].dna.type == "State"))){
+		if(! ((x[1] instanceof State) || (x[1].dna.type === "State"))){
 			throw "MSG: FindState() requires a State primitive as its argument.";
 		}
 	
@@ -551,7 +556,7 @@ functionLoaders.push(function(){
 	defineFunction("FindNotState", {object: [functionBank, VectorObject, PrimitiveObject], params: [{needPopulation: true, name: "[Agent Population]"}, {needPrimitive: true, name: "[State]"}]}, function(x) {
 	
 		var population = x[0];
-		if(! ((x[1] instanceof State) || (x[1].dna.type == "State"))){
+		if(! ((x[1] instanceof State) || (x[1].dna.type === "State"))){
 			throw "MSG: FindNotState() requires a State primitive as its argument.";
 		}
 	
@@ -573,7 +578,7 @@ functionLoaders.push(function(){
 		var res = [];
 		for(var i = 0; i < population.length(); i++){
 			var item = agent(population.items[i]);
-			if(item.fullId !== x[1].fullId){
+			if(item !== x[1]){
 				if( lessThanEq(distance(x[1], item), x[2]) ){
 					res.push(item);
 				}
@@ -582,29 +587,30 @@ functionLoaders.push(function(){
 		return new Vector(res);
 	});
 
-	defineFunction("FindNearest", {object: [functionBank, VectorObject, PrimitiveObject], params: [{needPopulation: true, name: "[Agent Population]"}, {needAgent: true, name: "[Agent]"}, {noUnits:true, noVector:true, defaultVal:1, name: "Count"}]}, function(x) {
+	defineFunction("FindNearest", {object: [functionBank, VectorObject, PrimitiveObject], params: [{needPopulation: true, name: "[Agent Population]"}, {needAgent: true, name: "[Agent]"}, {noUnits: true, noVector: true, defaultVal: 1, name: "Count"}]}, function(x) {
 		var population = x[0];
 		var count = 1;
+		
 		if(x.length == 3){
 			count = x[2].value;
+			
+			if(count < 1){
+				throw "MSG: You must select at least one agent in FindNearest().";
+			}
 		}
 	
 		var res = [];
-		population.items.forEach(function(q){
-			var item = agent(q);
-			if(item.fullId !== x[1].fullId){
-				res.push({distance: distance(x[1],item), item: item});
-			}else{
-				return null;
+		for(var i = 0; i < population.items.length; i++){
+			var item = agent(population.items[i]);
+			if(item !== x[1]){
+				res.push({distance: distance(x[1], item), item: item});
 			}
-		});
-	
+		}
+		
 		if(res.length < count){
 			throw "MSG: Can't find nearest "+count+" agents of a population of size "+res.length+".";
 		}
-		if(count<1){
-			throw "MSG: You must select at least one agent in FindNearest().";
-		}
+		
 	
 		var minItems = [res[0]];
 		for(var i = 1; i < res.length; i++){
@@ -638,20 +644,20 @@ functionLoaders.push(function(){
 		var count = 1;
 		if(x.length === 3){
 			count = x[2].value;
+			
+			if(count<1){
+				throw "MSG: You must select at least one agent in FindFurthest().";
+			}
 		}
-		if(count<1){
-			throw "MSG: You must select at least one agent in FindFurthest().";
-		}
+		
 	
 		var res = [];
-		population.items.forEach(function(q){
-			var item = agent(q);
-			if(item.fullId !== x[1].fullId){
+		for(var i = 0; i < population.items.length; i++){
+			var item = agent(population.items[i]);
+			if(item !== x[1]){
 				res.push({distance: distance(x[1],item), item: item});
-			}else{
-				return null;
 			}
-		});
+		}
 	
 		if(res.length < count){
 			throw "MSG: Can't find furthest "+count+" agents of a population of size "+res.length+".";
@@ -815,6 +821,7 @@ function distance(a,b){
 	var l2 = (b instanceof Vector)?b:b.location;
 	//console.log(a)
 	//console.log(b)
+	
 	var s1 = l1.items[0].toString()+","+l1.items[1].toString();
 	var s2 = l2.items[0].toString()+","+l2.items[1].toString();
 	if(simulate.distanceCache[s1+"-"+s2]){
@@ -847,12 +854,12 @@ function distance(a,b){
 	var v1 = distx.value;
 	var v2 = disty.value;
 	
-	if (!unitsEqual(distx.units, disty.units)) {
+	if (distx.units !== disty.units) {
 		v2 = fn["*"](v2, convertUnits(distx.units, disty.units));
 	}
 	
 	var dist = fn["real-part"](fn["sqrt"](fn["+"]( fn["*"](v1,v1), fn["*"](v2,v2)) ));
-	dist = new Material(dist, distx.units?distx.units.clone():undefined);
+	dist = new Material(dist, distx.units);
 	simulate.distanceCache[s1+s2]=dist;
 	return dist;
 	//var dist = functionBank["sqrt"]([plus( power(distx, (new Material(2))), power(disty, (new Material(2))) )])

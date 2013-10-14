@@ -79,10 +79,21 @@ if(! is_editor){
 
 Ext.onReady(function() {
     setTimeout(function() {
-        Ext.get('loading').remove();
+		setTimeout(function(){
+			try{
+		        Ext.get('model-overview').fadeOut({
+					duration: 1000,
+		            remove: true
+		        });
+			}catch(err){
+			
+			}	
+		}, 250)
+        Ext.get('loading-indicator').remove();
         Ext.get('loading-mask').fadeOut({
             remove: true
         });
+		
     },
     250);
 });

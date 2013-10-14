@@ -17,6 +17,7 @@ function beginUnfolding(){
 }
 
 function restartUnfolding(config){
+	//Instrument
 	loadStoredUnfolding();
 	if(config){
 		saveUnfoldingStatus(config);
@@ -48,14 +49,17 @@ function saveUnfoldingStatus(config){
 function finishUnfolding(){
 	unfoldingManager.unfolding = false;
 	loadStoredUnfolding();
+	selectionChanged();
 }
 
 function loadStoredUnfolding(){
-	importMXGraph(unfoldingManager.init);
-	if ((!is_editor) && (is_embed) && (is_zoom == 1)) {
-		graph.getView().setScale(0.25);
-		graph.fit();
-		graph.fit();
+	if(unfoldingManager.init){
+		importMXGraph(unfoldingManager.init);
+		if ((!is_editor) && (is_embed) && (is_zoom == 1)) {
+			graph.getView().setScale(0.25);
+			graph.fit();
+			graph.fit();
+		}
 	}
 }
 

@@ -13,7 +13,11 @@ Ext.onReady(function() {
 	main();
 });
 
-var threads = 0;
+require.config({
+    baseUrl: builder_path+"/resources"
+});
+
+var defaultSolver = '{"enabled": false, "algorithm": "RK1", "timeStep": 1}';
 
 Ext.form.customFields = {
 	'code': Ext.extend(Ext.form.TriggerField, {
@@ -425,17 +429,17 @@ function main() {
 	graph.isWrapping = graph.isHtmlLabel;
 
 	graph.isCellLocked = function(cell) {
-		return (! viewConfig.allowEdits);
+		return (! viewConfig.allowEdits) || getOpacity(cell) === 0 ;
 	}
 	graph.allowButtonSelect = false;
 	graph.isCellSelectable = function(cell) {
-		return (cell.value.nodeName != "Setting" && cell.value.nodeName != "Display" && (graph.allowButtonSelect || cell.value.nodeName != "Button"));
+		return (cell.value.nodeName != "Setting" && cell.value.nodeName != "Display" && (graph.allowButtonSelect || cell.value.nodeName != "Button" && getOpacity(cell) !== 0));
 	}
 	graph.isCellEditable = function(cell) {
 		if (! viewConfig.allowEdits) {
 			return false;
 		}
-		return (cell.value.nodeName != "Display" && cell.value.nodeName != "Setting" && cell.value.nodeName != "Ghost" && ( cell.value.nodeName != "Button" || graph.isCellSelected(cell)));
+		return (cell.value.nodeName != "Display" && cell.value.nodeName != "Setting" && getOpacity(cell) !== 0 && cell.value.nodeName != "Ghost" && ( cell.value.nodeName != "Button" || graph.isCellSelected(cell)));
 	}
 
 	graph.getCursorForCell = function(cell) {
@@ -493,12 +497,12 @@ function main() {
 	primitiveBank.folder.setAttribute('name', getText('New Folder'));
 	primitiveBank.folder.setAttribute('Note', '');
 	primitiveBank.folder.setAttribute('Type', 'None');
-	var defaultSolver = '{"enabled": false, "algorithm": "RK1", "timeStep": 1}';
 	primitiveBank.folder.setAttribute('Solver', defaultSolver);
 	primitiveBank.folder.setAttribute('Image', 'None');
 	primitiveBank.folder.setAttribute('FlipHorizontal', false);
 	primitiveBank.folder.setAttribute('FlipVertical', false);
 	primitiveBank.folder.setAttribute('LabelPosition', "Middle");
+	primitiveBank.folder.setAttribute('AgentBase', "");
 
 	primitiveBank.ghost = doc.createElement('Ghost');
 	primitiveBank.ghost.setAttribute('Source', '');
@@ -562,6 +566,7 @@ function main() {
 	primitiveBank.state.setAttribute('name', getText('New State'));
 	primitiveBank.state.setAttribute('Note', '');
 	primitiveBank.state.setAttribute('Active', 'false');
+	primitiveBank.state.setAttribute('Residency', '0');
 	primitiveBank.state.setAttribute('Image', 'None');
 	primitiveBank.state.setAttribute('FlipHorizontal', false);
 	primitiveBank.state.setAttribute('FlipVertical', false);
@@ -571,15 +576,19 @@ function main() {
 	primitiveBank.transition.setAttribute('name', getText('Transition'));
 	primitiveBank.transition.setAttribute('Note', '');
 	primitiveBank.transition.setAttribute('Trigger', 'Timeout');
-	primitiveBank.transition.setAttribute('Value', '0');
+	primitiveBank.transition.setAttribute('Value', '1');
+	primitiveBank.transition.setAttribute('Repeat', false);
+	primitiveBank.transition.setAttribute('Recalculate', false);
 	setValuedProperties(primitiveBank.transition);
 	
 	primitiveBank.action = doc.createElement('Action');
 	primitiveBank.action.setAttribute('name', getText('New Action'));
 	primitiveBank.action.setAttribute('Note', '');
-	primitiveBank.action.setAttribute('Trigger', 'Condition');
-	primitiveBank.action.setAttribute('Value', 'true');
-	primitiveBank.action.setAttribute('Action', '[Self].Move({Rand(), Rand()})');
+	primitiveBank.action.setAttribute('Trigger', 'Probability');
+	primitiveBank.action.setAttribute('Value', '0.5');
+	primitiveBank.action.setAttribute('Repeat', true);
+	primitiveBank.action.setAttribute('Recalculate', false);
+	primitiveBank.action.setAttribute('Action', 'Self.Move({Rand(), Rand()})');
 
 	primitiveBank.agents = doc.createElement('Agents');
 	primitiveBank.agents.setAttribute('name', getText('New Agent Population'));
@@ -649,14 +658,13 @@ function main() {
 
 	primitiveBank.setting = doc.createElement('Setting');
 	primitiveBank.setting.setAttribute('Note', '');
-	primitiveBank.setting.setAttribute('Version', '31');
+	primitiveBank.setting.setAttribute('Version', '33');
 	primitiveBank.setting.setAttribute('Throttle', '1');
 	primitiveBank.setting.setAttribute('TimeLength', '100');
 	primitiveBank.setting.setAttribute('TimeStart', '0');
 	primitiveBank.setting.setAttribute('TimeStep', '1');
 	primitiveBank.setting.setAttribute('TimeUnits', 'Years');
 	primitiveBank.setting.setAttribute('Units', "");
-	primitiveBank.setting.setAttribute("HiddenUIGroups", ["Validation", "User Interface"]);
 	primitiveBank.setting.setAttribute("SolutionAlgorithm", "RK1");
 	primitiveBank.setting.setAttribute("BackgroundColor", "white");
 	primitiveBank.setting.setAttribute("Macros", "");
@@ -755,11 +763,11 @@ function main() {
 	});
 
 	var connectionChangeHandler = function(sender, evt) {
-			var item = evt.getProperty("edge");
-			if (item.value.nodeName == "Link") {
-				linkBroken(item);
-			}
-		};
+		var item = evt.getProperty("edge");
+		if (item.value.nodeName == "Link") {
+			linkBroken(item);
+		}
+	};
 	graph.addListener(mxEvent.CELL_CONNECTED, connectionChangeHandler);
 	
 	graph.addListener(mxEvent.CELLS_FOLDED, function(graph, e){
@@ -901,6 +909,9 @@ function main() {
 		if(! cell){
 			return false;
 		}
+		if(getOpacity(cell) === 0){
+			return false;
+		}
 		var type = connectionType();
 		if(cell.value.nodeName == "Link" || type == "None"){
 			return false;
@@ -1004,352 +1015,7 @@ function main() {
 		var dec = new mxCodec(doc);
 		dec.decode(doc.documentElement, graph.getModel());
 
-
-		var mySetting = getSetting();
-
-		if (mySetting.getAttribute("Version") < 3) {
-			var converters = primitives("Converter");
-			for (var i = 0; i < converters.length; i++) {
-				var inps = converters[i].getAttribute("Inputs").split(",");
-				var outs = converters[i].getAttribute("Outputs").split(",");
-				var s = "";
-				for (var j = 0; j < inps.length; j++) {
-					if (j > 0) {
-						s = s + ";";
-					}
-					s = s + inps[j] + "," + outs[j];
-				}
-				converters[i].setAttribute("Data", s);
-			}
-			mySetting.setAttribute("Version", 3);
-		}
-		if (mySetting.getAttribute("Version") < 4) {
-			mySetting.setAttribute("SolutionAlgorithm", "RK1");
-			mySetting.setAttribute("Version", 4)
-		}
-
-		if (mySetting.getAttribute("Version") < 5) {
-			var stocks = primitives("Stock");
-			for (var i = 0; i < stocks.length; i++) {
-				stocks[i].setAttribute("NonNegative", false);
-			}
-			mySetting.setAttribute("Version", 5);
-		}
-
-		if (mySetting.getAttribute("Version") < 6) {
-			var pictures = primitives("Picture");
-			for (var i = 0; i < pictures.length; i++) {
-				pictures[i].setAttribute("FlipHorizontal", false);
-				pictures[i].setAttribute("FlipVertical", false);
-			}
-			mySetting.setAttribute("Version", 6);
-		}
-
-		if (mySetting.getAttribute("Version") < 7) {
-			var links = primitives("Link");
-			for (var i = 0; i < links.length; i++) {
-				links[i].setAttribute("BiDirectional", false);
-			}
-			mySetting.setAttribute("Version", 7);
-		}
-
-		if (mySetting.getAttribute("Version") < 8) {
-			var items = primitives("Stock").concat(primitives("Parameter"), primitives("Converter"));
-			for (var i = 0; i < items.length; i++) {
-				items[i].setAttribute("Image", "None");
-			}
-			items = primitives("Display");
-			for (var i = 0; i < items.length; i++) {
-				items[i].setAttribute("Image", "Display");
-			}
-			mySetting.setAttribute("Version", 8);
-		}
-
-		if (mySetting.getAttribute("Version") < 9) {
-			mySetting.setAttribute("BackgroundColor", "white");
-			mySetting.setAttribute("Version", 9);
-		}
-
-		if (mySetting.getAttribute("Version") < 10) {
-			var displays = primitives("Display");
-
-			for (var i = 0; i < displays.length; i++) {
-				displays[i].setVisible(false);
-			}
-			mySetting.setAttribute("Version", 10);
-			graph.refresh()
-		}
-
-		if (mySetting.getAttribute("Version") < 11) {
-			var cells = primitives("Stock").concat(primitives("Parameter"), primitives("Converter"), primitives("Text"));
-
-			graph.setCellStyles(mxConstants.STYLE_LABEL_BACKGROUNDCOLOR, mxConstants.NONE, cells);
-
-			mySetting.setAttribute("Version", 11);
-		}
-
-		if (mySetting.getAttribute("Version") < 12) {
-			var cells = primitives("Stock").concat(primitives("Parameter"), primitives("Converter"));
-			var pics = primitives("Picture");
-
-			for (var i = 0; i < pics.length; i++) {
-				pics[i].setAttribute("LabelPosition", "Bottom");
-			}
-
-			for (var i = 0; i < cells.length; i++) {
-				cells[i].setAttribute("LabelPosition", "Middle");
-			}
-
-			mySetting.setAttribute("Version", 12);
-		}
-
-		if (mySetting.getAttribute("Version") < 13) {
-			var items = primitives("Folder");
-			for (var i = 0; i < items.length; i++) {
-				items[i].setAttribute("Image", "None");
-				items[i].setAttribute("LabelPosition", "Middle");
-			}
-			mySetting.setAttribute("Version", 13);
-		}
-
-		if (mySetting.getAttribute("Version") < 14) {
-			var pictures = primitives("Stock").concat(primitives("Parameter"), primitives("Converter"), primitives("Folder"));
-			for (var i = 0; i < pictures.length; i++) {
-				pictures[i].setAttribute("FlipHorizontal", false);
-				pictures[i].setAttribute("FlipVertical", false);
-			}
-			mySetting.setAttribute("Version", 14);
-		}
-
-		if (mySetting.getAttribute("Version") < 15) {
-			var buttons = primitives("Button");
-			for (var i = 0; i < buttons.length; i++) {
-				var action = buttons[i].getAttribute("Function");
-				action = action.replace(/getName/g, "findName");
-				action = action.replace(/getType/g, "findType");
-				action = action.replace(/getAll/g, "findAll");
-				buttons[i].setAttribute("Function", action);
-			}
-			mySetting.setAttribute("Version", 15);
-		}
-
-		if (mySetting.getAttribute("Version") < 16) {
-			var vars = primitives("Parameter");
-			for (var i = 0; i < vars.length; i++) {
-				vars[i].value = changeNodeName(vars[i].value, "Variable");
-			}
-			mySetting.setAttribute("Version", 16);
-		}
-
-		if (mySetting.getAttribute("Version") < 17) {
-			mySetting.setAttribute("Throttle", -1);
-			mySetting.setAttribute("Version", 17);
-		}
-
-		if (mySetting.getAttribute("Version") < 18) {
-			var displays = primitives("Display");
-
-			for (var i = 0; i < displays.length; i++) {
-				displays[i].setAttribute("yAxis2", "");
-				displays[i].setAttribute("Primitives2", "");
-			}
-
-			mySetting.setAttribute("Version", 18);
-
-		}
-
-		if (mySetting.getAttribute("Version") < 19) {
-			mySetting.setAttribute("Macros", "");
-			mySetting.setAttribute("Version", 19);
-		}
-
-		if (mySetting.getAttribute("Version") < 20) {
-			var u = mySetting.getAttribute("Units");
-			if (isDefined(u)) {
-				mySetting.setAttribute("Units", u.replace(/,/g, "*"));
-			}
-			mySetting.setAttribute("Version", 20);
-		}
-
-		if (mySetting.getAttribute("Version") < 21) {
-			var displays = primitives("Display");
-			for (var i = 0; i < displays.length; i++) {
-				if (displays[i].getAttribute('Type') == "Scatterplot") {
-					displays[i].setAttribute("showMarkers", true);
-					displays[i].setAttribute("showLines", false);
-				} else {
-					displays[i].setAttribute("showMarkers", false);
-					displays[i].setAttribute("showLines", true);
-				}
-			}
-
-			mySetting.setAttribute("Version", 21);
-		}
-
-
-		if (mySetting.getAttribute("Version") < 22) {
-
-			mySetting.setAttribute("SensitivityPrimitives", "");
-			mySetting.setAttribute("SensitivityRuns", 50);
-			mySetting.setAttribute("SensitivityBounds", "50, 80, 95, 100");
-			mySetting.setAttribute("SensitivityShowRuns", "false");
-
-			mySetting.setAttribute("Version", 22);
-		}
-
-		if (mySetting.getAttribute("Version") < 23) {
-
-			var obsolete = findValue([/\bmin\(\s*</i, /\bmax\(\s*</i, /\bmean\(\s*</i, /\bmedian\(\s*</i, /\bstddev\(\s*</i]);
-
-			if (obsolete.length > 0) {
-
-				var msg = '<p>Insight Maker has received an update that removes the need for the <i>&lt;Primitive&gt;</i> notation. You may now use the <i>[Primitive]</i> in place of it.</p> ';
-				msg += '<br/><p>A side effect of this update is that the usage of the Min(), Max(), Mean(), Median() and StdDev() statistical functions for aggregating over a primitive\'s history have been renamed to PastMin(), PastMax(), etc... (the usage of these function for values is unchanged; e.g. Max(1, 4, 2) is still correct).</p>';
-				msg += '<br/><p>To correct this you need to change equations like:</p>';
-				msg += '<br/><b>Max(&lt;x&gt;)</b></p>';
-				msg += '<br/>to</p>';
-				msg += '<br/><b>PastMax([x])</b></p>';
-				msg += '<br/><p>The following of your primitives appear to use these function and need to be updated to work correctly with this change. You can adjust their equations manually:</p>';
-				msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
-					return x.getAttribute("name")
-				}).join(", ") + '</b></p>';
-
-				Ext.Msg.show({
-					icon: Ext.MessageBox.WARNING,
-					title: 'Model Update Required',
-					msg: msg,
-					buttons: Ext.MessageBox.OK
-				});
-
-			}
-
-
-			mySetting.setAttribute("Version", 23);
-		}
-
-		if (mySetting.getAttribute("Version") < 24) {
-			
-			var folders = primitives("Folder");
-			for (var i = 0; i < folders.length; i++) {
-				folders[i].setAttribute("Type", "None");
-			}
-			
-			var displays = primitives("Display");
-			for (var i = 0; i < displays.length; i++) {
-				displays[i].setAttribute("showArea", false);
-			}
-			
-			var texts = primitives("Text");
-			for (var i = 0; i < texts.length; i++) {
-				texts[i].setAttribute('LabelPosition', "Middle");
-			}
-
-			mySetting.setAttribute("Version", 24);
-		}
-
-
-		if (mySetting.getAttribute("Version") < 25) {
-			
-			setAllConnectable();
-
-			mySetting.setAttribute("Version", 25);
-		}
-		
-		if (mySetting.getAttribute("Version") < 26) {
-			
-			var flows = primitives("Flow");
-			for (var i = 0; i < flows.length; i++) {
-                if (! isTrue(flows[i].getAttribute("OnlyPositive"))) {
-                    graph.setCellStyles(mxConstants.STYLE_STARTARROW, "block", [flows[i]]);
-                    graph.setCellStyles("startFill", 0, [flows[i]]);
-                }
-			}
-			
-
-			mySetting.setAttribute("Version", 26);
-		}
-		
-		if (mySetting.getAttribute("Version") < 27) {
-			
-			
-			var displays = primitives("Display");
-			for (var i = 0; i < displays.length; i++) {
-				displays[i].setAttribute("legendPosition", "Automatic");
-			}
-			
-			mySetting.setAttribute("Version", 27);
-		}
-		
-		if (mySetting.getAttribute("Version") < 28) {
-			
-			var items = primitives();
-			for (var i = 0; i < items.length; i++) {
-				if("ShowSlider" in items[i]){
-					items[i].setAttribute("SliderStep", "");
-				}
-			}
-			
-			mySetting.setAttribute("Version", 28);
-		}
-		
-		if (mySetting.getAttribute("Version") < 29) {
-
-			var obsolete = excludeType(findValue(/[A-Za-z0-9_]\s+\(/i), "Button");
-
-			if(viewConfig.allowEdits){
-				if (obsolete.length > 0) {
-
-					var msg = '<p>Insight Maker has received a significant update to its equation engine providing improved flexibility and power.</p>';
-					msg += '<br/><p>A side effect of this update is that function names must now immediately be followed by a parenthesis. Thus, for instance, "Max&nbsp;&nbsp(1,2)" is no longer valid and needs to be replaced with  "Max(1,2)." This also improves the clarity and readability of equations.</p> ';
-					msg += '<br/><p>The following of your primitives appear to use an unsupported format. Their equations will automatically be updated to use the correct format:</p>';
-					msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
-						return x.getAttribute("name")
-					}).join(", ") + '</b></p>';
-				
-					msg += '<br/><p>You may save your model to keep these updates.</p>'
-
-					Ext.Msg.show({
-						icon: Ext.MessageBox.WARNING,
-						title: 'Model Update Required',
-						msg: msg,
-						buttons: Ext.MessageBox.OK
-					});
-
-				}
-			}
-		
-			if(obsolete.length>0){
-				obsolete.map(function(x){
-					setValue(x, getValue(x).replace(/([A-Za-z0-9_])\s+\(/gi, "$1("));
-				});
-			}
-		
-			mySetting.setAttribute("Version", 29);
-		}
-	
-		if (mySetting.getAttribute("Version") < 30) {
-			var folders = primitives("Folder");
-
-			for (var i = 0; i < folders.length; i++) {
-				folders[i].setAttribute("Solver", defaultSolver);
-			}
-
-			mySetting.setAttribute("Version", 30);
-		}
-		
-		if (mySetting.getAttribute("Version") < 31) {
-			var agents = primitives("Agents");
-
-			for (var i = 0; i < agents.length; i++) {
-				agents[i].setAttribute('ShowSlider', false);
-				agents[i].setAttribute('SliderMax', 100);
-				agents[i].setAttribute('SliderMin', 0);
-				agents[i].setAttribute('SliderStep', 1);
-			}
-
-			mySetting.setAttribute("Version", 31);
-		}
-		
+		updateModel();
 		
 
 	}
@@ -1817,32 +1483,7 @@ function main() {
 			return clean(res);
 		};
 
-	function pictureEditor() {
-		var picNames = ["None", "Growth", "Balance", 'Positive Feedback Clockwise', 'Positive Feedback Counterclockwise', 'Negative Feedback Clockwise', 'Negative Feedback Counterclockwise', 'Unknown Feedback Clockwise', 'Unknown Feedback Counterclockwise', 'Plus', 'Minus', 'Forwards', 'Backwards', 'Up', 'Down', 'Diagonal', "Reload", "Play", "Pause", "Stop", "Info", 'Question', 'Warning', 'Checkmark', 'Prohibited', 'Idea', "Home", 'Book', 'Clock', 'Computer', 'Dice', 'Gear', 'Hammer', 'Smiley', 'Heart', 'Key', 'Lock', 'Loudspeaker', 'Footprints', 'Mail', 'Network', 'Notes', 'Pushpin', 'Paperclip', 'People', 'Person', 'Wallet', 'Money', 'Flag', 'Trash'];
-
-		return new Ext.form.ComboBox({
-			triggerAction: "all",
-			store: new Ext.data.Store({
-				fields: [{
-					name: 'text',
-					type: 'string'
-				}],
-				data: Ext.Array.map(picNames, function(x) {
-					return {
-						text: x
-					}
-				})
-			}),
-			queryMode: 'local',
-			forceSelection: false,
-			selectOnFocus: true,
-			listConfig: {
-				getInnerTpl: function() {
-					return '<center><div class="x-combo-list-item" style=\"white-space:normal\";><img src="'+builder_path+'/images/SD/{text}.png" width=48 height=48/></div></center>';
-				}
-			}
-		});
-	}
+	
 
 
 	selectionChanged = function(forceClear) {
@@ -1883,32 +1524,20 @@ function main() {
 				'group': '  '+getText('General')
 			}];
 
-
-			if (viewConfig.allowEdits && cell.getAttribute("Image", -99) != -99) {
-				properties.push({
-					'name': 'Image',
-					'text': getText('Image'),
-					'value': cell.getAttribute("Image"),
-					'group': getText('User Interface'),
-					'editor': pictureEditor()
-				});
-
-			}
-
 			if ((isValued(cell) || cell.value.nodeName == "Agents") && cell.value.nodeName != "State" && cell.value.nodeName != "Action") {
 				if (viewConfig.allowEdits && cell.value.nodeName != "Converter") {
 					properties.push({
 						'name': 'ShowSlider',
 						'text': getText('Show Value Slider'),
 						'value': isTrue(cell.getAttribute("ShowSlider")),
-						'group': getText('User Interface')
+						'group': getText('Slider')
 					});
 
 					properties.push({
 						'name': 'SliderMax',
 						'text': getText('Slider Max'),
 						'value': parseFloat(cell.getAttribute("SliderMax")),
-						'group': getText('User Interface'),
+						'group': getText('Slider'),
 						'editor': {
 					        xtype: 'numberfield',
 							allowDecimals: true,
@@ -1921,7 +1550,7 @@ function main() {
 						'name': 'SliderMin',
 						'text': getText('Slider Min'),
 						'value': parseFloat(cell.getAttribute("SliderMin")),
-						'group': getText('User Interface'),
+						'group': getText('Slider'),
 						'editor': {
 					        xtype: 'numberfield',
 							allowDecimals: true,
@@ -1933,7 +1562,7 @@ function main() {
 						'name': 'SliderStep',
 						'text': getText('Slider Step'),
 						'value': cell.getAttribute("SliderStep"),
-						'group': getText('User Interface'),
+						'group': getText('Slider'),
 						'editor': {
 					        xtype: 'numberfield',
 					        minValue: 0,
@@ -1999,6 +1628,10 @@ function main() {
 			configPanel.setTitle("");
 		}
 
+		function descriptionLink(url, subject){
+			return "<a href='"+url+"' class='description_link' target='_blank'>Learn more about "+subject+" &rsaquo;</a><div style='clear:both'></div>"
+		}
+		
 		var descBase = "<br/><img style='float:left; margin-right: 7px' src='"+builder_path+"/images/gui/help.png' width=32px height=32px />";
 
 		var topDesc = "",
@@ -2009,134 +1642,54 @@ function main() {
 			//no primitive has been selected. Stick in empty text and sliders.
 			if (drupal_node_ID == -1 && slids.length == 0) {
 				if(is_ebook){
-					topDesc = "<br/><br/><big><center>Select a primitive to see its properties.</center></big>";
+					topDesc = "<center><big>Select a primitive to see its properties.</big></center>";
 				}else{
-					topDesc = "<center><a href='"+builder_path+"/resources/QuickStart.pdf' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
+					topDesc = "<center><a href='http://www.youtube.com/watch?v=9ApzfWPOF5g' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
 				}
 			} else {
 
 				var topDesc = clean(graph_description);
-				var topTags = "";
-				if (topDesc == "") {
+				if (topDesc == "" && drupal_node_ID != -1) {
 					if (viewConfig.saveEnabled) {
-						topDesc = "<span style='color: gray'>"+getText("You haven't entered a description for this Insight yet. Please enter one to help others understand it.")+"</span>";
+						topDesc = "<span style='color: #555'>"+getText("You haven't entered a description for this Insight yet. Please enter one to help others understand it.")+"</span>";
 					}
+				}
+				
+				
+				if(topDesc != ""){
+					topDesc = "<div class='sidebar_description'>" + topDesc + "</div>";
+				}
+				if (drupal_node_ID != -1 && cell == null) {
+					topDesc = topDesc +' <div class="sidebar_share"> '+getText('Share')+' <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span></div>'+ (is_editor ? '<div class="sidebar_edit"><a href="#" onclick="updateProperties()">'+getText('Edit description')+'</a></div>' : '');
 				}
 				
 				if(graph_tags.trim() != ""){
+					var topTags = "";
 					graph_tags.split(",").forEach(function(tag){
 						var t = tag.trim();
-						topTags = topTags+"<a target='_blank' href='http://insightmaker.com/tag/"+clean(t.replace(/ /g, "-"))+"'>"+clean(t)+"</a> ";	
+						topTags = topTags+"<a target='_blank' href='/tag/"+clean(t.replace(/ /g, "-"))+"'>"+clean(t)+"</a> ";	
 					});
+					topDesc = topDesc + "<div class='sidebar_tags'>Tags: "+topTags+"</div>";
 				}
-
-				topDesc = "<big class='description'>" + topDesc + "</big>";
-				if (drupal_node_ID != -1 && cell == null) {
-					topDesc = topDesc + '<br/><br/> ' + (is_editor ? '<a href="#" style="text-decoration:none" onclick="updateProperties()">'+getText('Edit description')+'</a>' : '') + ' <div style="float:right; vertical-align:middle"> '+getText('Share')+' <span  id="st_facebook_button" displayText="Facebook"></span><span  id="st_twitter_button" displayText="Tweet"></span><span  id="st_linkedin_button" displayText="LinkedIn"></span><span  id="st_mail_button" displayText="EMail"></span></div>';
-				}
-				topDesc = topDesc + "<br/><br/>";
 				
-				if(topTags != ""){
-					topDesc = topDesc + "Tags: "+topTags+"<br/><br/>";
-				}
 				if((! is_editor) && graph_author_name != ""){
-					topDesc = topDesc + "Author: <a target='_blank' href='http://insightmaker.com/user/"+clean(graph_author_id)+"'>"+clean(graph_author_name)+"</a><br/><br/>";
+					topDesc = topDesc + "<div class='sidebar_author'>Insight Author: <a target='_blank' href='/user/"+clean(graph_author_id)+"'>"+clean(graph_author_name)+"</a></div>";
 				}
 				
 				if (slids.length > 0) {
-					var sliderHolder = Ext.create("Ext.container.Container", {
-						layout: {
-							type: "vbox",
-							align: "stretch"
-						}
-					});
-					bottomItems.push(sliderHolder);
-					bottomItems.push(Ext.create("Ext.Component", {
-							html: "<br/>",
-							padding: 3
-						}));
-					var slids = sliderPrimitives();
-					sliders = [];
-
-					for (var i = 0; i < slids.length; i++) {
-						if (isNaN(getValue(slids[i]))) {
-							setValue(slids[i], (parseFloat(slids[i].getAttribute("SliderMin")) + parseFloat(slids[i].getAttribute("SliderMax"))) / 2);
-						}
-						var step = parseFloat(slids[i].getAttribute("SliderStep"))?parseFloat(slids[i].getAttribute("SliderStep")):undefined;
-						var perc = step?Math.ceil(-Math.log(step) /Math.log(10)):Math.floor(-(Math.log(Math.max(0.1, slids[i].getAttribute("SliderMax") - slids[i].getAttribute("SliderMin"))) / Math.log(10) - 4));
-
-						perc = Math.max(0, perc);
-						var slid = Ext.create("Ext.slider.Single", {
-							flex: 1,
-							minValue: parseFloat(slids[i].getAttribute("SliderMin")),
-							sliderCell: slids[i],
-							value: parseFloat(getValue(slids[i])),
-							maxValue: parseFloat(slids[i].getAttribute("SliderMax")),
-							decimalPrecision: perc,
-							increment: step
-						});
-						sliders.push(slid);
-						
-						//console.log(perc);
-						
-
-						var t = Ext.create("Ext.form.field.Number", {
-							slider: slid,
-							width: 60,
-							decimalPrecision: perc,
-							ignoreChange: false,
-							id: "sliderVal" + slids[i].id,
-							hideTrigger: true,
-							keyNavEnabled: false,
-							selectOnFocus: true,
-							mouseWheelEnabled: false,
-							minValue: parseFloat(slids[i].getAttribute("SliderMin")),
-							maxValue: parseFloat(slids[i].getAttribute("SliderMax")),
-							listeners: {
-								change: function(item, e, ops) {
-									if (!item.ignoreChange) {
-										if(item.validate()){
-											item.ignoreChange = true;
-											var v = parseFloat(item.getValue(), 10);
-											if (!isNaN(v)) {
-												item.slider.setValue(v);
-											}
-											item.ignoreChange = false;
-										}
-									}
-								}
+					bottomItems.push(createSliders(false, setValue, function(slider, setValue, textField, newValue){
+						Ext.Msg.confirm("Change Value", "<p>The current value of the primitive is:</p><br/><p><pre>"+getValue(slider.sliderCell).replace(/\\n/g, "\n")+"</pre></p><br/><p>Are you sure you want to change this value using the slider?</p>", function(btn){
+							if(btn == 'yes'){
+								setValue(slider.sliderCell, parseFloat(newValue));
+							}else{
+								textField.setRawValue("");
+								slider.setValue(undefined);
 							}
+							slider.confirming = false;
+			
 						});
-						slid.addListener("change", function(slider, newValue) {
-							var textField = Ext.getCmp("sliderVal" + slider.sliderCell.id);
-							if ((!textField.ignoreChange) || (parseFloat(textField.getValue()) != parseFloat(newValue))) {
-								textField.setRawValue(parseFloat(newValue));
-							}
-							setValue(slider.sliderCell, parseFloat(newValue));
-						});
-
-						var n = slids[i].getAttribute("Note");
-						if (isUndefined(n)) {
-							n = "";
-						}
-
-						sliderHolder.add(Ext.create("Ext.Component", {
-							html: "<big> &bull; " + slids[i].getAttribute("name") + "</big>" + (n == "" ? "" : "<div style='font-size:small;color:grey'>" + n + "</div>"),
-							padding: 3
-						}));
-
-						sliderHolder.add(Ext.create("Ext.container.Container", {
-							layout: {
-								type: "hbox",
-								align: "stretch"
-							},
-							margin: 3,
-							items: [slid, t]
-						}));
-
-						t.setValue(parseFloat(getValue(slids[i])));
-					}
-
+					}));
+					bottomItems.push({xtype: "component", html: "<br/><br/>"});
 				}
 
 			}
@@ -2144,8 +1697,7 @@ function main() {
 		} else if (cellType == "Stock") {
 
 
-
-			bottomDesc = descBase + '<p>A stock stores a material or a resource. Lakes and Bank Accounts are both examples of stocks. One stores water while the other stores money. The Initial Value defines how much material is initially in the Stock.</p>' + (is_editor ? ' <br/><b>Examples of valid Initial Values:</b><center><table class="undefined"><tr><td align=center>Static Value</td></tr><tr><td align=center><i>10</i></td></tr><tr><td>Mathematical Equation</td></tr><tr><td align=center><i>cos(2.78)+7*2</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>5+[My Variable]</i></td></tr></table></center>' : '');
+			bottomDesc = descBase + 'A stock stores a material or a resource. Lakes and Bank Accounts are both examples of stocks. One stores water while the other stores money. The Initial Value defines how much material is initially in the Stock. '+descriptionLink("/stocks", "Stocks");
 			properties.push({
 				'name': 'InitialValue',
 				'text': getText('Initial Value')+' =',
@@ -2182,7 +1734,7 @@ function main() {
 			});
 
 		} else if (cellType == "Variable") {
-			bottomDesc = descBase + "<p>A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables.</p>" + (is_editor ? "<br/><b>Examples of valid Values:</b><center><table class='undefined'><tr><td align=center>Static Value</td></tr><tr><td align=center><i>7.2</i></td></tr><tr><td>Using Current Simulation Time</td></tr><tr><td align=center><i>seconds()^2+6</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*2</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "A variable is a dynamically updated object in your model that synthesizes available data or provides a constant value for use in your equations. The birth rate of a population or the maximum volume of water in a lake are both possible uses of variables." +descriptionLink("/variables", "Variables");
 			properties.push({
 				'name': 'Equation',
 				'text': getText('Value/Equation')+' =',
@@ -2192,7 +1744,7 @@ function main() {
 				'renderer': equationRenderer
 			});
 		} else if (cell.value.nodeName == "Link") {
-			bottomDesc = descBase + "Links connect the different parts of your model. If one primitive in your model refers to another in its equation, the two primitives must either be directly connected or connected through a link. Once connected with links, square-brackets may be used to reference values of other primitives. So if you have a stock called <i>Bank Balance</i>, you could refer to it in another primitive's equation with <i>[Bank Balance]</i>.";
+			bottomDesc = descBase + "Links connect the different parts of your model. If one primitive in your model refers to another in its equation, the two primitives must either be directly connected or connected through a link. Once connected with links, square-brackets may be used to reference values of other primitives. So if you have a stock called <i>Bank Balance</i>, you could refer to it in another primitive's equation with <i>[Bank Balance]</i>."+descriptionLink("/links", "Links");
 			properties.push({
 				'name': 'BiDirectional',
 				'text': getText('Bi-Directional'),
@@ -2221,10 +1773,20 @@ function main() {
 				'group': ' '+getText('Configuration'),
 				'renderer': renderTimeBut
 			});
+			
+			properties.push({
+				'name': 'AgentBase',
+				'text': getText('Agent Parent'),
+				'value': cell.getAttribute("AgentBase"),
+				'group': ' '+getText('Configuration'),
+				'editor': new Ext.form.customFields['code']({}),
+				'renderer': equationRenderer
+			});
 		    
 		       
 		} else if (cell.value.nodeName == "Button") {
-			bottomDesc = descBase + "Buttons are used for interactivity. To select a button without triggering its action, hold down the Shift key when you click the button. Buttons are currently in Beta and their implementation may change in later versions of Insight Maker. More button documentation is <a href='http://insightmaker.com/sites/default/files/API/' target='_blank'>available here</a>.";
+			bottomDesc = descBase + "Buttons are used for interactivity. To select a button without triggering its action, hold down the Shift key when you click the button. Buttons are currently in Beta and their implementation may change in later versions of Insight Maker. Available button API commands are <a href='http://insightmaker.com/sites/default/files/API/' target='_blank'>available here</a>."+descriptionLink("/scripting", "Model Scripting");
+			
 			properties.push({
 				'name': 'Function',
 				'text': getText('Action'),
@@ -2234,10 +1796,33 @@ function main() {
 					grow: true,
 					growMax: 80
 				})
-			})
+			});
+			//add padding so action field does go outside the grid and get hidden
+			properties.push({
+				'name': 'xx',
+				'text': ' ',
+				'value': "",
+				'group': ' '+getText('Configuration'),
+				'editor': new Ext.form.TextArea({
+					grow: true,
+					growMax: 80,
+					style: 'display:none'
+				})
+			});
+			properties.push({
+				'name': 'xy',
+				'text': ' ',
+				'value': "",
+				'group': ' '+getText('Configuration'),
+				'editor': new Ext.form.TextArea({
+					grow: true,
+					growMax: 80,
+					style: 'display:none'
+				})
+			});
 
 		} else if (cell.value.nodeName == "Flow") {
-			bottomDesc = descBase + "<p>Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute.</p>" + (is_editor ? "<br/><b>Examples of valid Flow Rates:</b><center><table class='undefined'><tr><td align=center>Constant Rate</td></tr><tr><td align=center><i>10</i></td></tr><tr><td align=center>Using the Current Simulation Time</td></tr><tr><td align=center><i>minutes()/3</i></td></tr><tr><td align=center>Referencing Other Primitives</td></tr><tr><td align=center><i>[Lake Volume]*0.05+[Rain]/4</i></td></tr></table></center>" : "");
+			bottomDesc = descBase + "Flows represent the transfer of material from one stock to another. For example given the case of a lake, the flows for the lake might be: River Inflow, River Outflow, Precipitation, and Evaporation. Flows are given a flow rate and they operator over one unit of time; in effect: flow per one second or per one minute." +descriptionLink("/flows", "Flows");
 			properties.push({
 				'name': 'FlowRate',
 				'text': getText('Flow Rate')+' =',
@@ -2254,7 +1839,7 @@ function main() {
 			});
 
 		} else if (cell.value.nodeName == "Transition") {
-			bottomDesc = descBase + "<p>Transitions move agents between states. The probability is probability per time.</p>";
+			bottomDesc = descBase + "Transitions move agents between states. You can have transitions trigger based on some condition, a probability, or a timeout."+descriptionLink("/transitions", "Transitions");
 			properties.push({
 				'name': 'Trigger',
 				'text': getText('Triggered by'),
@@ -2275,8 +1860,21 @@ function main() {
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
+			
+			properties.push({
+				'name': 'Repeat',
+				'text': getText('Repeat'),
+				'value': isTrue(cell.getAttribute("Repeat")),
+				'group': ' '+getText('Configuration')
+			});
+			properties.push({
+				'name': 'Recalculate',
+				'text': getText('Recalculate'),
+				'value': isTrue(cell.getAttribute("Recalculate")),
+				'group': ' '+getText('Configuration')
+			});
 		} else if (cell.value.nodeName == "Action") {
-			bottomDesc = descBase + "<p>Actions can be used to move agents or dynamically create connections between them.</p>";
+			bottomDesc = descBase + "Action primitives can be used to execute some action such as moving agents or dynamically create connections between them." +descriptionLink("/actions", "Actions");
 			properties.push({
 				'name': 'Trigger',
 				'text': getText('Triggered by'),
@@ -2305,8 +1903,20 @@ function main() {
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
+			properties.push({
+				'name': 'Repeat',
+				'text': getText('Repeat'),
+				'value': isTrue(cell.getAttribute("Repeat")),
+				'group': ' '+getText('Configuration')
+			});
+			properties.push({
+				'name': 'Recalculate',
+				'text': getText('Recalculate'),
+				'value': isTrue(cell.getAttribute("Recalculate")),
+				'group': ' '+getText('Configuration')
+			});
 		} else if (cell.value.nodeName == "State") {
-			bottomDesc = descBase + "<p>The current state of an agent.</p>";
+			bottomDesc = descBase + "The primitive representing the current state of an agent. A boolean yes/no property. You can connect states with transitions to move an agent between states."+descriptionLink("/states", "States");
 
 			properties.push({
 				'name': 'Active',
@@ -2316,9 +1926,18 @@ function main() {
 				'editor': new Ext.form.customFields['code']({}),
 				'renderer': equationRenderer
 			});
+			
+			properties.push({
+				'name': 'Residency',
+				'text': getText('Residency')+' = ',
+				'value': cell.getAttribute("Residency"),
+				'group': ' '+getText('Configuration'),
+				'editor': new Ext.form.customFields['code']({}),
+				'renderer': equationRenderer
+			});
 
 		} else if (cell.value.nodeName == "Agents") {
-			bottomDesc = descBase + "<p>A collection of agents.</p>";
+			bottomDesc = descBase + "Agent populations hold a collection of agents: individually simulated entities which may interact with each other."+descriptionLink("/agentpopulations", "Agent Populations");
 
 
 			var dat = [];
@@ -2449,9 +2068,9 @@ function main() {
 
 		} else if (cellType == "Ghost") {
 			bottomDesc = descBase + "This item is a 'Ghost' of another primitive. It mirrors the values and properties of its source primitive. You cannot edit the properties of the Ghost. You need to instead edit the properties of its source.";
-			bottomDesc = bottomDesc + "<p><center><a href='#' onclick='var x = findID(getSelected()[0].getAttribute(\"Source\"));highlight(x);'>Show Source</a></center></p>";
+			bottomDesc = bottomDesc + "<br/><p><center><a href='#' onclick='var x = findID(getSelected()[0].getAttribute(\"Source\"));highlight(x);'>Show Source</a></center></p>"+descriptionLink("/ghosting", "Ghosts");
 		} else if (cellType == "Converter") {
-			bottomDesc = descBase + "Converters store a table of input and output data. When the input source takes on one of the input values, the converter takes on the corresponding output value. If no specific input value exists for the current input source value, then the nearest input neighbors are averaged.";
+			bottomDesc = descBase + "Converters store a table of input and output data. When the input source takes on one of the input values, the converter takes on the corresponding output value. If no specific input value exists for the current input source value, then the nearest input neighbors are averaged. "+descriptionLink("/converters", "Converters");
 			var n = neighborhood(cell);
 			var dat = [
 				["Time", "Time"]
@@ -2505,7 +2124,7 @@ function main() {
 				})
 			});
 		} else if (cellType == "Picture") {
-			bottomDesc = descBase + "Pictures can make your model diagram come alive.";
+			bottomDesc = descBase + "Pictures can make your model diagram come alive. Use the picture settings in the Styles section of the main toolbar to change the picture."+descriptionLink("/diagramming", "Modeling Diagramming");
 		}
 		configPanel.removeAll();
 
@@ -2513,14 +2132,12 @@ function main() {
 
 		if (topDesc != "") {
 			topItems.push(Ext.create('Ext.Component', {
-				html: topDesc,
-				margin: '5 5 5 5'
+				html: '<div class="'+((drupal_node_ID == -1)?"":"sidebar_top")+'">'+topDesc+'</div>'
 			}));
 		}
 		if (bottomDesc != "") {
 			bottomItems.push(Ext.create('Ext.Component', {
-				html: bottomDesc,
-				margin: '5 5 5 5'
+				html: '<div class="sidebar_bottom">'+bottomDesc+'</div>'
 			}))
 		}
 
@@ -2616,6 +2233,11 @@ function confirmClose() {
 }
 
 
+Ext.EventManager.on(window, 'beforeunload', function() {
+   return confirmClose();
+});
+
+
 Ext.example = function() {
 	var msgCt;
 
@@ -2686,32 +2308,12 @@ function showContextMenu(node, e) {
 	}
 	var selected = selectedItems.length > 0 && (! folder);
 	
-	var folderObject = {
-		text: getText("Create Folder"),
-		iconCls: 'folder-icon',
-		disabled: !selected,
-		handler: makeFolder
-	};
-	
-	/*if(folder){
-		folderObject = {
-			text: "Remove Folder",
-			iconCls: 'folder-icon',
-			disabled: false,
-			handler: function(){
-				graph.model.beginUpdate();
-				setParent(getChildren(selectedItems[0], false), getParent(selectedItems[0]));
-				removePrimitive(selectedItems[0]);
-				graph.model.endUpdate();
-			}
-		};
-	}*/
-
-	var menu = new Ext.menu.Menu({
-		items: [{
+		
+	var menuItems = [];
+	if(! selected){
+		var menuItems = [{
 			text: getText("Create Stock"),
 			iconCls: 'stock-icon-small',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2723,12 +2325,10 @@ function showContextMenu(node, e) {
 				setSelected(cell);
 				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-
 			}
 		}, {
 			text: getText("Create Variable"),
 			iconCls: 'parameter-icon-small',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2738,17 +2338,12 @@ function showContextMenu(node, e) {
 					setParent(cell, selectedItems[0]);
 				}
 				setSelected(cell);
-
 				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
-				
 			}
-
 		}, {
 			text: getText("Create Converter"),
 			iconCls: 'converter-icon',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2759,16 +2354,11 @@ function showContextMenu(node, e) {
 				}
 				setSelected(cell);
 				
-
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
-
 			}
 		}, '-',
 		{
 			text: getText("Create State"),
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2779,15 +2369,12 @@ function showContextMenu(node, e) {
 				}
 				setSelected(cell);
 				
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
 				
 			}
-
 		},
 		{
 			text: getText("Create Action"),
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2798,15 +2385,11 @@ function showContextMenu(node, e) {
 				}
 				setSelected(cell);
 				
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
 			}
-
 		},
 		{
 			text: getText("Create Agent Population"),
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2819,12 +2402,10 @@ function showContextMenu(node, e) {
 				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
 			}
-
 		}, '-',
 		{
 			text: getText("Create Text"),
 			iconCls: 'font-icon',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2835,16 +2416,11 @@ function showContextMenu(node, e) {
 				}
 				setSelected(cell);
 				
-
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
-
 			}
 		}, {
 			text: getText("Create Picture"),
 			iconCls: 'picture-icon',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2856,15 +2432,12 @@ function showContextMenu(node, e) {
 				setPicture(cell);
 				setSelected(cell);
 				
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
 			}
 
 		}, {
 			text: getText("Create Button"),
 			iconCls: 'button-icon',
-			disabled: selected,
 			handler: function() {
 				graph.model.beginUpdate();
 				var pt = graph.getPointForEvent(e);
@@ -2875,20 +2448,37 @@ function showContextMenu(node, e) {
 				}
 				setSelected(cell);
 				
-				
 				setTimeout(function(){graph.cellEditor.startEditing(cell)},20);
-				
 			}
+		}];
+		if(! is_ebook){
 
-		}, '-',
+			
+			menuItems = menuItems.concat([
+				'-',
+				{
+					text: getText("Insert Insight Maker Model"),
+					handler: function() {
+						showInsertModelWindow(graph.getPointForEvent(e));
+					}
+				}
+			]);
+		}
+		
+	}else{
+		menuItems = [
 		{
 			text: getText("Ghost Primitive"),
 			iconCls: 'ghost-icon',
 			disabled: graph.getSelectionCount() != 1 || ((!isValued(graph.getSelectionCell()) && graph.getSelectionCell().value.nodeName != "Picture")) || graph.getSelectionCell().value.nodeName == "Flow" || graph.getSelectionCell().value.nodeName == "Ghost",
 			handler: makeGhost
 		},
-		folderObject,
-
+		{
+			text: getText("Create Folder"),
+			iconCls: 'folder-icon',
+			disabled: !selected,
+			handler: makeFolder
+		},
 		, '-',
 		{
 			text: getText('Delete'),
@@ -2897,7 +2487,11 @@ function showContextMenu(node, e) {
 			handler: function() {
 				graph.removeCells(graph.getSelectionCells(), false);
 			}
-		}]
+		}];
+	}
+
+	var menu = new Ext.menu.Menu({
+		items: menuItems
 	});
 
 

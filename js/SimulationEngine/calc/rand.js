@@ -63,7 +63,7 @@ function RandExp(lambda) {
     if (lambda == null) {
       lambda = 1;
     }
-  return -lambda * Math.log(Rand());
+  return -(1/lambda) * Math.log(Rand());
 }
 function RandLognormal(mu, sigma) {
   var lmu = Math.log(mu) - (0.5) * Math.log((1) + Math.pow(sigma / mu, (2)));
@@ -103,6 +103,7 @@ function RandPoisson(lambda) {
   }
   return k - 1;
 }
+
 function RandGamma(alpha, beta) {
   var temp = 1;
   for (var i = 1; i <= alpha; i++) {
@@ -110,6 +111,13 @@ function RandGamma(alpha, beta) {
   }
   return -beta * Math.log(temp);
 }
+
+function RandBeta(alpha, beta) {
+	var x = RandGamma(alpha, 1);
+	var y = RandGamma(beta, 1);
+	return x/(x+y);
+}
+
 function RandTriangular(minimum, maximum, peak) {
 	
 	var a = (0+minimum);
@@ -133,6 +141,53 @@ function RandTriangular(minimum, maximum, peak) {
 	}else{
 		return b - Math.sqrt((1-u) * (b-a) * (b-c));
 	}
+}
+
+function RandDist(x, y){
+	//console.log(x);
+	//console.log(y);
+	if(x.length != y.length){
+		throw "MSG: The lengths of the 'x' and 'y' vectors must be the same.";
+	}
+	if(x.length < 2){
+		throw "MSG: There must be at least 2 points in a distribution to generate a random number."
+	}
+	var area = 0;
+	for(var i = 0; i < x.length - 1; i++){
+		area += (x[i+1]-x[i])*(y[i+1]+y[i])/2;
+	}
+	if(area == 0){
+		throw "MSG: The area of the distribution cannot be 0."
+	}
+	//console.log(area);
+	
+	var a = area*Rand();
+	var area = 0
+	for(var i = 0; i < x.length-1; i++){
+		var nextArea = (x[i+1]-x[i])*(y[i+1]+y[i])/2;
+		if(a > area && a < area + nextArea){
+			var neededArea = a - area;
+			var slope = (y[i+1]-y[i])/(x[i+1]-x[i]);
+			//var dist = neededArea/((y[i+1]+y[i])/2); 	// a = h*x+x*s*x/2 = x^2*s/2+h*x - a
+														// x= (-h +/- sqrt(h^2+4*s/2*a))/s
+			var dist;
+			if(slope == 0 ){
+				dist = neededArea/y[i];
+			}else{
+			//	console.log("--")
+			//	console.log(y[i]);
+			//	console.log(Math.pow(y[i],2));
+			//	console.log(slope);
+			//	console.log(neededArea);
+				dist = (-y[i]+Math.sqrt(Math.pow(y[i], 2)+2*slope*neededArea))/slope;
+			//	console.log(dist);
+			}
+			
+			return x[i]+dist;
+		}
+		area += nextArea;
+	}
+	
 }
 
 

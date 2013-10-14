@@ -20,95 +20,97 @@ function mxIconSet(state) {
 
 	var cell = orig(state.cell);
 
-	if (isValued(cell) || cell.value.nodeName == "Action") {
-		//equation
-		var img = mxUtils.createImage(builder_path + '/images/equal.png');
-		img.setAttribute('title', '');
-		img.style.position = 'absolute';
-		img.style.cursor = 'pointer';
-		img.style.width = '16px';
-		img.style.height = '16px';
-		img.style.left = (state.x + 2) + "px";
-		img.style.top = (state.y + 2) + "px";
+	if(getOpacity(cell) !==0 ){
+		if (isValued(cell) || cell.value.nodeName == "Action") {
+			//equation
+			var img = mxUtils.createImage(builder_path + '/images/equal.png');
+			img.setAttribute('title', '');
+			img.style.position = 'absolute';
+			img.style.cursor = 'pointer';
+			img.style.width = '16px';
+			img.style.height = '16px';
+			img.style.left = (state.x + 2) + "px";
+			img.style.top = (state.y + 2) + "px";
 
-		if (state.width < 2) {
-			img.style.left = state.x + state.width - 20;
-		}
-
-		mxEvent.addListener(img, md,
-		mxUtils.bind(this,
-
-		function(evt) {
-			// Disables dragging the image
-			mxEvent.consume(evt);
-		}));
-
-		mxEvent.addListener(img, 'click',
-		mxUtils.bind(this,
-
-		function(evt) {
-			//console.log(Ext.get(evt.srcElement));
-			showEditor(cell)//, Ext.get(evt.srcElement));
-
-			mxEvent.consume(evt);
-		}));
-
-		state.view.graph.container.appendChild(img);
-		this.images.push(img);
-	}
-
-
-	if (cell.value.getAttribute("Note") != null && Ext.String.trim(cell.value.getAttribute("Note")) != "") {
-		// Note
-		var img = mxUtils.createImage(builder_path + '/images/note.png');
-		img.setAttribute('title', '');
-		img.style.position = 'absolute';
-		img.style.cursor = 'pointer';
-		img.style.width = '16px';
-		img.style.height = '16px';
-		img.style.left = (state.x + state.width - 18) + "px";
-		img.style.top = (state.y + 2) + "px";
-		if (state.width < 2) {
-			img.style.left = state.x + 2;
-		}
-
-
-		mxEvent.addListener(img, md,
-		mxUtils.bind(this,
-
-		function(evt) {
-			// Disables dragging the image
-			mxEvent.consume(evt);
-		}));
-
-		mxEvent.addListener(img, 'click',
-		mxUtils.bind(this,
-
-		function(evt) {
-			var x = Ext.getCmp("note" + cell.id);
-			if (isUndefined(x)) {
-				var tooltip = new Ext.ToolTip({
-					html: "<big>" + clean(cell.value.getAttribute("Note")
-						.replace(/\n/g, "<br/>")) + "</big>",
-					autoHide: false,
-					closable: true,
-					width: 250,
-					draggable: true,
-					id: "note" + cell.id,
-					title: clean(cell.value.getAttribute("name")),
-					closeAction: 'destroy'
-				});
-				//console.log(evt);
-				tooltip.showAt([evt.clientX + 17, evt.clientY - 8]);
-				mxEvent.consume(evt);
-			} else {
-				x.destroy();
+			if (state.width < 2) {
+				img.style.left = state.x + state.width - 20;
 			}
-		}));
 
-		state.view.graph.container.appendChild(img);
-		this.images.push(img);
-	};
+			mxEvent.addListener(img, md,
+			mxUtils.bind(this,
+
+			function(evt) {
+				// Disables dragging the image
+				mxEvent.consume(evt);
+			}));
+
+			mxEvent.addListener(img, 'click',
+			mxUtils.bind(this,
+
+			function(evt) {
+				//console.log(Ext.get(evt.srcElement));
+				showEditor(cell)//, Ext.get(evt.srcElement));
+
+				mxEvent.consume(evt);
+			}));
+
+			state.view.graph.container.appendChild(img);
+			this.images.push(img);
+		}
+
+
+		if (cell.value.getAttribute("Note") != null && Ext.String.trim(cell.value.getAttribute("Note")) != "") {
+			// Note
+			var img = mxUtils.createImage(builder_path + '/images/note.png');
+			img.setAttribute('title', '');
+			img.style.position = 'absolute';
+			img.style.cursor = 'pointer';
+			img.style.width = '16px';
+			img.style.height = '16px';
+			img.style.left = (state.x + state.width - 18) + "px";
+			img.style.top = (state.y + 2) + "px";
+			if (state.width < 2) {
+				img.style.left = state.x + 2;
+			}
+
+
+			mxEvent.addListener(img, md,
+			mxUtils.bind(this,
+
+			function(evt) {
+				// Disables dragging the image
+				mxEvent.consume(evt);
+			}));
+
+			mxEvent.addListener(img, 'click',
+			mxUtils.bind(this,
+
+			function(evt) {
+				var x = Ext.getCmp("note" + cell.id);
+				if (isUndefined(x)) {
+					var tooltip = new Ext.ToolTip({
+						html: "<big>" + clean(cell.value.getAttribute("Note")
+							.replace(/\n/g, "<br/>")) + "</big>",
+						autoHide: false,
+						closable: true,
+						width: 250,
+						draggable: true,
+						id: "note" + cell.id,
+						title: clean(cell.value.getAttribute("name")),
+						closeAction: 'destroy'
+					});
+					//console.log(evt);
+					tooltip.showAt([evt.clientX + 17, evt.clientY - 8]);
+					mxEvent.consume(evt);
+				} else {
+					x.destroy();
+				}
+			}));
+		
+			state.view.graph.container.appendChild(img);
+			this.images.push(img);
+		}
+	}
 }
 mxIconSet.prototype.destroy = function() {
 	if (this.images != null) {

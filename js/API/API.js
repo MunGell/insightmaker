@@ -572,6 +572,170 @@ function closeAllWindows(){
 
 
 /*
+Method: openFile
+
+Prompts the user to select one or more files on their computer. Information about the selected files are made available and the contents of the files are optionally read into memory.
+
+Note that this function needs to be called as a direct result of user actions (such as the user clicking on a button). Browser security restrictions will prevent the function from operating if it is not called in response a user actions. Not also that this function is not supported on Internet Explorer 9.
+
+Parameters:
+
+config - A configuraiton object with the following optional properties:
+multiple - If false, only a single file may be selected; if true, one or more files may be selected at a time.
+accept - A string containing a MIME file type to filter file selection. If defined, only files matching the specified type may be selected. For example, "image/*" may be used to only accept image files.
+read - If defined the selected files will be opened and their contents loaded. Read may either be "binary" in which case the contents is loaded as a binary string, "text" in which case the contents is loaded as a regular text string, or "xlsx" in which case an Excel file is loaded as an object.
+onCompleted - A function to handle results. The openFile function is asynchronous. Once it completes, the callback function is called with the resulting data as a parameter.
+onError - A function to handle the occurence of an error.
+onSelected - A function fired once files have been selected but before data has been read.
+
+Returns:
+
+The openFile function is asynchronous and returns nothing directly. On the successful selection of files, the callback is called with the results. 
+
+If config.multiple is false, these results are a single file object. If config.multiple is true, then these results are an array of file objects. Each file object has the following properties:
+
+file - The orginal file object.
+name - The name of the selected file.
+type - The type of the selected file.
+size - The size of the selected file.
+contents - If config.read is true, the contents in the file is loaded with the specified type.
+
+Examples:
+
+>// Select a single text file and display its contents
+>openFile({
+>	read: "text",
+>	multiple: false,
+>	onCompleted: function(result){
+>		alert(result.contents);
+>	}
+>});
+
+*/
+
+function openFile(config){
+	config = config || {multiple: false, accept: null, onCompleted: null, onSelected: null, onError: null, read: false};
+	if(config.read){
+		config.read = config.read.toLowerCase();
+	}
+	if(config.read == "xlsx" && (! config.accept)){
+		config.accept = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+	}
+	
+	var opener = document.createElement("input");
+	opener.setAttribute("type", "file");
+	if(config.multiple){
+		opener.setAttribute("multiple", true);
+	}
+	if(config.accept){
+		opener.setAttribute("accept", config.accept);
+	}
+	
+	var res = null;
+	
+	var loadCount = 0;
+	var handleLoad = function(){
+		document.body.removeChild(opener);
+		
+		if(! res.length){
+			config.onCompleted(res);
+		}else{
+			loadCount++;
+			if(loadCount == res.length){
+				config.onCompleted(res);
+			}
+		}
+		
+	}
+	
+	var processFile = function(file){
+		var data = {};
+		data.file = file;
+		data.size = file.size;
+		data.name = file.name;
+		data.type = file.type;
+		
+		var reader = new FileReader();
+		reader.onloadend = function(evt){
+			if(config.read == "xlsx"){
+				require(['jszip'], function(){
+					require(['xlsx'], function(){
+					    data.contents = XLSX.read(reader.result, {type: "binary"});
+						handleLoad();
+					});
+				});
+			}else{
+				data.contents = reader.result;
+				handleLoad();
+			}
+		};
+		reader.onerror = function(){
+			if(config.onError){
+				config.onError(reader.error)
+			}else{
+				alert("FileReader error.");
+				console.log("FileReader Error");
+				console.log(reader.error);
+			}
+		};
+
+		reader.onabort = function(){
+			if(config.onError){
+				config.onError(reader.error)
+			}else{
+				alert("FileReader aborted.");
+				console.log("FileReader Error");
+				console.log(reader.error);
+			}
+			
+		}
+		
+		if(config.read == "binary"){
+			reader.readAsBinaryString(file);
+		}else if(config.read == "text"){
+			reader.readAsText(file);
+		}else if(config.read == "xlsx"){
+			reader.readAsBinaryString(file);
+		}else if(! config.read){
+			// leaving empty means don't load
+			setTimeout(handleLoad, 1);
+		}else{
+			throw "Unknown data read type: "+config.type;
+		}
+		return data;
+	}
+	
+	var callback = function(){
+
+		var files = opener.files;
+		
+		if(config.onSelected){
+			config.onSelected(files);
+		}
+		
+		if(config.onCompleted){
+			
+			if(typeof files[0] == "undefined"){
+				config.onCompleted(null);
+			}
+			
+			if(! config.multiple){
+				res = processFile(files[0]);
+			}else{
+				res = Array.prototype.slice.call(files).map(function(x){
+					return processFile(x);
+				});
+			}
+		}
+	}
+	
+	opener.onchange = callback;
+	document.body.appendChild(opener);
+	opener.click();
+}
+
+
+/*
 
 Group: General Model Functions
 
@@ -616,12 +780,28 @@ Examples:
 */
 
 function runModel(config) {
+	if( simulationRunning() ){
+		mxUtils.alert(getText("You have an existing simulation running that has not been completed. Either close the results window or press the windows 'Stop' button. You may then run a new simulation."));
+		simulate.resultsWindow.show();
+		return;
+	}
+	
 	if(isUndefined(config)){
 		config = {};
 	}else if(typeof config == 'boolean'){
 		config = {silent: config};
 	}
 	return runSimulation(config);
+}
+
+function simulationRunning(){
+	return simulate && (! simulate.completed());
+}
+
+function endRunningSimulation(){
+	if(simulate){
+		simulate.terminate();
+	}
 }
 
 /*
@@ -670,7 +850,6 @@ Reorganizes the primitives in the model according to an algorithm.
 Parameters:
 
 algorithm - The algorithm used to calculate the new positions of the primitive. Either "organic" or "circular".
-
 
 */
 
@@ -747,6 +926,7 @@ function setZoom(scale) {
 	}
 }
 
+
 /*
 
 Group: Simulation Settings
@@ -769,7 +949,7 @@ See also:
 
 
 function getTimeStep() {
-    return getSetting().getAttribute("TimeStep");
+    return parseFloat(getSetting().getAttribute("TimeStep"));
 }
 
 
@@ -812,7 +992,7 @@ See also:
 
 
 function getTimeStart() {
-    return getSetting().getAttribute("TimeStart");
+    return parseFloat(getSetting().getAttribute("TimeStart"));
 }
 
 
@@ -839,7 +1019,6 @@ function setTimeStart(timeStart) {
 	
 }
 
-
 /*
 Method: getTimeLength
 
@@ -854,9 +1033,8 @@ See also:
 <setTimeLength>
 */
 
-
 function getTimeLength() {
-    return getSetting().getAttribute("TimeLength");
+    return parseFloat(getSetting().getAttribute("TimeLength"));
 }
 
 
@@ -880,7 +1058,47 @@ function setTimeLength(timeLength) {
     getSetting(), "TimeLength",
     timeLength);
     graph.getModel().execute(edit);
-	
+}
+
+/*
+Method: getPauseInterval
+
+Gets the intervals at which to pause the simulation.
+
+Returns:
+
+The pause interval as a floating point number. Returns undefined if a pause interval has not been specified.
+
+See also:
+
+<setPauseInterval>
+*/
+
+function getPauseInterval() {
+    return parseFloat(getSetting().getAttribute("TimePause"));
+}
+
+
+/*
+Method: setPauseInterval
+
+Sets the intervals at which to pause the simulation.
+
+Parameters:
+
+pauseInterval - The pause interval for the simulation.
+
+See also:
+
+<setPauseInterval>
+*/
+
+
+function setPauseInterval(pauseInterval) {
+    var edit = new mxCellAttributeChange(
+    getSetting(), "TimePause",
+    pauseInterval);
+    graph.getModel().execute(edit);
 }
 
 /*
@@ -2552,6 +2770,58 @@ function connected(primitive1, primitive2) {
 	return false;
 }
 
+/* 
+
+Group: States
+
+*/
+
+
+/*
+Method: getResidency
+
+Gets the residency property of a state primitive.
+
+Parameters:
+
+state - The state for which the residency property is requested. May also be an array of states.
+
+Return:
+
+The residency property as a string.
+
+See also:
+
+<setResidency>
+*/
+
+function getResidency(state) {
+	return map(state, function(state) {
+		return state.getAttribute("Residency");
+	});
+}
+
+/*
+Method: setResidency
+
+Sets the residency property of a state primitive.
+
+Parameters:
+
+state - The state primitive for which the residency property will be set. May also be an array of states.
+residency - The new value for the residency property.
+
+See also:
+
+<getResidency>
+*/
+
+function setResidency(state, residency) {
+	map(state, function(primitive) {
+		var edit = new mxCellAttributeChange(primitive, "Residency", residency);
+		graph.getModel().execute(edit);
+	});
+}
 
 /* 
 
@@ -2647,6 +2917,98 @@ See also:
 function setTriggerValue(primitive, value) {
 	map(primitive, function(primitive) {
 		var edit = new mxCellAttributeChange(primitive, "Value", value);
+		graph.getModel().execute(edit);
+	});
+}
+
+/*
+Method: getTriggerRepeat
+
+Gets the trigger Repeat property of a transition or action.
+
+Parameters:
+
+primitive - The transition or action for which the property is requested. May also be an array of transitions or actions.
+
+Return:
+
+The trigger Repeat property as a boolean.
+
+See also:
+
+<setTriggerRepeat>
+*/
+
+function getTriggerRepeat(primitive) {
+	return map(primitive, function(primitive) {
+		return isTrue(primitive.getAttribute("Repeat"));
+	});
+}
+
+/*
+Method: setTriggerRepeat
+
+Sets the trigger Repeat property for a transition or action.
+
+Parameters:
+
+primitive - The transition or action for which the Repeat property will be set. May also be an array of transitions or actions.
+repeat - A boolean determining whether to repeat the trigger
+
+See also:
+
+<getTriggerRepeat>
+*/
+
+function setTriggerRepeat(primitive, repeat) {
+	map(primitive, function(primitive) {
+		var edit = new mxCellAttributeChange(primitive, "Repeat", repeat);
+		graph.getModel().execute(edit);
+	});
+}
+
+/*
+Method: getTriggerRecalculate
+
+Gets the trigger Recalculate property of a transition or action.
+
+Parameters:
+
+primitive - The transition or action for which the property is requested. May also be an array of transitions or actions.
+
+Return:
+
+The trigger Recalculate property as a boolean.
+
+See also:
+
+<setTriggerRecalculate>
+*/
+
+function getTriggerRecalculate(primitive) {
+	return map(primitive, function(primitive) {
+		return isTrue(primitive.getAttribute("Recalculate"));
+	});
+}
+
+/*
+Method: setTriggerRecalculate
+
+Sets the trigger Recalculate property for a transition or action.
+
+Parameters:
+
+primitive - The transition or action for which the Recalculate property will be set. May also be an array of transitions or actions.
+recalculate - A boolean determining whether to recalculate each time step
+
+See also:
+
+<getTriggerRecalculate>
+*/
+
+function setTriggerRecalculate(primitive, recalculate) {
+	map(primitive, function(primitive) {
+		var edit = new mxCellAttributeChange(primitive, "Recalculate", recalculate);
 		graph.getModel().execute(edit);
 	});
 }
@@ -2840,19 +3202,21 @@ function pressButton(button) {
 	
 }
 
-function runAction(code, errHeader){
+function runAction(code, errHeader){	
 	try {
 		eval("\"use strict;\"\n\n"+code);
 	} catch (err) {
 		errHeader = errHeader || '';
 		Ext.Msg.show({
 			title: getText('Action Error'),
-			msg: errHeader+'<p><tt>' + err + "</tt></p>",
+			msg: errHeader+'<p><tt>' + err + "</tt></p><p><b>Code:</b></p><p><tt><pre>" + code + "</pre></tt></p>",
 			buttons: Ext.Msg.OK,
 			icon: Ext.Msg.ERROR
 		});
 	}
 }
+
+
 
 /*
 
@@ -3540,6 +3904,52 @@ function setFolderType(folder, type) {
 	});
 }
 
+/*
+Method: getFolderAgentParent
+
+Gets the agent parent of a folder.
+
+Parameters:
+
+folder - The folder for which the agent parent is requested. May also be an array of folders.
+
+Return:
+
+The agent parent as a string.
+
+See also:
+
+<setFolderAgentParent>
+*/
+
+function getFolderAgentParent(folder) {
+	return map(folder, function(primitive) {
+		return primitive.getAttribute("AgentBase");
+	});
+}
+
+/*
+Method: setFolderAgentParent
+
+Sets the agent parent of a folder.
+
+Parameters:
+
+folder - The folder for which the type will be set. May also be an array of folders.
+agentParent - The agent parent as a string.
+
+See also:
+
+<getFolderAgentParent>
+*/
+
+function setFolderAgentParent(folder, agentParent) {
+	map(folder, function(primitive) {
+		var edit = new mxCellAttributeChange(primitive, "AgentBase", agentParent);
+		graph.getModel().execute(edit);
+	});
+}
+
 
 /*
 Method: getFolderSolver
@@ -3712,10 +4122,10 @@ See also:
 
 */
 
-var globalVars = {};
+var globalVarBank = {};
 
 function setGlobal(name, value){
-	globalVars[name] = value;
+	globalVarBank["_"+name] = value;
 }
 
 /*
@@ -3745,7 +4155,7 @@ See also:
 */
 
 function getGlobal(name){
-	return globalVars[name];
+	return globalVarBank["_"+name];
 }
 
 
@@ -3792,12 +4202,17 @@ function toggleTopBar() {
     var toolbar = ribbonPanel.getDockedItems()[0];
     if (!toolbar.isVisible()) {
         toolbar.show();
-		Ext.get("toolbarToggle").update("&uarr;");
+		try{
+			Ext.get("toolbarToggle").update("&uarr;");
+		}catch(err){}
     } else {
         toolbar.hide();
-		Ext.get("toolbarToggle").update("&darr;");
+		try{
+			Ext.get("toolbarToggle").update("&darr;");
+		}catch(err){}
     }
 }
+
 
 /*
 Method: sideBarShown

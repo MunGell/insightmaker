@@ -8,7 +8,15 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 */
 
-var resultsWindows = [];
+function dataRenderer(item){
+	if(item instanceof Vector){
+		return item.toString();
+	}else if(item instanceof Agent){
+		return "Agent";
+	}else{
+		return commaStr(item);
+	}
+}
 
 function commaStr(nStr) {
 	//if(nStr instanceof String){
@@ -650,8 +658,8 @@ function renderDisplay(display, displayInformation) {
 						header: displayInformation.headers[i],
 						sortable: true,
 						flex: 1,
-						dataIndex: "series" + i,
-						renderer: displayInformation.renderers[i]
+						dataIndex: displayInformation.elementIds[i],
+						renderer: dataRenderer
 					});
 				}
 			}
@@ -704,7 +712,7 @@ function renderDisplay(display, displayInformation) {
 									defaultColorIndex = defaultColorIndex % defaultColors.length;
 								}
 
-								fields.push("series" + i);
+								fields.push(displayInformation.elementIds[i]);
 								titles.push(displayInformation.headers[i]);
 							}
 						} else {
@@ -745,7 +753,7 @@ function renderDisplay(display, displayInformation) {
 						if (displayInformation.renderers[i]) {
 
 							var left = primitives2.indexOf(primitives[j]) == -1
-							var x = "series" + i;
+							var x = displayInformation.elementIds[i];
 
 							var c = null;
 							if (!isGray(displayInformation.colors[i])) {
@@ -815,7 +823,7 @@ function renderDisplay(display, displayInformation) {
 					return round(x, 9);
 				}
 			},
-			getRange: unfilteredRange
+			getRange: function(){return {min: displayInformation.store.min("Time"), max: displayInformation.times[displayInformation.times.length-1] }}
 		}];
 
 		if (primitives.length > primitives2.length) {
@@ -896,7 +904,7 @@ function renderDisplay(display, displayInformation) {
 			for (var i = 0; i < displayInformation.ids.length; i++) {
 				if (primitives[j] == displayInformation.ids[i]) {
 					if (displayInformation.renderers[i]) {
-						displayIds.push("series" + i);
+						displayIds.push(displayInformation.elementIds[i]);
 						displayNames.push(displayInformation.headers[i]);
 					} else {
 						histograms.push(createHistogramChart(displayInformation, i));
@@ -1192,15 +1200,13 @@ function createResultsWindow(displayInformation) {
 
 	analysisCount++;
 
-	//console.log(store);
-	//console.log(ids);
-	//console.log(header);
 	var displays = primitives("Display");
 
 	var tabs = [];
 	var scripter = {
 		time: 0
 	};
+	
 	displayInformation.scripter = scripter;
 
 	for (var i = 0; i < displays.length; i++) {
@@ -1228,23 +1234,62 @@ function createResultsWindow(displayInformation) {
 	});
 
 
+	
 
-
-	scripter.store = displayInformation.store;
-	scripter.maps = displayInformation.maps;
-	scripter.histograms = displayInformation.histograms;
+	
 	scripter.updatingSlider = false;
 	scripter.timeIndex = 0;
-	scripter.maxTime = displayInformation.times.length - 1;
+	scripter.maxTime = function(){
+		return this.simulator.displayInformation.store.maxLoaded;
+	};
 	scripter.minTime = 0;
 	scripter.timeStep = 2;
 	scripter.times = displayInformation.times;
+	scripter.simulator = simulate;
+	
+	scripter.showSliders = function(){
+		if(! scripter.slidersShown){
+			if(sliderPrimitives(["Variable"]).length > 0){
+				scripter.dockedPanel = Ext.create("Ext.Panel", {
+					xtype: "panel",
+					layout: "fit",
+					items: [createSliders("Variable", function(cell, value){
+						if(! scripter.isFinished){
+							var val = new Material(value);
+							for(var i = 0; i < simulate.sliders[cell.id].length; i++){
+								simulate.sliders[cell.id][i].equation = val;
+							}
+							simulate.sliders[cell.id][0].dna.equation = val;
+							simulate.valueChange = true;
+						}else{
+							mxUtils.alert("The simulation has finished and slider values cannot be changed.")
+						}
+					}, function(slider, setValue, textField, newValue){
+						setValue(slider.sliderCell, newValue)
+					})],
+					dock: "right",
+					width: 200,
+					autoScroll: true,
+					title: "Sliders",
+					collapsible: true,
+					split: true,
+					border: true,
+					bodyStyle: "background: none",
+					collapseDirection: "right",
+					animCollapse: false
+				});
+				win.addDocked(scripter.dockedPanel);
+			}
+			scripter.slidersShown = true
+		}
+	}
 
 	scripter.slider = Ext.create("Ext.form.SliderField", {
 		minValue: 0,
 		animate: false,
 		hideLabel: true,
-		maxValue: scripter.maxTime,
+		disabled: true,
+		maxValue: displayInformation.times.length - 1,
 		flex: 1,
 		step: scripter.timeStep,
 		margins: '0 10 0 10',
@@ -1259,8 +1304,8 @@ function createResultsWindow(displayInformation) {
 		labelWidth: 0,
 		allowBlank: false,
 		store: [
-			[.2, getText("%s x Normal", "0.2")],
-			[.5, getText("%s x Normal", "0.5")],
+			[0.2, getText("%s x Normal", "0.2")],
+			[0.5, getText("%s x Normal", "0.5")],
 			[1, getText("Normal Speed")],
 			[1.5, getText("%s x Normal", "1.5")],
 			[2, getText("%s x Normal", "2")],
@@ -1290,11 +1335,12 @@ function createResultsWindow(displayInformation) {
 	scripter.slider.s = scripter;
 
 	scripter.slider.on('change', function(slider, newValue) {
-		//console.log("A")
 		if (!this.s.updatingSlider) {
-			//console.log("b")
-			//console.log(newValue);
-			this.s.loadTime(newValue);
+			if(newValue > this.s.maxTime()){
+				this.setValue(this.s.maxTime());
+			}else{
+				this.s.loadTime(newValue);
+			}
 		}
 	});
 
@@ -1305,70 +1351,120 @@ function createResultsWindow(displayInformation) {
 		pressed: true,
 		icon: builder_path + '/images/pause.png'
 	});
-
+	
+	//scripter.spinner = Ext.create("Ext.Component", {html:"<img width=16 height=16 src='/builder/images/spinner_small.gif'/>"})
+	scripter.stopBut = Ext.create("Ext.button.Button", {
+		scale: 'medium',
+		margins: '0 10 0 10',
+		icon: builder_path + '/images/stopper.png',
+		handler: function(btn){
+			endRunningSimulation();
+		}
+	});
+	
+	scripter.finished = function(){
+		this.isFinished = true;
+		this.stopBut.hide();
+		//this.spinner.hide();
+		this.slider.setDisabled(false);
+		if(this.dockedPanel){
+			this.dockedPanel.collapse();
+		}
+	}
+	
 	scripter.playBut.s = scripter;
 
 	scripter.animInter = -1;
 	scripter.playBut.on("toggle", function(b, pressed) {
 		if (pressed) {
-			if (this.s.slider.getValue() == this.s.maxTime) {
-				this.s.slider.setValue(this.s.minTime);
+
+			scripter.endMode = "wait";
+			
+			if (scripter.slider.getValue() == displayInformation.times.length - 1) {
+				scripter.slider.setValue(scripter.minTime);
 			}
-			this.s.playBut.setIcon(builder_path + "/images/pause.png");
-			this.s.advanceTimer();
-			var instant = this;
-			this.s.animInter = setInterval(function() {
-				instant.s.advanceTimer()
-			}, this.s.combo.getValue() == -1 ? 200 : 100 / Math.min(.5, this.s.combo.getValue()));
+			scripter.playBut.setIcon(builder_path + "/images/pause.png");
+			scripter.advanceTimer();
+			
+			scripter.animInter = setInterval(function() {
+				scripter.advanceTimer()
+			}, 100 / Math.min(0.5, scripter.combo.getValue()));
+			
+			if(scripter.simulator && ! scripter.simulator.completed()){
+				scripter.simulator.resume();
+			}
 		} else {
-			this.s.playBut.setIcon(builder_path + "/images/play.png");
-			clearInterval(this.s.animInter);
+			scripter.pause(true);
 		}
 	});
+	
+	scripter.pause = function(shouldSleep){
+		//console.log("scripter pause")
+		
+		if(this.slider.isDisabled()){
+			this.showSliders();
+		}
+		
+		if(shouldSleep && ! this.isFinished){
+			this.slider.setValue(this.maxTime());
+		}
+		
+		if(this.playBut.pressed){
+			this.playBut.toggle(false, true);
+		}
+		this.playBut.setIcon(builder_path + "/images/play.png");
+		clearInterval(this.animInter);
+		
+		if(shouldSleep && ! this.simulator.completed()){
+			//console.log("scripter sleep")
+			this.simulator.sleep();
+		}
+	}
+	
+	
+	scripter.endMode = "wait"; // "wait" or "pause"
 
 	scripter.advanceTimer = function() {
-		if (this.slider.getValue() < this.maxTime) {
-			this.loadTime(Math.min(this.maxTime, this.slider.getValue() + this.timeStep * Math.max(.5, this.combo.getValue())));
-		} else {
-			this.playBut.toggle();
+		//console.log("advance")
+		if( (this.slider.getValue() < this.maxTime()) || (this.maxTime() == displayInformation.times.length - 1)){
+			if ( this.slider.getValue() < displayInformation.times.length - 1) {
+				if(this.combo.getValue() == -1){
+					this.loadTime(this.maxTime());
+				}else{
+					this.loadTime(Math.min(this.maxTime(), this.slider.getValue() + this.timeStep * Math.max(0.5, this.combo.getValue())));
+				}
+			} else {
+				this.playBut.toggle();
+			}
+		}else{
+			if(this.endMode == "pause" || scripter.isFinished){
+				this.pause();
+			}
 		}
 	}
 
 	scripter.loadTime = function(time) {
-		this.store.clearFilter(true);
+		displayInformation.store.clearFilter(true);
 		this.time = time;
-		//console.log("A");
-		this.store.filter([{
+		
+		displayInformation.store.filter([{
 			filterFn: function(item) {
-				return item.get("TimeIndex") <= time;
+				return item.get("id") <= time;
 			}
 		}]);
-		//console.log("b");
-		this.maps.forEach(function(x) {
+		
+		displayInformation.maps.forEach(function(x) {
 			buildMapStore(x, time);
 		});
-		this.histograms.forEach(function(x) {
+		displayInformation.histograms.forEach(function(x) {
 			buildHistogramStore(x, time);
 		});
-		//console.log("c");
+		
 		this.updatingSlider = true;
 		this.slider.setValue(time);
 		this.updatingSlider = false;
 	}
-	if (scripter.combo.getValue() != -1 && ! simulate.doFullSpeed) {
-		scripter.loadTime(1);
-		scripter.animInter = setInterval(function() {
-			scripter.advanceTimer()
-		}, scripter.combo.getValue() == -1 ? 200 : 100 / Math.min(.5, scripter.combo.getValue()));
-
-	} else {
-		scripter.loadTime(scripter.maxTime);
-		scripter.playBut.toggle();
-	}
-
-
-
-
+	
 	var winConfig = {
 		title: getText('Simulation Results %s', analysisCount),
 		analysisCount: analysisCount,
@@ -1388,6 +1484,7 @@ function createResultsWindow(displayInformation) {
 		resizable: true,
 		maximizable: true,
 		minimizable: true,
+		simulate: simulate,
 		layout: {
 			type: 'vbox',
 			align: 'stretch'
@@ -1399,10 +1496,11 @@ function createResultsWindow(displayInformation) {
 				align: 'middle'
 			},
 			margins: '5 3 10 10',
-			items: [scripter.playBut, scripter.slider, scripter.combo]
+			items: [scripter.playBut, scripter.slider, scripter.combo, scripter.stopBut]
 		}],
 
-		dockedItems: [{
+		dockedItems: [
+			{
 			xtype: 'toolbar',
 			enableOverflow: true,
 			dock: 'top',
@@ -1584,14 +1682,22 @@ function createResultsWindow(displayInformation) {
 		if (w.expandedState) {
 			w.expandedState = false;
 			w.collapse();
-			//collapse the window
 		} else {
-
 			w.expandedState = true;
 			win.expand();
 		}
 	});
-	resultsWindows.push(win);
+	
+
+	
+	win.on('close', function(w){
+		if(! scripter.simulator.completed()){
+			scripter.simulator.terminate();
+		}
+		clearInterval(scripter.animInter);
+	})
+	
+	win.scripter = scripter;
 	win.show();
 	
 	return win;
@@ -1608,6 +1714,10 @@ function buildMapStore(item, time) {
 		var xNull = -parseFloat(simpleNum(agent.data.width, agent.data.units));
 		var yNull = -parseFloat(simpleNum(agent.data.height, agent.data.units));
 
+		//console.log("--")
+		//console.log(time);
+		//console.log(item);
+		//console.log(item.agents[i])
 		var data = item.agents[i].results[time].current;
 		for (var j = 0; j < data.length; j++) {
 			locations[data[j].instanceId] = data[j].location;
@@ -1652,7 +1762,9 @@ function buildMapStore(item, time) {
 	}
 
 	var links = {};
-	for (var id in connections) {
+	var connectKeys = Object.keys(connections);
+	for (var j=0; j<connectKeys.length; j++) {
+		var id = connectKeys[j];
 		for (var i = 0; i < connections[id].length; i++) {
 			var key = [id, connections[id][i]].sort()
 				.join("__");
@@ -1682,7 +1794,7 @@ function createHistogramChart(displayInformation, i) {
 		}],
 		data: []
 	});
-
+	//console.log(displayInformation);
 	var histogram = {
 		store: store,
 		data: displayInformation.res[displayInformation.ids[i]].results

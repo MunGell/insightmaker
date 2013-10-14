@@ -153,6 +153,21 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			}
 			handelCursors();
 		}
+		
+		
+		var imageMenu = {
+			xtype: "menu",
+			iconsCls: "picture-icon",
+			items: ["Growth", "Balance", 'Positive Feedback Clockwise', 'Positive Feedback Counterclockwise', 'Negative Feedback Clockwise', 'Negative Feedback Counterclockwise', 'Unknown Feedback Clockwise', 'Unknown Feedback Counterclockwise', 'Plus', 'Minus', 'Forwards', 'Backwards', 'Up', 'Down', 'Diagonal', "Reload", "Play", "Pause", "Stop", "Info", 'Question', 'Warning', 'Checkmark', 'Prohibited', 'Idea', "Home", 'Book', 'Clock', 'Computer', 'Dice', 'Cards', 'Gear', 'Hammer', 'Smiley', 'Heart', 'Key', 'Lock', 'Loudspeaker', 'Footprints', 'Mail', 'Network', 'Notes', 'Pushpin', 'Paperclip', 'People', 'Person', 'Wallet', 'Money', 'Flag', 'Star', 'Rocket', 'Alarm', 'Beaker', 'Ball', 'Hat', 'List', 'Bolt', 'Cookie', 'Plugin', 'Monitor', 'Telescope', 'Chalkboard', 'Open', 'Trash'].map(function(x){
+					return {
+						text: '<center><div class="x-combo-list-item" style=\"white-space:normal\";><img src="'+builder_path+'/images/SD/'+x+'.png" width=48 height=48/></div></center>',
+						handler: function(){
+							setImage(getSelected(), x);
+						}
+					}
+			})
+			
+		}
 
 	
 	var colors = ["000000", "993300", "333300", "003300", "003366", "000080", "333399", "333333", "800000", "FF6600", "808000", "008000", "008080", "0000FF", "666699", "808080", "FF0000", "FF9900", "99CC00", "339966", "33CCCC", "3366FF", "800080", "969696", "FF00FF", "FFCC00", "FFFF00", "00FF00", "00FFFF", "6482B9", "993366", "C0C0C0", "FF99CC", "FDCDAC", "FFFF99", "B3E2CD", "CCFFFF", "A6D3F8", "CC99FF", "FFFFFF"];
@@ -234,6 +249,83 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 			graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxConstants.NONE, excludeType(graph.getSelectionCells(), "Ghost"));
 		}
 	});
+	lineColorMenu.add("-");
+	lineColorMenu.add({
+		text: getText('Solid Line'),
+		handler: function() {
+			graph.setCellStyles(mxConstants.STYLE_DASHED, 0, excludeType(graph.getSelectionCells(), "Ghost"));
+		}
+	});
+	lineColorMenu.add({
+		text: getText('Dashed Line'),
+		handler: function() {
+			graph.setCellStyles(mxConstants.STYLE_DASHED, 1, excludeType(graph.getSelectionCells(), "Ghost"));
+		}
+	});
+	lineColorMenu.add("-");
+	
+	var widthMenu = [];
+	function widthItem(size){
+		widthMenu.push({
+			text: getText('Width: %s', size),
+			handler: function() {
+				graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, size, excludeType(graph.getSelectionCells(), "Ghost"));
+				graph.setCellStyles(mxConstants.ARROW_SIZE, size*10, excludeType(graph.getSelectionCells(), "Ghost"));
+			}
+		});
+	}
+	for(var i = 1; i <= 10; i++){
+		widthItem(i);
+	}
+	for(var i = 15; i <= 50; i+=5){
+		widthItem(i);
+	}
+	lineColorMenu.add({
+		text: getText('Line Width'),
+		menu: {items: widthMenu}
+	});
+	
+	function capMenu(start){
+		
+		function createSetter(val){
+			return function(){
+				if(start){
+					graph.setCellStyles(mxConstants.STYLE_STARTARROW, val, excludeType(graph.getSelectionCells(), "Ghost"));
+				}else{
+					graph.setCellStyles(mxConstants.STYLE_ENDARROW, val, excludeType(graph.getSelectionCells(), "Ghost"));
+				}
+		}
+		}
+		var items = [
+			["None", mxConstants.NONE],
+			'-',
+			["Regular Arrow", mxConstants.ARROW_CLASSIC],
+			["Block Arrow", mxConstants.ARROW_BLOCK],
+			["Open Arrow", mxConstants.ARROW_OPEN],
+			["Diamond", mxConstants.ARROW_DIAMOND],
+			["Thin Diamond", mxConstants.ARROW_DIAMOND_THIN],
+			["Oval", mxConstants.ARROW_OVAL]
+		];
+		
+		for(var i=0; i < items.length; i++){
+			if(items[i] !== "-"){
+				items[i] = {text: items[i][0], handler: createSetter(items[i][1])}
+			}
+		}
+		return items;
+	}
+	
+	lineColorMenu.add("-");
+	lineColorMenu.add({
+		text: getText('Line Start'),
+		menu: {items: capMenu(true)}
+	});
+	lineColorMenu.add({
+		text: getText('Line End'),
+		menu: {items: capMenu(false)}
+	});
+	
+	
 
 	var fonts = Ext.create('Ext.data.Store', {
 		fields: [{
@@ -507,7 +599,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				xtype: 'buttongroup',
 				columns: 4,
 				height: 95,
-				title: getText('Primitives'),
+				title: getText('Add Primitive'),
 				id: 'valued',
 				items: [{
 					iconAlign: 'top',
@@ -756,7 +848,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				}, {
 					id: 'linecolor',
 					text: '',
-					tooltip: getText('Line Color'),
+					tooltip: getText('Line Style'),
 					iconCls: 'linecolor-icon',
 					menu: lineColorMenu
 				}, {
@@ -803,6 +895,32 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 						id: 'picture-menu',
 						cls: 'picture-menu',
 						items: [
+							{
+								text: "No Image",
+								iconCls: "cancel-small-icon",
+								handler: function(){
+									setImage(getSelected(), "None");
+								}
+							}
+						,
+						'-',
+						{
+							text: "Custom Image",
+							iconCls: "url-link-icon",
+							handler: function(){
+								Ext.Msg.prompt("Image URL", "<p>You may use a link to an existing custom image stored on-line. Please note that the image is only stored as a link within Insight Maker so you need to ensure that the original image stays on-line for it to remain in your model.</p><br/><p>Enter the full URL to the image:</p>", function(btn, val){
+									if(btn=="ok"){
+										setImage(getSelected(), val);
+									}
+								}, null, false, (urlImage(getSelected()[0])?getSelected()[0].getAttribute("Image"):""))
+							}
+						},
+						{
+							text: getText("Built-In Images"),
+							menu: imageMenu,
+							iconCls: "picture-icon"
+						},
+						'-',
 						{
 							id: 'fliphitem',
 							text: getText('Flip Horizontal'),
@@ -1213,7 +1331,7 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 				iconCls: 'run-icon',
 				tooltip: getText('Run') + ' ' + cmd("Enter"),
 				handler: function() {
-					runModel()
+					runModel();
 				},
 				scope: this
 			}, {

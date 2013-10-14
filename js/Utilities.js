@@ -306,6 +306,10 @@ function hasDisplay() {
     return cellsContainNodename(myCells, "Display");
 }
 
+function urlImage(cell){
+	return cell.getAttribute("Image") && cell.getAttribute("Image").substring(0, 4).toLowerCase() == "http";
+}
+
 function setPicture(cell) {
 	
     var styleString = cell.getStyle();
@@ -320,7 +324,7 @@ function setPicture(cell) {
         }
     } else {
         //alert(cell.getAttribute("Image"));
-        if (cell.getAttribute("Image").substring(0, 4).toLowerCase() == "http") {
+        if (urlImage(cell)) {
             styleString = mxUtils.setStyle(styleString, "image", cell.getAttribute("Image"));
         } else {
             styleString = mxUtils.setStyle(styleString, "image", builder_path+"/images/SD/" + cell.getAttribute("Image") + ".png");
@@ -649,23 +653,12 @@ function customUnits() {
     }
 }
 
-function sliderPrimitives() {
-    var myCells = primitives();
-    var slids = [];
-    for (var i = 0; i < myCells.length; i++) {
-        if (isTrue(myCells[i].getAttribute("ShowSlider"))) {
-            slids.push(myCells[i]);
-        }
-    }
-    return slids;
-}
-
 
 function orig(cell) {
-    if (isUndefined(cell) || cell == null) {
+    if (isUndefined(cell) || cell === null) {
         return null;
     }
-    if (cell.value.nodeName == "Ghost") {
+    if (cell.value.nodeName === "Ghost") {
         return graph.getModel().getCell(cell.value.getAttribute("Source"));
     } else {
         return cell;

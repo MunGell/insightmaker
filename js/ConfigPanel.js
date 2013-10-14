@@ -235,6 +235,22 @@ function handleGridEnables(gstore, selectedPrimitive) {
         var store = grid.getStore();
     }
 
+    if (selectedPrimitive.value.nodeName == "Folder") {
+        if (selectedPrimitive.getAttribute("Type") == "Agent") {
+            getGridRecord(store, 'AgentBase').set('disabled', false);
+        } else {
+            getGridRecord(store, 'AgentBase').set('disabled', true);
+        }
+    }
+	
+    if (selectedPrimitive.value.nodeName == "Action" || selectedPrimitive.value.nodeName == "Transition") {
+        if (selectedPrimitive.getAttribute("Trigger") == "Condition") {
+            getGridRecord(store, 'Recalculate').set('disabled', true);
+        } else {
+            getGridRecord(store, 'Recalculate').set('disabled', false);
+        }
+    }
+	
     if (selectedPrimitive.value.nodeName == "Stock") {
         if (selectedPrimitive.getAttribute("StockMode") == "Store") {
             getGridRecord(store, 'Delay').set('disabled', true);

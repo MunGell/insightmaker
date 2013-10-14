@@ -11,6 +11,26 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 functionLoaders.push(function(){
 
+defineFunction("RandBeta", {params: [{name:"Alpha", noUnits:true, noVector:true}, {name:"Beta", noUnits:true, noVector:true}]}, function(x){
+	
+	return new Material(RandBeta(x[0].value, x[1].value));
+});
+defineFunction("RandDist", {params: [{name:"Distribution", noUnits:true, needVector:true}, {name:"Y (in which case Distribution is X)", noUnits:true, needVector:true, defaultVal: false}]}, function(x){
+	var xVals, yVals;
+	if(x.length == 1 || x[1] === false){
+		var vec = x[0];
+		xVals = [];
+		yVals = [];
+		for(var i=0; i<vec.items.length; i++){
+			xVals.push(vec.items[i].items[0].toNum().value);
+			yVals.push(vec.items[i].items[1].toNum().value);
+		}
+	}else{
+		xVals = x[0].toNum().items.map(function(x){return x.value});
+		yVals = x[1].toNum().items.map(function(x){return x.value});
+	}
+	return new Material(RandDist(xVals, yVals));
+});
 defineFunction("RandBoolean", {params: [{name:"Probability", defaultVal: 0.5, noUnits:true, noVector:true}]}, function(x){
 	var p;
 	if (x.length != 0) {
@@ -85,7 +105,7 @@ defineFunction("Magnitude", {params:[{name: "Number"}]}, function(x){
 	return r;
 });
 defineFunction("Angle", {params:[{name: "Number"}], recurse: true}, function(x){
-	return new Material(fn.angle(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+	return new Material(fn.angle(x[0].toNum().value), getUnitStore(["radians"], [1]));
 });
 defineFunction("Abs", {params:[{name: "Number"}], recurse: true}, function(x){
 	var r = x[0].toNum();
@@ -95,10 +115,10 @@ defineFunction("Abs", {params:[{name: "Number"}], recurse: true}, function(x){
 defineFunction("sin", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
-	if(! unitless(z.units)){
-		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	if(z.units){
+		z = mult(z, new Material(1, getUnitStore(["radians"], [-1])))
 	}
-	if(unitless(z.units)){
+	if(! z.units){
 		return new Material(fn.sin(z.value));
 	}else{
 		throw "MSG: Non-angular units cannot be used in Sin().";
@@ -107,10 +127,10 @@ defineFunction("sin", {params:[{name: "Number"}], recurse: true}, function(x){
 defineFunction("cos", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
-	if(! unitless(z.units)){
-		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	if(z.units){
+		z = mult(z, new Material(1, getUnitStore(["radians"], [-1])))
 	}
-	if(unitless(z.units)){
+	if(! z.units){
 		return new Material(fn.cos(z.value));
 	}else{
 		throw "MSG: Non-angular units cannot be used in Cos().";
@@ -120,10 +140,10 @@ defineFunction("cos", {params:[{name: "Number"}], recurse: true}, function(x){
 defineFunction("tan", {params:[{name: "Number"}], recurse: true}, function(x){
 	var z = x[0].toNum();
 	
-	if(! unitless(z.units)){
-		z = mult(z, new Material(1, new UnitStore(["Radians"], [-1])))
+	if(z.units){
+		z = mult(z, new Material(1, getUnitStore(["radians"], [-1])))
 	}
-	if(unitless(z.units)){
+	if(! z.units){
 		return new Material(fn.tan(z.value));
 	}else{
 		throw "MSG: Non-angular units cannot be used in Tan().";
@@ -143,13 +163,13 @@ defineFunction("atan", {params:[{name: "Number",  noUnits: true}], recurse: true
 });
 
 defineFunction("arcsin", {params:[{name: "Number",  noUnits: true}], recurse: true}, function(x){
-	return new Material(fn.asin(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+	return new Material(fn.asin(x[0].toNum().value), getUnitStore(["radians"], [1]));
 });
 defineFunction("arccos", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
-	return new Material(fn.acos(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+	return new Material(fn.acos(x[0].toNum().value), getUnitStore(["radians"], [1]));
 });
 defineFunction("arctan", {params:[{name: "Number", noUnits: true}], recurse: true}, function(x){
-	return new Material(fn.atan(x[0].toNum().value), new UnitStore(["Radians"], [1]));
+	return new Material(fn.atan(x[0].toNum().value), getUnitStore(["radians"], [1]));
 });
 
 defineFunction("Sqrt", {params:[{name: "Number"}], recurse: true}, function(x){
@@ -852,7 +872,7 @@ defineFunction("Console", {params:[{name:"Message", allowString: true, allowBool
 
 defineFunction("Prompt", {params:[{name:"Message", allowString: true, allowBoolean: true}, {name:"Default", defaultVal: "", allowString: true, allowBoolean: true}]}, function(x) {
 	var y = x[1];
-	if((y instanceof Material) && unitless(y.units)){
+	if((y instanceof Material) && ! y.units){
 		y = y.value;
 	}
 	var x = prompt(x[0], y);
@@ -981,7 +1001,7 @@ function defineFunction(name, definition, fn){
 		
 		for (var i = 0; i < x.length; i++) {
 			var config = arr?configs[i]:configs;
-			if (config.noUnits && (!((!(x[i].toNum() instanceof Material)) || unitless(x[i].toNum().units)))) {
+			if (config.noUnits && (!((!(x[i].toNum() instanceof Material)) || ! x[i].toNum().units))) {
 				throw "MSG: " + fnName + " does not except units for the argument '"+config.name+"'.";
 			}
 			if (config.noVector && (x[i] instanceof Vector)) {

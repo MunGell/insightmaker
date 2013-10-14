@@ -192,7 +192,9 @@ Ext.EquationWindow = function(args) {
 	["Poisson Distribution", "RandPoisson(##Lambda$$)", "Generates a Poisson distributed random number."],
 	["Triangular Distribution", "RandTriangular(##Minimum$$, ##Maximum$$, ##Peak$$)", "Generates a triangularly distributed random number."],
 	["Exponential Distribution", "RandExp(##Lambda$$)", "Generates an exponentially distributed random number with the specified rate parameter."],
-	["Gamma Distribution", "RandGamma(##Alpha$$, ##Beta$$)", "Generates a gamma distributed random number."]
+	["Gamma Distribution", "RandGamma(##Alpha$$, ##Beta$$)", "Generates a Gamma distributed random number."],
+	["Beta Distribution", "RandBeta(##Alpha$$, ##Beta$$)", "Generates a Beta distributed random number."],
+	["Custom Distribution", "RandDist(##X$$, ##Y$$)", "Generates a random number according to a custom distribution. Takes two vectors with the x- and y-coordinates respectively of points defining the distribution. Points are interpolated linearly. The distribution does not have to be normalized such that its area is 1, but the points must be sorted from smallest to largest x locations. You may also pass a single vector containing pairs of {x, y} coordinates (e.g. { {1, 0}, {3, 4}, {4, 0} } ).", ["RandDist({0, 1, 2, 3}, {0, 5, 1, 0})", "1.2"]]
 	]],
 	["Agents",
 	[
@@ -200,18 +202,18 @@ Ext.EquationWindow = function(args) {
 	["Find State", "##[Agent Population]$$.FindState(##[State]$$)", "Returns a vector of agents in the specified state.", ["[University].FindState([Smoker])", "All smokers in the University population"]],
 	["Find Not State", "##[Agent Population]$$.FindNotState(##[State]$$)", "Returns a vector of agents not in the specified state.", ["[University].FindNotState([Smoker])", "All non-smokers in the University population"]],
 	["Find Index", "##[Agent Population]$$.FindIndex(##Index$$)", "Returns an agent with the specified index. Agent indexes start at 1.", ["[Population].FindIndex(1)", "The first agent created"]],
-	["Find Nearby", "##[Agent Population]$$.FindNearby(##[Target]$$, ##Distance$$)", "Returns a vector of agents that are within the specified distance of a target agent.", ["[Population].FindState([Infected]).FindNearby([Self], 25)", "All infected people who are near the agent"]],
+	["Find Nearby", "##[Agent Population]$$.FindNearby(##[Target]$$, ##Distance$$)", "Returns a vector of agents that are within the specified distance of a target agent.", ["[Population].FindState([Infected]).FindNearby(Self, 25)", "All infected people who are near the agent"]],
 	["Find Nearest", "##[Agent Population]$$.FindNearest(##[Target]$$, ##Count=1$$)", "Returns the nearest agents to the target agent. The number of agents returned is specified by the optional Count.", ["[Population].FindNearest([Target])", "The nearest agent to the target"]],
 	["Find Furthest", "##[Agent Population]$$.FindFurthest(##[Target]$$, ##Count=1$$)", "Returns the agent farthest from the target agent. The number of agents returned is specified by the optional Count.", ["[Population].FindFurthest([Target], 4)", "The four furthest agents from the target"]],
 	["Value", "##[Agent Population]$$.Value(##[Primitive]$$)", "Returns the values of the specified primitive for each agent in the population as a vector.", ["[University].Value([GPA]).Mean()", "The average GPA of all students in the University population"]],
 	["Set Value", "##[Agent Population]$$.SetValue(##[Primitive]$$, ##Value$$)", "Sets the value of the specified primitive for each agent in the population to the given value.", ["[University].SetValue([Smoker], false)", "Make all the smokers quit smoking"]],
-	["Location", "##[Agent]$$.Location()", "Returns the location of an agent as the vector {x, y}.", ["[Self].Location().x", "The x-coordinate of the agent"]],
+	["Location", "##[Agent]$$.Location()", "Returns the location of an agent as the vector {x, y}.", ["Self.Location().x", "The x-coordinate of the agent"]],
 	["Distance", "Distance(##[Agent 1]$$, ##[Agent 2]$$)", "Returns the distance between two agents."],
-	["Move", "##[Agent]$$.Move(##{x, y}$$)", "Moves an agent the amount specified.", ["[Self].Move({Rand(), Rand()})", "Take a random walk"]],
-	["MoveTowards", "##[Agent]$$.MoveTowards(##[Target]$$, ##Distance$$)", "Moves an agent towards a target agent the distance specified.", ["[Self].MoveTowards([Prey], 10)", "Chase after the prey"]],
-	["Connected", "##[Agent]$$.Connected()", "Returns the agents connected to an agent in the network.", ["[Self].Connected().Length()", "The number of connections an agent has"]],
-	["Connect", "##[Agent 1]$$.Connect(##[Agent 2]$$)", "Connects two agents in the network. The second agent can also be a vector of agents.", ["[Self].Connect([Population].FindNearest([Self]))", "Connects an agent to the nearest agent to it in the population"]],
-	["Unconnect", "##[Agent 1]$$.Unconnect(##[Agent 2]$$)", "Unconnects two agents in the network. The second agent can also be a vector of agents.", ["[Self].Unconnect([Self].Connected())", "Removes an agent's connections"]],
+	["Move", "##[Agent]$$.Move(##{x, y}$$)", "Moves an agent the amount specified.", ["Self.Move({Rand(), Rand()})", "Take a random walk"]],
+	["MoveTowards", "##[Agent]$$.MoveTowards(##[Target]$$, ##Distance$$)", "Moves an agent towards a target agent the distance specified.", ["Self.MoveTowards([Prey], 10)", "Chase after the prey"]],
+	["Connected", "##[Agent]$$.Connected()", "Returns the agents connected to an agent in the network.", ["Self.Connected().Length()", "The number of connections an agent has"]],
+	["Connect", "##[Agent 1]$$.Connect(##[Agent 2]$$)", "Connects two agents in the network. The second agent can also be a vector of agents.", ["Self.Connect([Population].FindNearest(Self))", "Connects an agent to the nearest agent to it in the population"]],
+	["Unconnect", "##[Agent 1]$$.Unconnect(##[Agent 2]$$)", "Unconnects two agents in the network. The second agent can also be a vector of agents.", ["Self.Unconnect(Self.Connected())", "Removes an agent's connections"]],
 	["PopulationSize", "##[Agent Population]$$.PopulationSize()", "The total number of agents in a population."],
 	["Add", "##[Agent Population]$$.Add(##[Base]=Initial Agent$$)", "Adds a new agent to the population. If [Base] is set, the new agent will be a clone of [Base]. Otherwise the agent will be like a newly created agent at the start of the simulation.", ["Repeat([University].Add(), 200)", "Enroll 200 new students in the University"]],
 	["Remove", "##[Agent]$$.Remove()", "Removes an agent from the population. The agent will no longer be simulated. Can be used to \"Kill\" an agent.", ["[University].FindState([Smoker]).Map(x.Remove())", "Expel all the smokers from the University"]],
@@ -243,7 +245,8 @@ Ext.EquationWindow = function(args) {
 	["Pulse", "Pulse(##Time$$, ##Height$$, ##Width=0$$, ##Repeat=-1$$)", "Creates a pulse input at the specified time with the specified Height and Width. Height defaults to 1 and Width defaults to 0. Repeat is optional and will create a pulse train with the specified time if positive..", "Pulse({10 Years}, 5, 2)"],
 	["Step", "Step(##Start$$, ##Height=1$$)", "Creates an input that is initially set to 0 and after the time of Start is set to Height. Height defaults to 1.", "Step({10 Years}, 5)"],
 	["Ramp", "Ramp(##Start$$, ##Finish$$, ##Height=1$$)", "Creates a ramp input which moves linearly from 0 to Height between the Start and Finish times. Before Start, the value is 0; after Finish, the value is Height. Height defaults to 1.", "Ramp({10 Year}, {20 Years}, 5)"],
-	["Stop", "Stop()", "Immediately terminates the simulation. Often used in combination with an IfThenElse statement.", "IfThenElse(Rand() < 0.01, Stop(), 0)"]
+	["Pause", "Pause()", "Pauses the simulation and allows sliders to be adjusted. Often used in combination with an IfThenElse function.", "IfThenElse(Years() = 20, Pause(), 0)"],
+	["Stop", "Stop()", "Immediately terminates the simulation. Often used in combination with an IfThenElse function.", "IfThenElse(Rand() < 0.01, Stop(), 0)"]
 	]],
 	["Strings",
 	[
@@ -266,17 +269,18 @@ Ext.EquationWindow = function(args) {
 	["For-In Loop", "For ##Variable$$ in ##Vector$$\n  ##Expression$$\nEnd Loop", "Repeats an action for each element in a vector.", ['sum <- 0\nFor x in {1, 10, 27}\n  sum <- sum + x\nEnd Loop\nsum', "38"]],
 	["Functions", "Function ##Name$$()\n  ##Expression$$\nEnd Function", "Creates a reusable function.", ['Function Square(x)\n  x^2\nEnd Function\nSquare(5)', "25"]],
 	["Anonymous Functions", "##Variable$$ <- Function()\n  ##Expression$$\nEnd Function", "Creates an anonymous function.", ['square <- Function(x)\n  x^2\nEnd Function\nsquare(5)', "25"]],
-	["Anonymous Functions", "Function() ##Expression$$", "Creates a single-line anonymous function.", ['{1, 2, 3}.Map(Function(value) value^2 - value)', "{0, 2, 6}"]]
+	["Anonymous Functions", "Function() ##Expression$$", "Creates a single-line anonymous function.", ['{1, 2, 3}.Map(Function(value) value^2 - value)', "{0, 2, 6}"]],
+	["Throwing Errors", "throw '##Message$$'", "Passes an error message up to the nearest Try-Catch block or aborts the simulation with the error message.", 'throw "Error: Index out of range."'],
+	["Error Handling", "Try\n  ##Expression$$\nCatch ##ErrorString$$\n  ##Expression // Handle the error$$\nEnd Try", 'Attempts to execute some code. If an error occurs, the error is passed as a string variable to the catch block which will then be executed. The catch block will not be executed unless an error occurs.', 'Try\n  mean(x)\nCatch err\n  alert("Could not calculate the mean of the variable. Error Message: "+err)\nEnd Try']
 	]],
 	["User Input",
 	[
 	["Alert", "Alert(##Message$$)", "Show an alert dialogue with the message.", 'Alert("An event has occurred.")'],
 	["Prompt", "Prompt(##Message$$, ##Default=''$$)", "Prompts the user for an input and returns it. Can optionally provide a default value for the input.", 'timeScale <- Prompt("What time scale should we use?.", 10).Parse()'],
-	["Confirm", "Confirm(##Message$$)", "Prompts the user to confirm a statement and returns a boolean based on whether they confirmed it or not..", 'advanced <- Confirm("Use advanced mode?")']
+	["Confirm", "Confirm(##Message$$)", "Prompts the user to confirm a statement and returns a boolean based on whether they confirmed it or not.", 'advanced <- Confirm("Use advanced mode?")']
 	]]
 
 	];
-	
 	
 	
 	function addButton(vals){

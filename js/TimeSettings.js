@@ -16,30 +16,27 @@ var timeSettingsFn = function(){
 		timeStep: setting.getAttribute("TimeStep"),
 		timeStart: setting.getAttribute("TimeStart"),
 		timeUnits: setting.getAttribute("TimeUnits"),
-		timeLength: setting.getAttribute("TimeLength")
+		timeLength: setting.getAttribute("TimeLength"),
+		timePause: setting.getAttribute("TimePause")
 	});
 }
 
-
-
-
-
 function showTimeSettings(config)
 {
-   
     var configWin = new Ext.Window({
         layout: 'fit',
 		closeAction: 'destroy',
         modal: true,
         title: getText("Simulation Time Settings"),
         width:  Math.min(Ext.getBody().getViewSize().width, 370),
-        height:  Math.min(Ext.getBody().getViewSize().height, ((! config.cell)?370:180)),
+        height:  Math.min(Ext.getBody().getViewSize().height, ((! config.cell)?400:180)),
         resizable: false,
         plain: true,
         items: [new Ext.FormPanel({
             fieldDefaults: {
                 labelWidth: 150
             },
+			autoScroll: false,
             frame: true,
             bodyStyle: 'padding:5px 5px 0',
             width: 450,
@@ -131,6 +128,15 @@ function showTimeSettings(config)
                 }
                 ]
             },
+            new Ext.form.NumberField({
+				hidden: config.cell,
+                fieldLabel: getText('Pause Interval'),
+                id: 'stimepause',
+                allowBlank: true,
+                minValue: 0,
+                decimalPrecision: 12,
+				value: config.timePause
+            }),
             new Ext.form.ComboBox({
                 fieldLabel: getText("Analysis Algorithm"),
                 typeAhead: true,
@@ -209,13 +215,16 @@ function showTimeSettings(config)
 	                    setting, "TimeStep",
 	                    Ext.getCmp('stimestep').getValue().toString());
 	                    graph.getModel().execute(edit);
-
+						
+	                    edit = new mxCellAttributeChange(
+	                    setting, "TimePause",
+	                    Ext.getCmp('stimepause').getValue());
+	                    graph.getModel().execute(edit);
 
 	                    edit = new mxCellAttributeChange(
 	                    setting, "TimeUnits",
 	                    Ext.getCmp('timeSettingsForm').getValues()['tunits']);
 	                    graph.getModel().execute(edit);
-
 					}
 
                     graph.getModel().endUpdate();

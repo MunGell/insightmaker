@@ -12,7 +12,6 @@ terms of the Insight Maker Public License (http://insightMaker.com/impl).
 
 Ext.form.customFields['units'] = Ext.extend(Ext.form.customFields['units'], {
 
-
 	onTriggerClick: function() {
 		this.suspendEvents(false);
 		this.editorWindow = new Ext.UnitsWindow({
@@ -43,18 +42,18 @@ Ext.UnitsWindow = function(args) {
 	var obj = this;
 
 	obj.setUnitsText = function(u) {
-		obj.args.newUnits = u;
-		Ext.get("unitsTxt").update("Units: " + clean(u));
+		unitsLabel.setValue(clean(u));
 	}
 
 
 	obj.args = args;
 
-	var unitsLabel = Ext.create("Ext.Component", {
-		html: "<big><big><big><center><div id='unitsTxt'>Units Label</div></center></big></big></big>",
-		height: 30,
-		margin: '5,5,5,5'
-	});
+	var unitsLabel = new Ext.form.field.Text({
+		xtype: "textfield",
+		height: 40,
+		fieldStyle: "font-size: x-large; text-align:center;",
+		stripCharsRe: /[^A-Za-z 0-9\.\/\(\)\*\^]/g
+	})
 
 	obj.args.tree = new Ext.tree.Panel({
 		animate: false,
@@ -92,47 +91,50 @@ Ext.UnitsWindow = function(args) {
 
 
 		var roots = [root];
-		var lastNode = {};
-
-		root.appendChild({
+		var lastNode = root.appendChild({
 			text: "Unitless",
 			draggable: false,
 			leaf: true,
 			expanded: true
 		});
 		
-		lastNode = root.appendChild({
-			text: getText("Units Used in Model"),
-			draggable: false,
-			leaf: false,
-			expanded: true
-		});
+		
 		
 		var modelUnits = unitsUsedInModel();
-		for(var i=0; i<modelUnits.length; i++){
-			lastNode.appendChild({
-				text: modelUnits[i],
+		if(modelUnits.length > 0){
+			lastNode = root.appendChild({
+				text: getText("Units Used in Model"),
 				draggable: false,
-				leaf: true,
+				leaf: false,
 				expanded: true
 			});
+			for(var i=0; i<modelUnits.length; i++){
+				lastNode.appendChild({
+					text: modelUnits[i],
+					draggable: false,
+					leaf: true,
+					expanded: true
+				});
+			}
 		}
 		
-
-		lastNode = root.appendChild({
-			text: getText("Custom Units"),
-			draggable: false,
-			leaf: false,
-			expanded: true
-		});
+		
 		var cU = customUnits();
-		for (var i = 0; i < cU.length; i++) {
-			lastNode.appendChild({
-				text: clean(cU[i][0]),
+		if(cU.length > 0){
+			lastNode = root.appendChild({
+				text: getText("Custom Units"),
 				draggable: false,
-				leaf: true,
-				expanded: false
+				leaf: false,
+				expanded: true
 			});
+			for (var i = 0; i < cU.length; i++) {
+				lastNode.appendChild({
+					text: clean(cU[i][0]),
+					draggable: false,
+					leaf: true,
+					expanded: false
+				});
+			}
 		}
 
 		var indentation = 0;
@@ -173,7 +175,7 @@ Ext.UnitsWindow = function(args) {
 	obj.setupUnits(obj.args.tree);
 
 	obj.win = new Ext.Window({
-		title: getText('Units Selection'),
+		title: getText('Primitive Value Units'),
 		layout: {
 			type: "vbox",
 			align: "stretch"
@@ -193,9 +195,8 @@ Ext.UnitsWindow = function(args) {
 		buttons: [{
 			id: 'units_but',
 			scale: "large",
-			text: getText('Custom Units'),
+			text: getText('Custom Named Units'),
 			iconCls: 'units-icon',
-			tooltip: getText('Define custom units'),
 			handler: function() {
 				var setting = getSetting();
 
@@ -385,13 +386,13 @@ Ext.UnitsWindow = function(args) {
 			text: getText('Apply'),
 			handler: function() {
 				if (obj.args.parent != "") {
-					obj.args.parent.setValue(obj.args.newUnits);
+					obj.args.parent.setValue(unitsLabel.getValue());
 					obj.win.close();
 					obj.args.parent.resumeEvents();
 					grid.plugins[0].completeEdit();
 				} else {
 					graph.getModel().beginUpdate();
-					obj.args.cell.setAttribute("Units", obj.args.newUnits);
+					obj.args.cell.setAttribute("Units", unitsLabel.getValue());
 					graph.getModel().endUpdate();
 					obj.win.close();
 				}

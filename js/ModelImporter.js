@@ -175,7 +175,107 @@ function importModel() {
 	});
 
 	win.show();
+}
 
+function showInsertModelWindow(pt){
+	Ext.Msg.prompt('Insert Insight Maker Model', 'Enter the URL for the Insight Maker model you wish to insert (e.g. <i>'+base_path+'/insight/1234</i>). This model will be inserted as a component into your current model.', function(btn, url){
+		if(btn == 'ok'){
+			 var progress = Ext.MessageBox.wait(getText("Inserting Model..."),undefined, {icon:'run-icon',width:300, closable:false, modal:true, progress:true, progressText:' '});
+			$.ajax({
+				url: url,
+				dataType: "html",
+				success: function(txt){
+					var matches = txt.match(/var graph_source_data = "(.*?)";\n/);
+					
+					if((! matches) || matches[1].trim()==""){
+						mxUtils.alert("Model could not be inserted. Please ensure the model URL is correct.");
+						progress.close();
+					}else{
+						var data = matches[1];
+
+						var title = txt.match(/var graph_title = "(.*?)";\n/)[1].replace(/\\\"/,"\"").replace(/\\n/,"\n").replace(/\\\//,"/").replace(/\\\\/,"\\");
+						var description = txt.match(/var graph_description = "(.*?)";\n/)[1].replace(/\\\"/,"\"").replace(/\\n/,"\n").replace(/\\\//,"/").replace(/\\\\/,"\\");
+						
+						//console.log(data);
+						data = data.replace(/\\"/g, "\"").replace(/\\\//g, "/").replace(/\\n/g, "\n");
+
+						var doc = mxUtils.parseXml(data);
+						var dec = new mxCodec(doc);
+						
+						var model = dec.decode(doc.documentElement);
+						
+						var cells = model.cells;
+						for(var id in cells){
+							cells[id].setAttribute("oldId", id);
+						}
+						
+
+						graph.getModel().beginUpdate();
+						
+						var folder = createPrimitive(title, "Folder", [pt.x, pt.y], [100, 100]);
+						
+						cells = cells[1].children;
+						
+						cells = excludeType(cells, "Settings");
+						cells = excludeType(cells, "Display");
+						
+						cells = graph.importCells(cells, 0, 0, folder);
+						for(var id in cells){
+							var cell = cells[id];
+							if(cell.value.nodeName == "Converter"){
+								var source = cell.getAttribute("Source");
+								if(source[0] != "*"){
+									for(var id2 in cells){
+										if(cells[id2].getAttribute("oldId") == source){
+											cell.setAttribute("Source", id2);
+											break
+										}
+									}
+								}
+							}else if(cell.value.nodeName == "Agents"){
+								var source = cell.getAttribute("Agent");
+								for(var id2 in cells){
+									if(cells[id2].getAttribute("oldId") == source){
+										cell.setAttribute("Agent", id2);
+										break
+									}
+								}
+							}
+						}
+						
+						for(id in cells){
+							cells[id].setAttribute("oldId", undefined);
+						}
+						
+						setImage(folder, "Plugin");
+						setNote(folder, description);
+
+						var geo = folder.geometry;
+						geo.alternateBounds = new mxRectangle(0,0, 128, 128);
+						graph.getModel().setGeometry(folder, geo);
+						
+						collapseFolder(folder);
+						folder.setAttribute("LabelPosition", "Bottom");
+						setLabelPosition(folder);
+						
+						//Converter and agent population rewire
+						
+						graph.getModel().endUpdate();
+						
+						
+						clearPrimitiveCache();
+						setAllConnectable();
+						
+						progress.close();
+					}
+				},
+				error: function(){
+					mxUtils.alert("Model could not be inserted. Please ensure the morel URL is correct.");
+					progress.close();
+				}
+			})
+		}
+	})
 }
 
 
