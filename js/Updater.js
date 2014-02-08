@@ -387,5 +387,40 @@ function updateModel(){
 
 		mySetting.setAttribute("Version", 33);
 	}
+	
+	if (mySetting.getAttribute("Version") < 34) {
+
+		var obsolete = excludeType(findValue(/\[self\]/i), "Button");
+
+		if(viewConfig.allowEdits){
+			if (obsolete.length > 0) {
+
+				var msg = '<p>Insight Maker has received a significant update to its equation engine improving Agent Based Modeling..</p>';
+				msg += '<br/><p>A side effect of this update is that the "Self" agent must always be referred to using the variable syntax -- <i>Self</i> -- instead of the old primitive syntax -- <i>[Self]</i>.</p> ';
+				msg += '<br/><p>The following of your primitives appear to use the outdated format. Their equations will automatically be updated to use the correct format:</p>';
+				msg += '<br/><p><b>' + Ext.Array.map(obsolete, function(x) {
+					return x.getAttribute("name")
+				}).join(", ") + '</b></p>';
+		
+				msg += '<br/><p>You may save your model to keep these updates.</p>'
+
+				Ext.Msg.show({
+					icon: Ext.MessageBox.WARNING,
+					title: 'Model Update Required',
+					msg: msg,
+					buttons: Ext.MessageBox.OK
+				});
+
+			}
+		}
+
+		if(obsolete.length>0){
+			obsolete.map(function(x){
+				setValue(x, getValue(x).replace(/\[Self\]/gi, "Self"));
+			});
+		}
+
+		mySetting.setAttribute("Version", 34);
+	}
 
 }

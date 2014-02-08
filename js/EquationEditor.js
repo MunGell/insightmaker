@@ -238,7 +238,9 @@ Ext.EquationWindow = function(args) {
 	["Contains", "##Vector$$.Contains(##Needle$$)", "Returns true if the needle is in the vector. Otherwise returns false.", ["{1, 4, 9}.Contains(9)", "true"]],
 	["Repeat", "Repeat(##Expression$$, ##Times$$)", "Creates a new vector by repeating an expression a specified expression a number of times. 'x' in the expression refers to the current index. Times may also be a vector of strings in which case a named vector is created.", ["Repeat(x^2, 3)", "{1, 4, 9}"]],
 	["Map", "##Vector$$.Map(##Function$$)", "Applies a function to each element of a vector and returns the result. The function may also be an expression where 'x' in the expression represents the current element.", ["{1, 2, 3}.Map(x*2)", "{2, 4, 6}"]],
-	["Filter", "##Vector$$.Filter(##Function$$)", "Tests each element of a vector using a function and returns the elements which evaluate to true. The function may also be an expression where 'x' in the expression represents the current element.", ["{1, 2, 3}.Filter(x >= 2)", "{2, 3}"]]
+	["Filter", "##Vector$$.Filter(##Function$$)", "Tests each element of a vector using a function and returns the elements which evaluate to true. The function may also be an expression where 'x' in the expression represents the current element.", ["{1, 2, 3}.Filter(x >= 2)", "{2, 3}"]],
+	["Keys", "##Vector$$.Keys()", "Returns the keys for a named vector as a vector. Any element without a key will be omitted.", ["{a: 1, b: 4, b: 9}.Keys()", "{'a', 'b', 'c'}"]],
+	["Values", "##Vector$$.Values()", "Returns the values of a vector (stripping away any keys if it is a named vector).", ["{a: 1, b: 4, b: 9}.Values()", "{1, 4, 9}"]]
 	]],
 	["General",
 	[["If Then Else", "IfThenElse(##Test Condition$$, ##Value if True$$, ##Value if False$$)", "Tests a condition and returns one value if the condition is true and another value if the condition is false.", ["IfThenElse(20 > 10, 7, 5)", "7"]],

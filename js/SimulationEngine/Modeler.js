@@ -240,11 +240,11 @@ function innerRunSimulation(config) {
 			var agentCells = getChildren(findID(id));
 			
 			x.DNAs = [];
-			for(var j=0; j<agentCells.length; j++){
+			for(var j = 0; j < agentCells.length; j++){
 				if(modelType(agentCells[j].value.nodeName)){
 					x.DNAs.push(getDNA(agentCells[j], solvers));
 				}
-				if(agentCells[j].value.nodeName=="State"){
+				if(agentCells[j].value.nodeName == "State"){
 					x.stateIds.push(agentCells[j].id);
 				}
 			}
@@ -555,8 +555,12 @@ function innerRunSimulation(config) {
 		var oldError = config.onError;
 		config.onError = function(res){
 			
-			for(var solver in simulate.model.solvers){
-				updateDisplayed(simulate.model.solvers[solver]);
+			try{
+				for(var solver in simulate.model.solvers){
+					updateDisplayed(simulate.model.solvers[solver]);
+				}
+			}catch(err){
+			
 			}
 			
 			if(simulate.resultsWindow){
@@ -896,8 +900,18 @@ function getDNA(cell, solvers){
 }
 
 function folderSolvers(cell, solvers){
-	if((! cell) || cell==null){
+	if((! cell) || cell == null){
 		return solvers.base;
+	}
+	if(cell.value.nodeName == "Agents"){
+		//console.log("AGENTS")
+		var x = cell.getAttribute("Agent");
+		//console.log(x)
+		if(solvers[x]){
+			//console.log("SET!")
+			//console.log(solvers[x])
+			return solvers[x];
+		}
 	}
 	
 	var p = getParent(cell);
@@ -946,7 +960,7 @@ function decodeDNA(dna, agent){
 				simulate.sliders[dna.id] = [x];
 			}
 		}
-		
+	
 	
 		if(x instanceof Action){
 			dna.solver.actions.push(x);
@@ -1282,6 +1296,7 @@ function updateDisplayed(solver){
 			var storeData = [];
 			var maxTime = solver.maxLoaded;
 			maxTime = isDefined(maxTime)?(maxTime+1):0;
+			var maxInData = solver.maxLoaded;
 			for (var k = maxTime; k < simulate.results.Time.length; k++) {
 				var inStore =  simulate.displayInformation.store.getById(k);
 				var d  = {};
@@ -1289,48 +1304,69 @@ function updateDisplayed(solver){
 					d["id"] = k;
 					d["Time"] = simulate.results["Time"][k];
 				}
-				for (var j = 0; j < displayed.length; j++) {
-					var i = simulate.displayInformation.ids.indexOf(displayed[j].id);
+				//console.log("--");
+				//console.log(solver);
+				//console.log(displayed.length);
+				//console.log(d.Time+" -"+k)
 				
-					if(i > -1){
-						if(simulate.results[simulate.displayInformation.ids[i]].states){
-							var states = simulate.results[simulate.displayInformation.ids[i]].states;
-							var current = simulate.results.data[k][displayed[j].id].current;
+				if(isUndefined(simulate.results.data[k][displayed[0].id])){
+					//continue;
+				}else{
+					maxInData = k;
+					for (var j = 0; j < displayed.length; j++) {
+
+						//console.log(displayed[j].id)
+						var i = simulate.displayInformation.ids.indexOf(displayed[j].id);
 				
-							var tally = {};
-							for(var j = 0; j < current.length; j++){
-								for(var s = 0; s < current[j].state.length; s++){
-						
-									tally[current[j].state[s].id.toString()] = (tally[current[j].state[s].id.toString()] + 1) || 1;
+						if(i > -1){
+							if(simulate.results[simulate.displayInformation.ids[i]].states){
+								var states = simulate.results[simulate.displayInformation.ids[i]].states;
+								
+								//console.log("--")
+								//console.log(k);
+								//console.log(displayed[j].id)
+								//console.log(simulate.results.data);
+								if(simulate.results.data[k][displayed[j].id]){
+									var current = simulate.results.data[k][displayed[j].id].current;
+				
+									var tally = {};
+									for(var q = 0; q < current.length; q++){
+										if(current[j].state){
+											for(var s = 0; s < current[q].state.length; s++){
+												tally[current[q].state[s].id.toString()] = (tally[current[q].state[s].id.toString()] + 1) || 1;
+											}
+										}
+									}
+				
+									for(var q = 0; q < states.length; q++){
+										d[simulate.displayInformation.elementIds[i+q]] = tally[states[q]] || 0;
+									}
 								}
-							}
-				
-							for(var j = 0; j < states.length; j++){
-								d[simulate.displayInformation.elementIds[i+j]] = tally[states[j]] || 0;
-							}
-						}else if(simulate.results[simulate.displayInformation.ids[i]].indexedNames){
-							var z = 0;
-							while(i < simulate.displayInformation.ids.length && simulate.displayInformation.ids[i] == displayed[j].id){
-								try{
-									d[simulate.displayInformation.elementIds[i]] = selectFromMatrix(simulate.results.data[k][displayed[j].id].fullClone(), simulate.results[simulate.displayInformation.ids[i]].indexedFullNames[z].slice());
-								}catch(err){
-									throw ({
-										msg: getText("Cannot change vector keys during a simulation."),
-										primitive: displayed[j].dna.cell,
-										showEditor: true
-									});
+							}else if(simulate.results[simulate.displayInformation.ids[i]].indexedNames){
+								var z = 0;
+								while(i < simulate.displayInformation.ids.length && simulate.displayInformation.ids[i] == displayed[j].id){
+									try{
+										d[simulate.displayInformation.elementIds[i]] = selectFromMatrix(simulate.results.data[k][displayed[j].id].fullClone(), simulate.results[simulate.displayInformation.ids[i]].indexedFullNames[z].slice());
+									}catch(err){
+										throw ({
+											msg: getText("Cannot change vector keys during a simulation."),
+											primitive: displayed[j].dna.cell,
+											showEditor: true
+										});
 		
-								}
+									}
 					
-								z++;
-								i++;
-							}
+									z++;
+									i++;
+								}
 				
-						}else{
-							d[simulate.displayInformation.elementIds[i]] = simulate.results.data[k][displayed[j].id];
+							}else{
+								d[simulate.displayInformation.elementIds[i]] = simulate.results.data[k][displayed[j].id];
+							}
 						}
 					}
 				}
+				
 				if(inStore){
 					inStore.set(d);
 					inStore.commit();
@@ -1338,7 +1374,7 @@ function updateDisplayed(solver){
 					storeData.push(d);
 				}
 			}
-			solver.maxLoaded = simulate.results.Time.length-1;
+			solver.maxLoaded = maxInData;
 			simulate.displayInformation.store.maxLoaded = Math.max(simulate.displayInformation.store.maxLoaded, solver.maxLoaded)
 		
 			//console.log(storeData)
@@ -1348,7 +1384,8 @@ function updateDisplayed(solver){
 			simulate.displayInformation.store.resumeEvents();
 			simulate.displayInformation.store.filter();
 		}
-
+		//window.store = simulate.displayInformation.store;
+		
 		if(! simulate.resultsWindow){
 			simulate.resultsWindow = createResultsWindow(simulate.displayInformation);
 

@@ -200,7 +200,7 @@ function TaskQueue(config){
 }
 
 TaskQueue.prototype.print = function(){
-	console.log("Current Time: "+this.time);
+	console.log("Current Time: "+this.time.value);
 	this.tasks.goMin();
 	while(this.tasks.current() !== null){
 		console.log(this.tasks.current().name);
@@ -498,6 +498,7 @@ Task.prototype.compare = function(other){
 			return -1;
 		}
 	}
+	throw "Comparison error";
 }
 
 Task.prototype.toString = function(){

@@ -231,16 +231,17 @@ Primitive.method("setValue", function() {
 Primitive.method("printPastValues", function() {
 	console.log(this.pastValues.map(function(x){return x.value;}))
 });
-//var evals = [];
+
 Primitive.method("value", function() {
 	
 	if (isUndefined(this.cachedValue)) {
-
-		//if(evals.indexOf(this.dna.name)>-1){
-			//console.log(this.dna.name);
-			//die
-			//}
-		//evals.push(this.dna.name);
+		
+		
+		if(simulate.valuedPrimitives.indexOf(this) > -1){
+			throw "MSG: "+getText("Circular equation loop identified including the primitives: %s", simulate.valuedPrimitives.slice(simulate.valuedPrimitives.indexOf(this)).map(function(x){return x.dna.name}).join(", "));
+		}
+		simulate.valuedPrimitives.push(this);
+		
 		try{
 			var x = this.calculateValue().toNum();
 			if((x instanceof Material) && ! isFinite(x.value)){
@@ -349,6 +350,7 @@ State.method("innerClone", function(p){
 State.method("setValue", function(value) {
 	this.setActive(trueValue(value));
 	this.cachedValue = undefined;
+	simulate.valuedPrimitives = [];
 	this.value();
 	if(this.agentId){
 		this.container.updateStates();
@@ -910,6 +912,7 @@ Stock.method("setValue", function(value) {
 	//console.log("--")
 	this.level = value;
 	this.cachedValue = undefined;
+	simulate.valuedPrimitives = [];
 	this.value();
 });
 Stock.method("print", function(){

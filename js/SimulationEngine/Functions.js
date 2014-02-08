@@ -99,7 +99,7 @@ functionLoaders.push(function(){
 		return mult(item, new Material(1, getUnitStore(["weeks"],[-1])));
 	});
 
-	defineFunction("Months", { params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
+	defineFunction("Months", { params: [{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
 		var item;
 		if (x.length == 0) {
 			item = simulate.time().fullClone();
@@ -109,7 +109,7 @@ functionLoaders.push(function(){
 		return mult(item, new Material(1, getUnitStore(["months"],[-1])));
 	});
 
-	defineFunction("Years", {params:[{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
+	defineFunction("Years", {params: [{name: "Value", defaultVal: "time", noVector: true}]}, function(x) {
 		var item;
 		if (x.length == 0) {
 			item = simulate.time().fullClone();
@@ -440,11 +440,17 @@ functionLoaders.push(function(){
 	});
 
 	defineFunction("Value", {object: [functionBank, VectorObject, AgentObject], params: [{name: "[Population]"}, {needPrimitive: true, name: "[Primitive]"}]}, function(x) {//need population should be false
+		
 		var id = x[1].id;
 	
 		//console.log("v:");
 		var population = null;
 		//sdsadas
+		
+		if(! ((x[0] instanceof Agents) || (x[0] instanceof Agent) || (x[0] instanceof Vector) || (! x[0]))){
+			x[0] = x[0].toNum();
+		}
+		
 		if(x[0] instanceof Agents){
 			population = getPopulation(x[0]);
 		}
@@ -869,6 +875,9 @@ function distance(a,b){
 }
 
 function agent(obj, fnName, pName){
+	if((obj instanceof Variable) || (obj instanceof Stock)){
+		obj = obj.toNum();
+	}
 	if(obj instanceof Agent){
 		return obj;
 	}else if(obj instanceof Primitive){

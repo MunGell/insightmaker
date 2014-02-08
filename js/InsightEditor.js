@@ -13,9 +13,11 @@ Ext.onReady(function() {
 	main();
 });
 
-require.config({
-    baseUrl: builder_path+"/resources"
-});
+if(require.config){
+	require.config({
+	    baseUrl: builder_path+"/resources"
+	});
+}
 
 var defaultSolver = '{"enabled": false, "algorithm": "RK1", "timeStep": 1}';
 
@@ -451,8 +453,6 @@ function main() {
 		if (mxUtils.isNode(cell.value)) {
 			if (cell.value.nodeName == "Link" && orig(cell).getAttribute("name") == "Link") {
 				return "";
-				//} else if(cell.value.nodeName == "Button"){
-				//return "<span style='cursor:hand;'>"+cell.getAttribute("name")+"</span>";
 			} else {
 				return clean(orig(cell).getAttribute("name"));
 			}
@@ -658,7 +658,7 @@ function main() {
 
 	primitiveBank.setting = doc.createElement('Setting');
 	primitiveBank.setting.setAttribute('Note', '');
-	primitiveBank.setting.setAttribute('Version', '33');
+	primitiveBank.setting.setAttribute('Version', '34');
 	primitiveBank.setting.setAttribute('Throttle', '1');
 	primitiveBank.setting.setAttribute('TimeLength', '100');
 	primitiveBank.setting.setAttribute('TimeStart', '0');
@@ -1185,9 +1185,11 @@ function main() {
 			var cell = this.getInitialCellForEvent(me);
 			
 			if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
+				
 				if (me.evt.shiftKey == false) {
 					pressButton(cell);
 					me.consume();
+					graph.allowButtonSelect = false;
 					return false;
 				}else{
 					graph.allowButtonSelect = true;
@@ -1238,44 +1240,7 @@ function main() {
 
 
 	
-		/*
-		mxGraphHandler.prototype.mouseDown = function(sender, me) {
-			//console.log(sender);
-			graph.allowButtonSelect=false;
-			var cell = this.getInitialCellForEvent(me);
-			if (cell !== null && cell.value.nodeName == "Button" && (!graph.getSelectionModel().isSelected(cell))) {
-				if (me.evt.shiftKey == false) {
-					pressButton(cell);
-					me.consume();
-					return false;
-				}else{
-					graph.allowButtonSelect=true;
-				}
-			}
-			
-			if (!me.isConsumed() && this.isEnabled() && this.graph.isEnabled() && !this.graph.isForceMarqueeEvent(me.getEvent()) && me.getState() != null) {
-				var cell = this.getInitialCellForEvent(me);
-				this.cell = null;
-				this.delayedSelection = this.isDelayedSelection(cell);
-				if (this.isSelectEnabled() && !this.delayedSelection) {
-					this.graph.selectCellForEvent(cell, me.getEvent());
-				}
-				if (this.isMoveEnabled()) {
-					var model = this.graph.model;
-					var geo = model.getGeometry(cell);
-					if (this.graph.isCellMovable(cell) && ((!model.isEdge(cell) || this.graph.getSelectionCount() > 1 || (geo.points != null && geo.points.length > 0) || model.getTerminal(cell, true) == null || model.getTerminal(cell, false) == null) || this.graph.allowDanglingEdges || (this.graph.isCloneEvent(me.getEvent()) && this.graph.isCellsCloneable()))) {
-						this.start(cell, me.getX(), me.getY());
-					}
-					this.cellWasClicked = true;
-					if ((!false && !true) || me.getSource().nodeName != 'SELECT') {
-						me.consume();
-					} else if (false && me.getSource().nodeName == 'SELECT') {
-						this.cellWasClicked = false;
-						this.first = null;
-					}
-				}
-			}
-		}*/
+		
 
 	// Alt disables guides
 	mxGuide.prototype.isEnabledForEvent = function(evt) {
@@ -1644,7 +1609,7 @@ function main() {
 				if(is_ebook){
 					topDesc = "<center><big>Select a primitive to see its properties.</big></center>";
 				}else{
-					topDesc = "<center><a href='http://www.youtube.com/watch?v=9ApzfWPOF5g' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
+					topDesc = "<center><a href='http://www.youtube.com/watch?v=uH5zM7J-eHU' target='_blank'><img src='"+builder_path+"/images/Help.jpg' width=217 height=164 /><br><big>Watch this short video &rsaquo; </big></a><br/><br/><br/>Or take a look at the <a href='http://InsightMaker.com/help' target='_blank'>Detailed Insight Maker Manual</a><br/><br/>There is also a <a href='http://www.systemswiki.org/index.php?title=Modeling_%26_Simulation_with_Insight_Maker' target='_blank'>free, on-line education course</a> which teaches you how to think in a systems manner using Insight Maker.</center>";
 				}
 			} else {
 

@@ -279,6 +279,9 @@ html, body {
 	height: 100%;
 }
 
+.help-icon {
+    background-image:url(../images/help.png) !important;
+}
 .apply-icon {
     background-image:url(../images/apply.png) !important;
 }

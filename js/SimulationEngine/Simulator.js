@@ -13,6 +13,7 @@ function Simulator(config){
 	this.randLoc = -1;
 	this.lastRandPos = -1;
 	this.previousRandLists = [];
+	this.valuedPrimitives = [];
 	
 	this.distanceCache = {};
 	
@@ -157,6 +158,7 @@ Simulator.prototype.run = function(config){
 			priority: 1,
 			action: function(){
 				if(me.valueChange){
+					simulate.valuedPrimitives = [];
 					for(var s in me.model.solvers){
 						var solver = me.model.solvers[s];
 						for(var i = 0; i < solver.valued.length; i++){
@@ -239,7 +241,7 @@ Simulator.prototype.printStates = function(displayed){
 	var t = parseFloat(this.time().value.toPrecision(20));
 	
 	if(this.results.Time.indexOf(t) == -1){
-		for(var i=this.results.Time.length; i>0; i--){
+		for(var i = this.results.Time.length; i > 0; i--){
 			if(this.results.Time[i-1]<t){
 				this.results.Time.splice(i,0, t)
 				this.results.data.splice(i,0, {})
@@ -360,13 +362,15 @@ Simulator.prototype.createSolver = function(solver){
 		me.tasks.add(new Task({
 				time: time,
 				expires: 1,
-				name: "RK1 Solver",
+				name: "RK1 Solver - " +solver.id,
 				action: function(){
 					var l = flows.length;
 					for(var i = 0; i < l; i++){
 						flows[i].clean();
 					}
 					
+
+					simulate.valuedPrimitives = [];
 					l = valued.length;
 					for(var i = 0; i < l; i++){
 						valued[i].clearCached();
@@ -387,7 +391,7 @@ Simulator.prototype.createSolver = function(solver){
 							updateTrigger.call(transitions[i]);
 						}
 					}
-					
+					//console.log("B")
 					me.step(solver);
 					
 					if(repeat && lessThanEq(plus(time, userTimeStep), me.timeEnd)){
@@ -415,7 +419,7 @@ Simulator.prototype.createSolver = function(solver){
 	
 		me.tasks.add(new Task({
 				time: time,
-				name: "RK4 Solver (Init)",
+				name: "RK4 Solver (Init)  - " +solver.id,
 				priority: -10,
 				expires: 1,
 				blocker: id+" init",
@@ -425,6 +429,8 @@ Simulator.prototype.createSolver = function(solver){
 					for(var i = 0; i < l; i++){
 						flows[i].clean();
 					}
+					
+					simulate.valuedPrimitives =[];
 					
 					l = valued.length;
 					for(var i = 0; i < l; i++){
@@ -440,12 +446,13 @@ Simulator.prototype.createSolver = function(solver){
 		);
 		me.tasks.add(new Task({
 				time: time,
-				name: "RK4 Solver (step 1)",
+				name: "RK4 Solver (step 1) - " +solver.id,
 				priority: -5,
 				expires: 4,
 				blocker: id+" start",
 				action: function(){
 					if(solver.RKPosition > 1){
+						simulate.valuedPrimitives = [];
 						var l = valued.length;
 						for(var i = 0; i < l; i++){
 							valued[i].clearCached();
@@ -501,11 +508,12 @@ Simulator.prototype.createSolver = function(solver){
 		);
 		me.tasks.add(new Task({
 				time: plus(time, timeStep),
-				name: "RK4 Solver (step 2,3)",
+				name: "RK4 Solver (step 2,3) - " +solver.id,
 				priority: -10,
 				expires: 2,
 				blocker: id+" mid",
 				action: function(){
+					simulate.valuedPrimitives = [];
 					var l = valued.length;
 					for(var i = 0; i < l; i++){
 						if(!( valued[i] instanceof State)){
@@ -534,10 +542,12 @@ Simulator.prototype.createSolver = function(solver){
 	
 		me.tasks.add(new Task({
 				time: plus(time, userTimeStep),
-				name: "RK4 Solver (step 4)",
+				name: "RK4 Solver (step 4) - " +solver.id,
 				priority: -30,
 				expires: 1,
 				action: function(){
+
+					simulate.valuedPrimitives = [];
 					var l = valued.length;
 					for(var i = 0; i < l; i++){
 						if(!( valued[i] instanceof State)){

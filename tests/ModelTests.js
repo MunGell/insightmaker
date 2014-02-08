@@ -682,7 +682,7 @@ function testAgents(){
 	setTriggerType(t2, "Timeout");
 	setTriggerValue(t2, "5");
 	setTriggerType(t2, "Condition");
-	setTriggerValue(t2, "index([self])=1 and years=7");
+	setTriggerValue(t2, "index(self)=1 and years=7");
 
 	res = runModel(true);
 	assertEqual("Pop 7", res.value(v)[0], 0);
@@ -690,7 +690,7 @@ function testAgents(){
 	assertEqual("Pop 9", res.value(v)[8], 9);
 	assertEqual("Pop 10", res.value(v2)[8], 1);
 	
-	setTriggerValue(t2, "[self].index()=1 and years=7");
+	setTriggerValue(t2, "self.index()=1 and years=7");
 
 	res = runModel(true);
 	assertEqual("Pop 7 (obj)", res.value(v)[0], 0);
@@ -786,7 +786,7 @@ function testAgents(){
 	removePrimitive(l);
 	removePrimitive(l2);
 	
-	setValue(v3, "index([self])");
+	setValue(v3, "index(self)");
 	
 	
 	res = runModel(true);
@@ -926,7 +926,7 @@ function testAgents(){
 	assertEqual("Custom Loc 19", res.value(v)[0], 0);
 	assertEqual("Custom Loc 20", res.value(v2)[8], 0);
 	
-	setAgentPlacementFunction(pop, "<<index([Self])*10,index([Self])*20>>");
+	setAgentPlacementFunction(pop, "<<index(Self)*10,index(Self)*20>>");
 	setValue(v, "Select(Location(FindIndex([Population], 1)),1)");
 	setValue(v2, "Select(Location(FindIndex([Population], 2)),2)");
 	res = runModel(true);
@@ -938,7 +938,7 @@ function testAgents(){
 	assertEqual("Custom Loc 21 (Self)", res.value(v)[0], 10);
 	assertEqual("Custom Loc 22 (Self)", res.value(v2)[8], 40);
 	
-	setAgentPlacementFunction(pop, "<<[Self].index()*10,[Self].index()*20>>");
+	setAgentPlacementFunction(pop, "<<Self.index()*10,Self.index()*20>>");
 	setValue(v, "[Population].FindIndex(1).Location().x");
 	setValue(v2, "[Population].FindIndex(2).Location().y");
 	res = runModel(true);
@@ -950,7 +950,7 @@ function testAgents(){
 	setParent(mover, f);
 	setTriggerType(mover, "Condition");
 	setTriggerValue(mover, "true")
-	setValue(mover, "move([Self], {10, 20})");
+	setValue(mover, "move(Self, {10, 20})");
 	res = runModel(true);
 	assertEqual("Custom Move 22", res.value(v)[2], 10+2*10);
 	assertEqual("Custom Move 23", res.value(v2)[9], 40+9*20);
@@ -1020,14 +1020,14 @@ function testAgents(){
 	assertEqual("Custom Network 29 (Obj)", res.value(v2)[8], 1);
 	
 	
-	setValue(mover, "ifthenelse( index(self)==3, unconnect([self], findIndex([population], 1)), 0)");
+	setValue(mover, "ifthenelse( index(self)==3, unconnect(self, findIndex([population], 1)), 0)");
 	res = runModel(true);
 	assertEqual("Custom Network 30", res.value(v)[0], 9); 
 	assertEqual("Custom Network 31", res.value(v2)[0], 1);
 	assertEqual("Custom Network 32", res.value(v)[8], 8);
 	assertEqual("Custom Network 33", res.value(v2)[8], 0);
 	
-	setValue(mover, "ifthenelse( index([self])==3, [self].unconnect([population].findIndex(1)), 0)");
+	setValue(mover, "ifthenelse( index(self)==3, self.unconnect([population].findIndex(1)), 0)");
 	res = runModel(true);
 	assertEqual("Custom Network 30 (Obj)", res.value(v)[0], 9); 
 	assertEqual("Custom Network 31 (Obj)", res.value(v2)[0], 1);
@@ -1035,36 +1035,36 @@ function testAgents(){
 	assertEqual("Custom Network 33 (Obj)", res.value(v2)[8], 0);
 	
 	
-	setValue(mover, "ifthenelse(index([self])==3, connect([self], findIndex([population], 2)),0)");
+	setValue(mover, "ifthenelse(index(self)==3, connect(self, findIndex([population], 2)),0)");
 	res = runModel(true);
 	assertEqual("Custom Network 34", res.value(v)[0], 9);
 	assertEqual("Custom Network 35", res.value(v2)[0], 1);
 	assertEqual("Custom Network 36", res.value(v)[8], 9);
 	assertEqual("Custom Network 37", res.value(v2)[8], 2);
 	
-	setValue(mover, "IfThenElse(self.index()==3, [self].connect([population].findIndex(2)),0)");
+	setValue(mover, "IfThenElse(self.index()==3, self.connect([population].findIndex(2)),0)");
 	res = runModel(true);
 	assertEqual("Custom Network 34 (Obj)", res.value(v)[0], 9);
 	assertEqual("Custom Network 35 (Obj)", res.value(v2)[0], 1);
 	assertEqual("Custom Network 36 (Obj)", res.value(v)[8], 9);
 	assertEqual("Custom Network 37 (Obj)", res.value(v2)[8], 2);
 	
-	setValue(mover, "ifthenelse(index([self])==3, connect([self], true),0)");
+	setValue(mover, "ifthenelse(index(self)==3, connect(self, true),0)");
 	res = runModel(true);
 	assertUnequal("Custom Network 38", res.error, "none");
 	
 	
-	setValue(mover, "ifthenelse(index([self])==3, [self].connect(true),0)");
+	setValue(mover, "ifthenelse(index(self)==3, self.connect(true),0)");
 	res = runModel(true);
 	assertUnequal("Custom Network 38 (Obj)", res.error, "none");
 	
-	setValue(mover, "ifthenelse(index([self])==3, connect([self], 1),0)");
+	setValue(mover, "ifthenelse(index(self)==3, connect(self, 1),0)");
 	res = runModel(true);
 	assertUnequal("Custom Network 39", res.error, "none");
 
 	setTriggerType(mover, "Condition");
-	setTriggerValue(mover, "((index([self])==3 && years>=2) || (index([self])==5 && years>=5))");
-	setValue(mover, "remove([self])");
+	setTriggerValue(mover, "((index(self)==3 && years>=2) || (index(self)==5 && years>=5))");
+	setValue(mover, "remove(self)");
 	setValue(v, "populationSize([Population])")
 	setValue(v2, "count(connected(findIndex([Population], 1)))")
 	res = runModel(true);
@@ -1072,8 +1072,8 @@ function testAgents(){
 	assertEqual("Add/Remove 2", res.value(v)[4], 9);
 	assertEqual("Add/Remove 3", res.value(v)[8], 8);
 	
-	setTriggerValue(mover, "(([self].index()==3 && years==2) || ([self].index()==5 && years==5))");
-	setValue(mover, "[self].remove()");
+	setTriggerValue(mover, "((self.index()==3 && years==2) || (self.index()==5 && years==5))");
+	setValue(mover, "self.remove()");
 	setValue(v, "[Population].populationSize()")
 	setValue(v2, "[Population].findIndex(1).connected().length()")
 	res = runModel(true);
@@ -1081,7 +1081,7 @@ function testAgents(){
 	assertEqual("Add/Remove 2 (Obj)", res.value(v)[4], 9);
 	assertEqual("Add/Remove 3 (Obj)", res.value(v)[8], 8);
 	
-	setTriggerValue(mover, "((index([self])==3 && years==2) || (index([self])==5 && years==5))");
+	setTriggerValue(mover, "((index(self)==3 && years==2) || (index(self)==5 && years==5))");
 	setValue(mover, "add([Population])");
 	setValue(v, "populationSize([Population])")
 	setValue(v2, "count(connected(findIndex([Population], 3)))")
@@ -1095,15 +1095,15 @@ function testAgents(){
 	assertEqual("Add/Remove 6 (Obj)", res.value(v)[4], 11);
 	assertEqual("Add/Remove 7 (Obj)", res.value(v)[8], 12);
 	
-	setTriggerValue(mover, "((index([self])==3 && years==2) || (index([self])==5 && years==5))");
-	setValue(mover, "add([Population], [Self])");
+	setTriggerValue(mover, "((index(self)==3 && years==2) || (index(self)==5 && years==5))");
+	setValue(mover, "add([Population], Self)");
 	setValue(v, "populationSize([Population])")
 	res = runModel(true);
 	assertEqual("Add/Remove 8", res.value(v)[0], 10);
 	assertEqual("Add/Remove 9", res.value(v)[4], 11);
 	assertEqual("Add/Remove 10", res.value(v)[8], 12);
 	
-	setValue(mover, "[Population].add([Self])");
+	setValue(mover, "[Population].add(Self)");
 	assertEqual("Add/Remove 8 (Obj)", res.value(v)[0], 10);
 	assertEqual("Add/Remove 9 (Obj)", res.value(v)[4], 11);
 	assertEqual("Add/Remove 10 (Obj)", res.value(v)[8], 12);
@@ -1122,7 +1122,7 @@ function testAgents(){
 	assertEqual("Add/Remove 14", res.value(v2)[7], 0); //not clone
 	
 	setPopulationSize(pop, 1);
-	setValue(mover, "add([Population], [Self])");
+	setValue(mover, "add([Population], Self)");
 	setValue(v, "populationSize([Population])")
 	setValue(v2, "ifthenElse(populationsize([Population])==2, Select(Location(FindIndex([Population], 1)),2)==Select(Location(FindIndex([Population], 2)),2), -1)")
 	res = runModel(true);
@@ -2065,6 +2065,19 @@ function testSimulation(){
 		res = runModel(true);
 		assertEqual("Unit Conversion Vars 1", res.value(p)[3],10);
 		assertEqual("Unit Conversion Vars 2", res.value(p2)[3], 10);
+		
+		//Test Units Being Copied function
+		clearModel()
+		var p  = createPrimitive("My Variable 1", "Variable",[0,0],[100,100]);
+		var p2  = createPrimitive("My Variable 2", "Variable",[0,0],[100,100]);
+		var p3  = createPrimitive("My Variable 3", "Variable",[0,0],[100,100]);
+		var l = createConnector("Link","Link",p,p2);
+		var l = createConnector("Link","Link",p2,p3);
+		setValue(p,"{a: 1.2, b:3.2}");
+		setValue(p2, "round([My Variable 1])");
+		setValue(p3, "[My Variable 2].b");
+		res = runModel(true);
+		assertEqual("Recurse Function", res.value(p3)[3],3);
 		
 		//Test Delay function
 		clearModel()

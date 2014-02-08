@@ -2016,19 +2016,23 @@ function showNote(primitive) {
 		if(! (cell.value.getAttribute("Note",null)===null || cell.value.getAttribute("Note")=="")){		
 	        var x = Ext.getCmp("note" + cell.id);
 	        if (isUndefined(x)) {
-	            var tooltip = new Ext.ToolTip(
-	            {
-	                html: "<big>" + clean(cell.value.getAttribute("Note").replace(/\n/g, "<br/>")) + "</big>",
-	                autoHide: false,
-	                closable: true,
-					width:250,
-	                draggable: true,
-	                id: "note" + cell.id,
-	                title: clean(cell.value.getAttribute("name")),
-					closeAction:"destroy"
-	            });
+				
 				var state = graph.view.getState(cell);
-	            tooltip.showAt([state.x + mxPanel.getEl().getLeft()+ state.width+4-graph.container.scrollLeft, state.y + mxPanel.getEl().getTop()-graph.container.scrollTop]);
+				if(state){
+		            var tooltip = new Ext.ToolTip(
+		            {
+		                html: "<big>" + clean(cell.value.getAttribute("Note").replace(/\n/g, "<br/>")) + "</big>",
+		                autoHide: false,
+		                closable: true,
+						width:250,
+		                draggable: true,
+		                id: "note" + cell.id,
+		                title: clean(cell.value.getAttribute("name")),
+						closeAction:"destroy"
+		            });
+				
+		            tooltip.showAt([state.x + mxPanel.getEl().getLeft()+ state.width+4-graph.container.scrollLeft, state.y + mxPanel.getEl().getTop()-graph.container.scrollTop]);
+				}
 			
 			}
 		}

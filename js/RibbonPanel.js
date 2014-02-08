@@ -1268,6 +1268,16 @@ var RibbonPanel = function(graph, mainPanel, configPanel) {
 							scope: this
 						}]
 					}
+				},
+				{
+					hidden: (!is_editor) || is_embed || is_ebook,
+					text: getText('Help'),
+					iconCls: 'help-icon',
+					tooltip: getText("Insight Maker's Manual"),
+					handler: function(){
+						showURL("http://insightmaker.com/manual")
+					},
+					scope: this
 				}
 
 

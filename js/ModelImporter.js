@@ -177,6 +177,16 @@ function importModel() {
 	win.show();
 }
 
+function cellWithOldID(oldID){
+	var cells = primitives();
+	for(var i = 0; i < cells.length; i++){
+		if(cells[i].getAttribute("oldId") == oldID){
+			return cells[i];
+		}
+	}
+	throw "Cell not found: " + oldID;
+}
+
 function showInsertModelWindow(pt){
 	Ext.Msg.prompt('Insert Insight Maker Model', 'Enter the URL for the Insight Maker model you wish to insert (e.g. <i>'+base_path+'/insight/1234</i>). This model will be inserted as a component into your current model.', function(btn, url){
 		if(btn == 'ok'){
@@ -208,7 +218,6 @@ function showInsertModelWindow(pt){
 						for(var id in cells){
 							cells[id].setAttribute("oldId", id);
 						}
-						
 
 						graph.getModel().beginUpdate();
 						
@@ -219,33 +228,28 @@ function showInsertModelWindow(pt){
 						cells = excludeType(cells, "Settings");
 						cells = excludeType(cells, "Display");
 						
-						cells = graph.importCells(cells, 0, 0, folder);
-						for(var id in cells){
-							var cell = cells[id];
-							if(cell.value.nodeName == "Converter"){
-								var source = cell.getAttribute("Source");
-								if(source[0] != "*"){
-									for(var id2 in cells){
-										if(cells[id2].getAttribute("oldId") == source){
-											cell.setAttribute("Source", id2);
-											break
-										}
+						graph.importCells(cells, 0, 0, folder);
+						
+						
+						var newCells = primitives();
+						newCells.forEach(function(cell){
+							if(cell.getAttribute("oldId") != undefined){
+								if(cell.value.nodeName == "Converter"){
+									var source = cell.getAttribute("Source");
+									if(source[0] != "*" && source != "Time"){
+										cell.setAttribute("Source", cellWithOldID(source).id);
 									}
-								}
-							}else if(cell.value.nodeName == "Agents"){
-								var source = cell.getAttribute("Agent");
-								for(var id2 in cells){
-									if(cells[id2].getAttribute("oldId") == source){
-										cell.setAttribute("Agent", id2);
-										break
-									}
+								}else if(cell.value.nodeName == "Agents"){
+									cell.setAttribute("Agent", cellWithOldID(cell.getAttribute("Agent")).id);
+								}else if(cell.value.nodeName == "Ghost"){
+									cell.setAttribute("Source", cellWithOldID(cell.getAttribute("Source")).id);
 								}
 							}
-						}
+						});
 						
-						for(id in cells){
-							cells[id].setAttribute("oldId", undefined);
-						}
+						newCells.map(function(cell){
+							cell.setAttribute("oldId", undefined);
+						});
 						
 						setImage(folder, "Plugin");
 						setNote(folder, description);

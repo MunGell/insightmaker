@@ -528,6 +528,8 @@ function evaluate(input, dontToNum) {
 	
 	PB["test vector"] = new Primitive(new Vector([new Material(1), new Material(2), new Material(3)],[], VectorBase));
 	
+	PB["test vector 2"] = new Primitive(new Vector([new Material(1.2), new Material(2.9), new Material(3)],[], VectorBase));
+	
 	var root = trimTree(createTree(input), PB);
 	
 	//console.log(root);
@@ -559,14 +561,17 @@ function evaluate(input, dontToNum) {
  		}
  	}
 	if(x instanceof Material){
-		//console.log(x);
-		//console.log(x.toString());
 		if(x.value.toPrecision){
-			x.value = x.value.toPrecision(21);
+			if(x.value === 0){
+				x.value = "0";
+			}else{
+				x.value = x.value.toPrecision(21);
+			}
 		}
 		if(x.value.substr(x.value.length-1,1)=="."){
 			x.value=x.value.substring(0, x.value.length-1)
 		}
+		
 		x.value=x.value.replace(/\.?\+\.?/g,"+");
 		x.value=x.value.replace(/\.?\-\.?/g,"-");
 		x.value=x.value.replace(/\.i/g,"i");
@@ -1691,7 +1696,11 @@ funcEvalMap["TRYCATCH"] = function(node, scope) {
 		return evaluateNode(node.children[0], scope);
 	}catch(err){
 		var localScope = {"-parent": scope};
-		localScope[node.children[2].text] = s(err.substr(5));
+		if((typeof err == "string") || err instanceof String){
+			localScope[node.children[2].text] = s(err.substr(5));
+		}else{
+			localScope[node.children[2].text] = s("An error has occurred.");
+		}
 		return evaluateNode(node.children[1], localScope)
 	}
 };

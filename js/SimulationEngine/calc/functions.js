@@ -820,6 +820,15 @@ functionBank["flatten"] = function(x) {
 	return new Vector(res.items, res.hasName?res.names:undefined);
 };
 
+defineFunction("Keys", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	if(! x[0].names){
+		return new Vector([]);
+	}
+	return new Vector(x[0].names.filter(function(x){return isDefined(x)}).map(function(x){return s(x)}));
+});
+defineFunction("Values", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
+	return new Vector(x[0].items);
+});
 defineFunction("Length", {object: VectorObject, params:[{name:"Vector", needVector: true}]}, function(x) {
 	return new Material(sn("#e"+x[0].items.length));
 });
@@ -1042,9 +1051,11 @@ function defineFunction(name, definition, fn){
 				throw "MSG: " + fnName + " requires a function for the argument '"+config.name+"'.";
 			}
 		}
-		
-		if(definition.recurse && (x[0] instanceof Vector)){
-			return x[0].cloneApply(function(z){return f([z].concat(x.slice(1)), id)});
+		if(definition.recurse){
+			var q = x[0].toNum();
+		}
+		if(definition.recurse && (q instanceof Vector)){
+			return q.cloneApply(function(z){return f([z].concat(x.slice(1)), id)});
 		}else{
 			return fn(x, id);
 		}
